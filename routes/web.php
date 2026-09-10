@@ -9,10 +9,9 @@ Route::get('/login', [AdminWebController::class, 'showLogin'])->name('login');
 Route::post('/neodyit/login', [AdminWebController::class, 'processLogin'])->name('admin.login.process');
 Route::post('/neodyit/logout', [AdminWebController::class, 'logout'])->name('admin.logout');
 
-// Root Redirect to Custom Security Portal Route
-Route::get('/', function () {
-    return redirect()->route('admin.dashboard');
-});
+// Root Landing Page
+Route::get('/', [AdminWebController::class, 'landingPage'])->name('landing');
+
 Route::get('/neodyit', function () {
     return redirect()->route('admin.dashboard');
 });

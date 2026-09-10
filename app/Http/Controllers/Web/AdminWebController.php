@@ -16,6 +16,21 @@ use Illuminate\Support\Facades\Validator;
 class AdminWebController extends Controller
 {
     /**
+     * Show Public App Landing Page
+     */
+    public function landingPage()
+    {
+        $activeQuizzes = Quiz::where('status', 'active')->withCount('questions')->take(6)->get();
+        $campaigns = Campaign::where('status', 'active')->latest()->get();
+        $stats = [
+            'total_students' => User::where('role', 'student')->count(),
+            'total_quizzes' => Quiz::count(),
+            'total_attempts' => QuizAttempt::count(),
+        ];
+        return view('landing', compact('activeQuizzes', 'campaigns', 'stats'));
+    }
+
+    /**
      * Show Admin Login Page
      */
     public function showLogin()
