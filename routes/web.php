@@ -3,22 +3,22 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\AdminWebController;
 
-// Public Admin Auth Routes
-Route::get('/admin/login', [AdminWebController::class, 'showLogin'])->name('admin.login');
+// Public Custom Admin Auth Routes
+Route::get('/neodyit/login', [AdminWebController::class, 'showLogin'])->name('admin.login');
 Route::get('/login', [AdminWebController::class, 'showLogin'])->name('login');
-Route::post('/admin/login', [AdminWebController::class, 'processLogin'])->name('admin.login.process');
-Route::post('/admin/logout', [AdminWebController::class, 'logout'])->name('admin.logout');
+Route::post('/neodyit/login', [AdminWebController::class, 'processLogin'])->name('admin.login.process');
+Route::post('/neodyit/logout', [AdminWebController::class, 'logout'])->name('admin.logout');
 
-// Root Redirect
+// Root Redirect to Custom Security Portal Route
 Route::get('/', function () {
     return redirect()->route('admin.dashboard');
 });
-Route::get('/admin', function () {
+Route::get('/neodyit', function () {
     return redirect()->route('admin.dashboard');
 });
 
-// Protected Admin Web Portal Routes
-Route::middleware(['auth:web', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+// Protected Custom Admin Web Portal Routes (/neodyit/*)
+Route::middleware(['auth:web', 'admin'])->prefix('neodyit')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('dashboard');
     Route::get('/quizzes', [AdminWebController::class, 'quizzes'])->name('quizzes');
     Route::get('/campaigns', [AdminWebController::class, 'campaigns'])->name('campaigns');

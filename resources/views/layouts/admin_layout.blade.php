@@ -402,32 +402,32 @@
 
         <div class="nav-section-title">Navigation</div>
         <ul class="nav-menu">
-            <li class="nav-item {{ Request::is('admin/dashboard*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('neodyit/dashboard*') ? 'active' : '' }}">
                 <a href="{{ route('admin.dashboard') }}">
                     <i class="fa-solid fa-chart-pie"></i> Dashboard
                 </a>
             </li>
-            <li class="nav-item {{ Request::is('admin/quizzes*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('neodyit/quizzes*') ? 'active' : '' }}">
                 <a href="{{ route('admin.quizzes') }}">
                     <i class="fa-solid fa-layer-group"></i> Quizzes
                 </a>
             </li>
-            <li class="nav-item {{ Request::is('admin/campaigns*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('neodyit/campaigns*') ? 'active' : '' }}">
                 <a href="{{ route('admin.campaigns') }}">
                     <i class="fa-solid fa-bullhorn"></i> Campaigns & Notices
                 </a>
             </li>
-            <li class="nav-item {{ Request::is('admin/users*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('neodyit/users*') ? 'active' : '' }}">
                 <a href="{{ route('admin.users') }}">
                     <i class="fa-solid fa-users"></i> Users Directory
                 </a>
             </li>
-            <li class="nav-item {{ Request::is('admin/media*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('neodyit/media*') ? 'active' : '' }}">
                 <a href="{{ route('admin.media') }}">
                     <i class="fa-solid fa-folder-open"></i> Media Library
                 </a>
             </li>
-            <li class="nav-item {{ Request::is('admin/settings*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('neodyit/settings*') ? 'active' : '' }}">
                 <a href="{{ route('admin.settings') }}">
                     <i class="fa-solid fa-sliders"></i> System Settings
                 </a>
