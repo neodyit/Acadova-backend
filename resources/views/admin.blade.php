@@ -783,6 +783,10 @@
             }
         }
 
+        function openCreateQuizModal() {
+            openModal('createQuizModal');
+        }
+
         function openModal(id) {
             document.getElementById(id).classList.add('active');
         }
