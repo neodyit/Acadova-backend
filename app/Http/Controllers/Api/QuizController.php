@@ -371,6 +371,8 @@ class QuizController extends Controller
                 'total_questions' => $quiz->questions->count(),
             ],
         ]);
+    }
+
     /**
      * Get attempts history for current user or all attempts
      */
