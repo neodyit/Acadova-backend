@@ -17,5 +17,11 @@ class Campaign extends Model
         'banner_color',
         'status',
         'is_featured',
+        'ends_at',
+    ];
+
+    protected $casts = [
+        'ends_at' => 'datetime',
+        'is_featured' => 'boolean',
     ];
 }

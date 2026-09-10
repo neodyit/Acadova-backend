@@ -643,6 +643,12 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Campaign End Date & Time (Optional)</label>
+                    <input type="datetime-local" id="campaignEndsAt" class="form-control">
+                    <small style="color: var(--text-muted); font-size: 11.5px;">Leave empty for no expiry. Automatically hides from student dashboard after this date & time.</small>
+                </div>
+
+                <div class="form-group">
                     <label>Description / Notice Body</label>
                     <textarea id="campaignDescription" class="form-control" rows="3" placeholder="Write detailed notice or event description..." required></textarea>
                 </div>
@@ -789,6 +795,7 @@
                     <div class="quiz-title">${escapeHtml(c.title)}</div>
                     <div class="quiz-subject" style="color: var(--primary); font-weight:700;">${escapeHtml(c.badge || 'Notice')} • Color: ${escapeHtml(c.banner_color || 'purple')}</div>
                     <p style="font-size:13px; color:var(--text-muted); margin: 8px 0 14px 0; line-height:1.4;">${escapeHtml(c.description)}</p>
+                    ${c.ends_at ? `<div style="font-size:12px; color:#e17055; font-weight:600; margin-bottom:4px;"><i class="fa-regular fa-clock"></i> Ends: ${new Date(c.ends_at).toLocaleString()}</div>` : ''}
                     ${c.link_url ? `<div style="font-size:12px; color:var(--primary); word-break:break-all;"><i class="fa-solid fa-link"></i> ${escapeHtml(c.link_url)}</div>` : ''}
                 </div>
             `).join('');
@@ -812,6 +819,7 @@
             document.getElementById('campaignColor').value = c.banner_color || 'purple';
             document.getElementById('campaignStatus').value = c.status || 'active';
             document.getElementById('campaignLink').value = c.link_url || '';
+            document.getElementById('campaignEndsAt').value = c.ends_at ? new Date(c.ends_at).toISOString().slice(0, 16) : '';
             document.getElementById('campaignDescription').value = c.description || '';
 
             openModal('createCampaignModal');
@@ -826,7 +834,8 @@
                 badge: document.getElementById('campaignBadge').value,
                 banner_color: document.getElementById('campaignColor').value,
                 status: document.getElementById('campaignStatus').value,
-                link_url: document.getElementById('campaignLink').value,
+                link_url: document.getElementById('campaignLink').value || null,
+                ends_at: document.getElementById('campaignEndsAt').value || null,
                 description: document.getElementById('campaignDescription').value,
             };
 

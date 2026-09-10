@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('banner_color')->default('purple');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->boolean('is_featured')->default(true);
+            $table->timestamp('ends_at')->nullable();
             $table->timestamps();
         });
     }

@@ -20,6 +20,14 @@ class CampaignController extends Controller
             $query->where('status', $status);
         }
 
+        // Filter out expired campaigns for student view if status is active
+        if ($status === 'active') {
+            $query->where(function ($q) {
+                $q->whereNull('ends_at')
+                  ->orWhere('ends_at', '>', now());
+            });
+        }
+
         $campaigns = $query->latest()->get();
 
         return response()->json([
@@ -41,6 +49,7 @@ class CampaignController extends Controller
             'banner_color' => 'nullable|string',
             'status' => 'required|in:active,inactive',
             'is_featured' => 'boolean',
+            'ends_at' => 'nullable|date',
         ]);
 
         $campaign = Campaign::create([
@@ -51,6 +60,7 @@ class CampaignController extends Controller
             'banner_color' => $validated['banner_color'] ?? 'purple',
             'status' => $validated['status'],
             'is_featured' => $request->boolean('is_featured', true),
+            'ends_at' => $validated['ends_at'] ?? null,
         ]);
 
         return response()->json([
@@ -102,6 +112,7 @@ class CampaignController extends Controller
             'banner_color' => 'nullable|string',
             'status' => 'sometimes|required|in:active,inactive',
             'is_featured' => 'boolean',
+            'ends_at' => 'nullable|date',
         ]);
 
         $campaign->update($validated);
