@@ -593,6 +593,10 @@
                     <button type="button" class="btn btn-secondary" onclick="closeModal('createQuizModal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Quiz</button>
                 </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Create / Edit Campaign Modal -->
     <div class="modal-overlay" id="createCampaignModal">
         <div class="modal-container">
