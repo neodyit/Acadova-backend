@@ -232,6 +232,137 @@
             font-weight: 800;
         }
 
+        /* Mobile Hamburger & Overlay */
+        .mobile-toggle {
+            display: none;
+            background: #F1F5F9;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            color: var(--dark);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-toggle:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(3px);
+            z-index: 95;
+            display: none;
+        }
+
+        @media (max-width: 992px) {
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .header {
+                padding: 0 16px;
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .action-bar > div {
+                width: 100%;
+            }
+
+            .action-bar .btn, .action-bar .form-control {
+                width: 100%;
+                max-width: 100% !important;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .stat-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 18px;
+            }
+
+            .stat-info h3 {
+                font-size: 20px;
+            }
+
+            .quiz-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .filter-tabs {
+                overflow-x: auto;
+                padding-bottom: 8px;
+                white-space: nowrap;
+            }
+
+            .user-badge span {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-container {
+                padding: 24px 16px;
+            }
+            .header-title {
+                font-size: 16px;
+            }
+        }
+
         .content {
             padding: 36px;
             flex: 1;
@@ -674,11 +805,17 @@
         </div>
     </aside>
 
+    <!-- Mobile Backdrop Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
     <!-- Main Content Wrapper -->
     <div class="main-wrapper">
         <!-- Top App Bar Header -->
         <header class="header">
             <div class="header-left">
+                <button class="mobile-toggle" onclick="toggleMobileSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
                 <h1 class="header-title" id="pageTitle">Dashboard</h1>
                 <div class="status-badge">
                     <span class="dot"></span> Backend Live
@@ -1237,6 +1374,13 @@
                 window.history.pushState({ section }, '', `/admin/${section}`);
             }
 
+            if (window.innerWidth <= 992) {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+            }
+
             // Load section data
             if (section === 'dashboard') {
                 loadDashboardStats();
@@ -1250,6 +1394,13 @@
             } else if (section === 'media') {
                 loadMediaFiles();
             }
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('active');
+            if (overlay) overlay.classList.toggle('active');
         }
 
         async function loadDashboardStats() {
