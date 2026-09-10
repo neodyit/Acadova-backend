@@ -632,7 +632,7 @@
     <div class="toast" id="toast">Operation completed successfully!</div>
 
     <script>
-        const API_BASE = '/api';
+        const API_BASE = 'https://acadova.neodyit.com/api';
         let currentActiveQuiz = null;
         let allFetchedQuizzes = [];
 
