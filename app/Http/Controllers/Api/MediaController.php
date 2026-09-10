@@ -77,16 +77,28 @@ class MediaController extends Controller
      */
     public function showFile($path)
     {
-        $fullPath = storage_path('app/public/' . $path);
+        $cleanPath = ltrim(urldecode($path), '/');
 
-        if (!file_exists($fullPath)) {
-            $fullPath = storage_path('app/' . $path);
+        $possiblePaths = [
+            storage_path('app/public/' . $cleanPath),
+            storage_path('app/' . $cleanPath),
+            public_path('storage/' . $cleanPath),
+            base_path('storage/app/public/' . $cleanPath),
+        ];
+
+        $fullPath = null;
+        foreach ($possiblePaths as $p) {
+            if (file_exists($p) && is_file($p)) {
+                $fullPath = $p;
+                break;
+            }
         }
 
-        if (!file_exists($fullPath)) {
+        if (!$fullPath) {
             return response()->json([
                 'success' => false,
-                'message' => 'Media file not found: ' . $path,
+                'message' => 'Media file not found: ' . $cleanPath,
+                'searched' => $possiblePaths,
             ], 404);
         }
 
