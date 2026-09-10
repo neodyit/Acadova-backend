@@ -45,8 +45,11 @@ if (!empty($_GET['db_host'])) {
     config(['database.connections.mysql.host' => $_GET['db_host']]);
 }
 
-// Clear cached config to ensure live .env changes take effect
-Artisan::call('config:clear');
+// Purge existing connection so MySQL reconnects with updated overrides
+if (!empty($_GET['db_name']) || !empty($_GET['db_user']) || !empty($_GET['db_pass']) || !empty($_GET['db_host'])) {
+    \Illuminate\Support\Facades\DB::purge('mysql');
+    \Illuminate\Support\Facades\DB::reconnect('mysql');
+}
 
 echo "========================================\n";
 echo "  Acadova Live Migration Runner \n";
