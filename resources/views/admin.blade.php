@@ -1357,6 +1357,10 @@
 
     <!-- Scripting -->
     <script>
+        const API_BASE = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.includes('file://')) 
+            ? window.location.origin 
+            : 'https://acadova.neodyit.com';
+
         const INITIAL_SECTION = "{{ $activeSection ?? 'dashboard' }}";
         let quizzesData = [];
         let campaignsData = [];
@@ -1396,7 +1400,7 @@
             const password = document.getElementById('loginPassword').value;
 
             try {
-                const res = await fetch('/api/login', {
+                const res = await fetch(`${API_BASE}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -1493,7 +1497,7 @@
 
         async function loadDashboardStats() {
             try {
-                const res = await fetch('/api/admin/stats');
+                const res = await fetch(`${API_BASE}/api/admin/stats');
                 const json = await res.json();
                 if (json.success) {
                     document.getElementById('statTotalStudents').innerText = json.data.total_students || 0;
@@ -1508,7 +1512,7 @@
 
         async function loadRecentAttempts() {
             try {
-                const res = await fetch('/api/admin/attempts');
+                const res = await fetch(`${API_BASE}/api/admin/attempts');
                 const json = await res.json();
                 const tbody = document.getElementById('dashboardAttemptsBody');
                 if (json.success && json.data.length > 0) {
@@ -1533,7 +1537,7 @@
 
         async function loadQuizzes() {
             try {
-                const res = await fetch('/api/quizzes');
+                const res = await fetch(`${API_BASE}/api/quizzes');
                 const json = await res.json();
                 quizzesData = Array.isArray(json) ? json : (json.data || []);
                 renderQuizzes();
@@ -1584,7 +1588,7 @@
 
         async function loadCampaigns() {
             try {
-                const res = await fetch('/api/campaigns');
+                const res = await fetch(`${API_BASE}/api/campaigns');
                 const json = await res.json();
                 campaignsData = json.data || json || [];
                 renderCampaigns();
@@ -1618,7 +1622,7 @@
 
         async function loadUsers() {
             try {
-                const res = await fetch('/api/admin/users');
+                const res = await fetch(`${API_BASE}/api/admin/users');
                 const json = await res.json();
                 usersData = json.data || [];
                 renderUsersTable(usersData);
@@ -1719,7 +1723,7 @@
             const pwd = document.getElementById('userPassword').value;
             if (pwd) payload.password = pwd;
 
-            const url = userId ? `/api/admin/users/${userId}` : '/api/admin/users';
+            const url = userId ? `${API_BASE}/api/admin/users/${userId}` : `${API_BASE}/api/admin/users`;
             const method = userId ? 'PUT' : 'POST';
 
             try {
@@ -1745,7 +1749,7 @@
         async function deleteUser(id) {
             if (!confirm('Are you sure you want to delete this user? All their quiz attempt records will also be removed.')) return;
             try {
-                const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                const res = await fetch(`${API_BASE}/api/admin/users/${id}`, { method: 'DELETE' });
                 const json = await res.json();
                 if (res.ok && json.success) {
                     showToast('User account deleted');
@@ -1761,7 +1765,7 @@
 
         async function loadMediaFiles() {
             try {
-                const res = await fetch('/api/media');
+                const res = await fetch(`${API_BASE}/api/media');
                 const json = await res.json();
                 const files = json.data || [];
                 const grid = document.getElementById('mediaGrid');
@@ -1812,7 +1816,7 @@
             formData.append('folder', folder);
 
             try {
-                const res = await fetch('/api/upload', {
+                const res = await fetch(`${API_BASE}/api/upload', {
                     method: 'POST',
                     body: formData,
                 });
@@ -1856,7 +1860,7 @@
                 description: document.getElementById('quizDescription').value,
             };
 
-            const url = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';
+            const url = quizId ? `${API_BASE}/api/quizzes/${quizId}` : `${API_BASE}/api/quizzes`;
             const method = quizId ? 'PUT' : 'POST';
 
             try {
@@ -1896,7 +1900,7 @@
         async function deleteQuiz(id) {
             if (!confirm('Are you sure you want to delete this quiz?')) return;
             try {
-                const res = await fetch(`/api/quizzes/${id}`, { method: 'DELETE' });
+                const res = await fetch(`${API_BASE}/api/quizzes/${id}`, { method: 'DELETE' });
                 if (res.ok) {
                     showToast('Quiz deleted');
                     loadQuizzes();
@@ -1920,7 +1924,7 @@
             const container = document.getElementById('questionsList');
             container.innerHTML = '<div style="text-align: center; color: var(--text-muted);">Loading questions...</div>';
             try {
-                const res = await fetch(`/api/quizzes/${quizId}`);
+                const res = await fetch(`${API_BASE}/api/quizzes/${quizId}`);
                 const data = await res.json();
                 const questions = data.questions || [];
 
@@ -1978,7 +1982,7 @@
             };
 
             try {
-                const res = await fetch(`/api/quizzes/${quizId}/questions`, {
+                const res = await fetch(`${API_BASE}/api/quizzes/${quizId}/questions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1998,7 +2002,7 @@
             if (!confirm('Delete this question?')) return;
             const quizId = document.getElementById('activeQuizId').value;
             try {
-                const res = await fetch(`/api/questions/${qId}`, { method: 'DELETE' });
+                const res = await fetch(`${API_BASE}/api/questions/${qId}`, { method: 'DELETE' });
                 if (res.ok) {
                     showToast('Question deleted');
                     loadQuestionsList(quizId);
@@ -2019,7 +2023,7 @@
             formData.append('csv_file', csvInput.files[0]);
 
             try {
-                const res = await fetch(`/api/quizzes/${quizId}/import-csv`, {
+                const res = await fetch(`${API_BASE}/api/quizzes/${quizId}/import-csv`, {
                     method: 'POST',
                     body: formData
                 });
