@@ -31,6 +31,8 @@ Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy']);
 // Protected Endpoints
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/attempts', [QuizController::class, 'getAttempts']);
     Route::post('/quizzes/{id}/submit', [QuizController::class, 'submitAttempt']);

@@ -97,6 +97,9 @@ class AuthController extends Controller
     /**
      * Get authenticated user profile.
      */
+    /**
+     * Get authenticated user profile.
+     */
     public function me(Request $request)
     {
         return response()->json([
@@ -104,6 +107,81 @@ class AuthController extends Controller
             'data' => [
                 'user' => $request->user(),
             ]
+        ], 200);
+    }
+
+    /**
+     * Update authenticated user profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|min:2|max:255',
+            'phone' => 'nullable|string|max:30',
+            'roll_number' => 'nullable|string|unique:users,roll_number,' . $user->id,
+            'faculty_id' => 'nullable|string',
+            'department' => 'nullable|string|max:255',
+            'bio' => 'nullable|string',
+            'avatar' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors occurred',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user->update($request->only([
+            'name', 'phone', 'roll_number', 'faculty_id', 'department', 'bio', 'avatar'
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'data' => [
+                'user' => $user->fresh(),
+            ]
+        ], 200);
+    }
+
+    /**
+     * Change user password.
+     */
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors occurred',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password does not match',
+            ], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully',
         ], 200);
     }
 
