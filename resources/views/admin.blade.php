@@ -1446,7 +1446,8 @@
         async function loadQuizzes() {
             try {
                 const res = await fetch('/api/quizzes');
-                quizzesData = await res.json();
+                const json = await res.json();
+                quizzesData = Array.isArray(json) ? json : (json.data || []);
                 renderQuizzes();
             } catch (e) {
                 showToast('Failed to load quizzes');
