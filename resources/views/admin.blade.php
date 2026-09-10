@@ -663,9 +663,10 @@
 
         function formatDateTimeAmPm(dateStr) {
             if (!dateStr) return '';
-            const d = new Date(dateStr);
+            // Parse UTC or local string properly
+            const d = new Date(dateStr.includes('Z') || dateStr.includes('+') ? dateStr : dateStr.replace(' ', 'T') + 'Z');
             let hours = d.getHours();
-            const minutes = d.getMinutes().toString().padLeft ? d.getMinutes().toString().padStart(2, '0') : (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes());
+            const minutes = (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12;
             hours = hours ? hours : 12;
@@ -739,8 +740,12 @@
 
             if (quiz.scheduled_at) {
                 const d = new Date(quiz.scheduled_at);
-                const isoStr = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-                document.getElementById('quizScheduledAt').value = isoStr;
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                document.getElementById('quizScheduledAt').value = `${year}-${month}-${day}T${hours}:${minutes}`;
             } else {
                 document.getElementById('quizScheduledAt').value = '';
             }
@@ -752,6 +757,13 @@
         async function handleSaveQuiz(e) {
             e.preventDefault();
             const editId = document.getElementById('editingQuizId').value;
+            const scheduledVal = document.getElementById('quizScheduledAt').value;
+
+            let formattedScheduled = null;
+            if (scheduledVal) {
+                // Convert datetime-local value (YYYY-MM-DDTHH:mm) to MySQL DATETIME format (YYYY-MM-DD HH:mm:ss)
+                formattedScheduled = scheduledVal.replace('T', ' ') + ':00';
+            }
 
             const data = {
                 title: document.getElementById('quizTitle').value,
@@ -759,7 +771,7 @@
                 instructor: document.getElementById('quizInstructor').value,
                 duration_minutes: parseInt(document.getElementById('quizDuration').value),
                 status: document.getElementById('quizStatus').value,
-                scheduled_at: document.getElementById('quizScheduledAt').value || null,
+                scheduled_at: formattedScheduled,
                 description: document.getElementById('quizDescription').value,
             };
 
