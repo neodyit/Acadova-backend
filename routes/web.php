@@ -10,14 +10,29 @@ Route::get('/admin', function () {
     return redirect('/admin/dashboard');
 });
 
-// Explicit Page Routes for Web Panel
-Route::get('/admin/{section?}', function ($section = 'dashboard') {
-    $allowed = ['dashboard', 'quizzes', 'campaigns', 'users', 'media', 'settings'];
-    if (!in_array($section, $allowed)) {
-        return redirect('/admin/dashboard');
-    }
-    return view('admin', ['activeSection' => $section]);
-})->where('section', 'dashboard|quizzes|campaigns|users|media|settings');
+Route::get('/admin/dashboard', function () {
+    return view('admin', ['activeSection' => 'dashboard']);
+});
+
+Route::get('/admin/quizzes', function () {
+    return view('admin', ['activeSection' => 'quizzes']);
+});
+
+Route::get('/admin/campaigns', function () {
+    return view('admin', ['activeSection' => 'campaigns']);
+});
+
+Route::get('/admin/users', function () {
+    return view('admin', ['activeSection' => 'users']);
+});
+
+Route::get('/admin/media', function () {
+    return view('admin', ['activeSection' => 'media']);
+});
+
+Route::get('/admin/settings', function () {
+    return view('admin', ['activeSection' => 'settings']);
+});
 
 Route::get('/sample-csv', function () {
     $csvContent = "Question,Type,Option1,Option2,Option3,Option4,Correct_Option\n"
