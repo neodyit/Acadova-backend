@@ -1497,7 +1497,7 @@
 
         async function loadDashboardStats() {
             try {
-                const res = await fetch(`${API_BASE}/api/admin/stats');
+                const res = await fetch(`${API_BASE}/api/admin/stats`);
                 const json = await res.json();
                 if (json.success) {
                     document.getElementById('statTotalStudents').innerText = json.data.total_students || 0;
@@ -1512,7 +1512,7 @@
 
         async function loadRecentAttempts() {
             try {
-                const res = await fetch(`${API_BASE}/api/admin/attempts');
+                const res = await fetch(`${API_BASE}/api/admin/attempts`);
                 const json = await res.json();
                 const tbody = document.getElementById('dashboardAttemptsBody');
                 if (json.success && json.data.length > 0) {
@@ -1537,7 +1537,7 @@
 
         async function loadQuizzes() {
             try {
-                const res = await fetch(`${API_BASE}/api/quizzes');
+                const res = await fetch(`${API_BASE}/api/quizzes`);
                 const json = await res.json();
                 quizzesData = Array.isArray(json) ? json : (json.data || []);
                 renderQuizzes();
@@ -1588,7 +1588,7 @@
 
         async function loadCampaigns() {
             try {
-                const res = await fetch(`${API_BASE}/api/campaigns');
+                const res = await fetch(`${API_BASE}/api/campaigns`);
                 const json = await res.json();
                 campaignsData = json.data || json || [];
                 renderCampaigns();
@@ -1622,7 +1622,7 @@
 
         async function loadUsers() {
             try {
-                const res = await fetch(`${API_BASE}/api/admin/users');
+                const res = await fetch(`${API_BASE}/api/admin/users`);
                 const json = await res.json();
                 usersData = json.data || [];
                 renderUsersTable(usersData);
@@ -1765,7 +1765,7 @@
 
         async function loadMediaFiles() {
             try {
-                const res = await fetch(`${API_BASE}/api/media');
+                const res = await fetch(`${API_BASE}/api/media`);
                 const json = await res.json();
                 const files = json.data || [];
                 const grid = document.getElementById('mediaGrid');
@@ -1816,7 +1816,7 @@
             formData.append('folder', folder);
 
             try {
-                const res = await fetch(`${API_BASE}/api/upload', {
+                const res = await fetch(`${API_BASE}/api/upload`, {
                     method: 'POST',
                     body: formData,
                 });
