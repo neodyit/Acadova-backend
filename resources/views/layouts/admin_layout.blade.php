@@ -391,12 +391,12 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
         <div class="brand">
-            <div class="brand-icon">
-                <i class="fa-solid fa-graduation-cap"></i>
+            <div class="brand-icon" style="background: linear-gradient(135deg, #00B894, #6C5CE7); box-shadow: 0 6px 16px rgba(0, 184, 148, 0.35);">
+                <i class="fa-solid fa-code-branch"></i>
             </div>
             <div class="brand-text">
                 <h2>Acadova</h2>
-                <span>ADMIN PANEL</span>
+                <span style="color: #00B894; font-size: 10px;">POWERED BY NEODY IT</span>
             </div>
         </div>
 
@@ -434,13 +434,13 @@
             </li>
         </ul>
 
-        <div class="sidebar-footer">
-            <div class="sidebar-footer-icon">
-                <i class="fa-solid fa-server"></i>
+        <div class="sidebar-footer" style="background: #F1F5F9; border: 1px solid var(--border);">
+            <div class="sidebar-footer-icon" style="background: #00B894;">
+                <i class="fa-solid fa-microchip"></i>
             </div>
             <div style="font-size: 12px;">
-                <div style="font-weight: 700; color: var(--dark);">Acadova Engine</div>
-                <div style="color: var(--text-muted); font-size: 11px;">v2026.2 • Session Auth</div>
+                <div style="font-weight: 800; color: var(--dark);">Neody IT Suite</div>
+                <div style="color: var(--text-muted); font-size: 11px;">Acadova Core v2026.3</div>
             </div>
         </div>
     </aside>
