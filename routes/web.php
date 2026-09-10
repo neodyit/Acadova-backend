@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\AdminWebController;
 
 // Public Admin Auth Routes
-Route::get('/admin/login', [AdminWebController::class, 'showLogin'])->name('admin.login');
+Route::get('/admin/login', [AdminWebController::class, 'showLogin'])->name('admin.login')->name('login');
 Route::post('/admin/login', [AdminWebController::class, 'processLogin'])->name('admin.login.process');
 Route::post('/admin/logout', [AdminWebController::class, 'logout'])->name('admin.logout');
 
