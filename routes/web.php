@@ -23,3 +23,12 @@ Route::get('/sample-csv', function () {
         'Content-Disposition' => 'attachment; filename="sample_questions.csv"',
     ]);
 });
+
+// Fallback Media Serving Route for production environments
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath);
+})->where('path', '.*');

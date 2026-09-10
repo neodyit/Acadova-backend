@@ -5,10 +5,15 @@ use App\Http\Controllers\Api\QuizController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\CampaignController;
+use App\Http\Controllers\Api\MediaController;
 
 // Public Auth Endpoints
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Structured Media & File Upload API
+Route::post('/upload', [MediaController::class, 'store']);
+Route::get('/media', [MediaController::class, 'index']);
 
 // Public/Protected Quizzes & Campaigns API
 Route::get('/quizzes', [QuizController::class, 'index']);
