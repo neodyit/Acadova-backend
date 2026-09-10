@@ -851,7 +851,19 @@
             container.innerHTML = questions.map((q, idx) => {
                 const isMulti = q.type === 'multiple';
                 const opts = Array.isArray(q.options) ? q.options : JSON.parse(q.options);
-                const correctArr = Array.isArray(q.correct_option) ? q.correct_option : [q.correct_option];
+                let correctArr = [];
+                if (Array.isArray(q.correct_option)) {
+                    correctArr = q.correct_option;
+                } else if (typeof q.correct_option === 'string') {
+                    try {
+                        const parsed = JSON.parse(q.correct_option);
+                        correctArr = Array.isArray(parsed) ? parsed : [q.correct_option];
+                    } catch (_) {
+                        correctArr = [q.correct_option];
+                    }
+                } else {
+                    correctArr = [q.correct_option];
+                }
 
                 return `
                     <div class="question-box">
