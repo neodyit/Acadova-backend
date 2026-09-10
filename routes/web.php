@@ -1,37 +1,29 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\AdminWebController;
 
+// Public Admin Auth Routes
+Route::get('/admin/login', [AdminWebController::class, 'showLogin'])->name('admin.login');
+Route::post('/admin/login', [AdminWebController::class, 'processLogin'])->name('admin.login.process');
+Route::post('/admin/logout', [AdminWebController::class, 'logout'])->name('admin.logout');
+
+// Root Redirect
 Route::get('/', function () {
-    return redirect('/admin/dashboard');
+    return redirect()->route('admin.dashboard');
 });
-
 Route::get('/admin', function () {
-    return redirect('/admin/dashboard');
+    return redirect()->route('admin.dashboard');
 });
 
-Route::get('/admin/dashboard', function () {
-    return view('admin', ['activeSection' => 'dashboard']);
-});
-
-Route::get('/admin/quizzes', function () {
-    return view('admin', ['activeSection' => 'quizzes']);
-});
-
-Route::get('/admin/campaigns', function () {
-    return view('admin', ['activeSection' => 'campaigns']);
-});
-
-Route::get('/admin/users', function () {
-    return view('admin', ['activeSection' => 'users']);
-});
-
-Route::get('/admin/media', function () {
-    return view('admin', ['activeSection' => 'media']);
-});
-
-Route::get('/admin/settings', function () {
-    return view('admin', ['activeSection' => 'settings']);
+// Protected Admin Web Portal Routes
+Route::middleware(['auth:web', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('dashboard');
+    Route::get('/quizzes', [AdminWebController::class, 'quizzes'])->name('quizzes');
+    Route::get('/campaigns', [AdminWebController::class, 'campaigns'])->name('campaigns');
+    Route::get('/users', [AdminWebController::class, 'users'])->name('users');
+    Route::get('/media', [AdminWebController::class, 'media'])->name('media');
+    Route::get('/settings', [AdminWebController::class, 'settings'])->name('settings');
 });
 
 Route::get('/sample-csv', function () {
