@@ -209,13 +209,13 @@
         /* Quiz Cards Grid */
         .quiz-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 24px;
         }
 
         .quiz-card {
             background: white;
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 24px;
             border: 1px solid var(--border);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
@@ -260,6 +260,19 @@
             color: var(--text-muted);
             font-weight: 500;
             margin-bottom: 16px;
+        }
+
+        .quiz-schedule-badge {
+            font-size: 12px;
+            font-weight: 600;
+            color: #D97706;
+            background: #FFFBEB;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .quiz-meta {
@@ -386,7 +399,7 @@
             gap: 10px;
         }
 
-        .option-radio {
+        .option-radio, .option-checkbox {
             width: 18px;
             height: 18px;
             accent-color: var(--primary);
@@ -410,6 +423,18 @@
             background: none;
             border: none;
         }
+
+        .q-type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .q-type-single { background: #EEF2FF; color: #6C5CE7; }
+        .q-type-multiple { background: #E6FFFA; color: #047857; }
 
         /* Toast notification */
         .toast {
@@ -479,7 +504,7 @@
             <div class="action-bar">
                 <div>
                     <h1 style="font-size: 24px; font-weight: 800; color: var(--dark);">Manage Quizzes</h1>
-                    <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Create, edit, and publish dynamic quizzes for students.</p>
+                    <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Create, edit, and schedule dynamic single/multiple choice quizzes.</p>
                 </div>
                 <button class="btn btn-primary" onclick="openCreateQuizModal()">
                     <i class="fa-solid fa-plus"></i> Create New Quiz
@@ -493,14 +518,15 @@
         </div>
     </div>
 
-    <!-- Create Quiz Modal -->
+    <!-- Create / Edit Quiz Modal -->
     <div class="modal-overlay" id="createQuizModal">
         <div class="modal-container">
             <div class="modal-header">
-                <div class="modal-title">Create New Quiz</div>
+                <div class="modal-title" id="quizModalTitleText">Create New Quiz</div>
                 <button class="close-btn" onclick="closeModal('createQuizModal')">&times;</button>
             </div>
-            <form id="createQuizForm" onsubmit="handleCreateQuiz(event)">
+            <form id="createQuizForm" onsubmit="handleSaveQuiz(event)">
+                <input type="hidden" id="editingQuizId">
                 <div class="form-group">
                     <label>Quiz Title</label>
                     <input type="text" id="quizTitle" class="form-control" placeholder="e.g. Operating Systems Scheduling Quiz" required>
@@ -512,18 +538,30 @@
                         <input type="text" id="quizSubject" class="form-control" placeholder="e.g. Computer Science" required>
                     </div>
                     <div class="form-group">
-                        <label>Duration (Minutes)</label>
-                        <input type="number" id="quizDuration" class="form-control" value="15" min="1" required>
+                        <label>Instructor Name</label>
+                        <input type="text" id="quizInstructor" class="form-control" placeholder="e.g. Dr. Aman" required>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="quizStatus" class="form-control">
-                        <option value="active">Active (Available for Students)</option>
-                        <option value="upcoming">Upcoming</option>
-                        <option value="completed">Completed / Archived</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duration (Minutes)</label>
+                        <input type="number" id="quizDuration" class="form-control" value="15" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="quizStatus" class="form-control" onchange="toggleScheduledDateInput()">
+                            <option value="active">Active (Live for Students)</option>
+                            <option value="upcoming">Upcoming (Scheduled)</option>
+                            <option value="completed">Completed / Archived</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- AM / PM Date & Time Picker for Upcoming Quizzes -->
+                <div class="form-group" id="scheduledGroup" style="display: none;">
+                    <label><i class="fa-regular fa-clock"></i> Schedule Date & Time (12-Hour AM/PM)</label>
+                    <input type="datetime-local" id="quizScheduledAt" class="form-control">
                 </div>
 
                 <div class="form-group">
@@ -533,7 +571,7 @@
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('createQuizModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save & Continue</button>
+                    <button type="submit" class="btn btn-primary">Save Quiz</button>
                 </div>
             </form>
         </div>
@@ -561,30 +599,25 @@
             </h3>
             <form id="addQuestionForm" onsubmit="handleAddQuestion(event)">
                 <input type="hidden" id="activeQuizId">
-                <div class="form-group">
-                    <label>Question Text</label>
-                    <input type="text" id="qText" class="form-control" placeholder="Enter question..." required>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Question Text</label>
+                        <input type="text" id="qText" class="form-control" placeholder="Enter question..." required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Question Type</label>
+                        <select id="qType" class="form-control" onchange="renderOptionInputs()">
+                            <option value="single">Single Choice (1 Correct)</option>
+                            <option value="multiple">Multiple Choice (Multiple Correct)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Options (Select radio for correct answer)</label>
-                    <div class="options-list">
-                        <div class="option-item">
-                            <input type="radio" name="correctOpt" value="0" class="option-radio" checked>
-                            <input type="text" class="form-control q-opt" placeholder="Option 1" required>
-                        </div>
-                        <div class="option-item">
-                            <input type="radio" name="correctOpt" value="1" class="option-radio">
-                            <input type="text" class="form-control q-opt" placeholder="Option 2" required>
-                        </div>
-                        <div class="option-item">
-                            <input type="radio" name="correctOpt" value="2" class="option-radio">
-                            <input type="text" class="form-control q-opt" placeholder="Option 3" required>
-                        </div>
-                        <div class="option-item">
-                            <input type="radio" name="correctOpt" value="4" class="option-radio">
-                            <input type="text" class="form-control q-opt" placeholder="Option 4" required>
-                        </div>
+                    <label id="optionsLabelText">Options (Select radio for correct answer)</label>
+                    <div class="options-list" id="optionsContainer">
+                        <!-- Option Inputs Rendered via JS -->
                     </div>
                 </div>
 
@@ -601,9 +634,18 @@
     <script>
         const API_BASE = '/api';
         let currentActiveQuiz = null;
+        let allFetchedQuizzes = [];
 
-        // Fetch Quizzes on load
-        document.addEventListener('DOMContentLoaded', fetchQuizzes);
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchQuizzes();
+            renderOptionInputs();
+        });
+
+        function toggleScheduledDateInput() {
+            const status = document.getElementById('quizStatus').value;
+            const group = document.getElementById('scheduledGroup');
+            group.style.display = status === 'upcoming' ? 'block' : 'none';
+        }
 
         async function fetchQuizzes() {
             try {
@@ -611,11 +653,25 @@
                 const json = await res.json();
 
                 if (json.success) {
+                    allFetchedQuizzes = json.data;
                     renderQuizzes(json.data);
                 }
             } catch (err) {
                 showToast('Failed to load quizzes');
             }
+        }
+
+        function formatDateTimeAmPm(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            let hours = d.getHours();
+            const minutes = d.getMinutes().toString().padLeft ? d.getMinutes().toString().padStart(2, '0') : (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes());
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const day = d.getDate();
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            return `${day} ${monthNames[d.getMonth()]} ${d.getFullYear()}, ${hours}:${minutes} ${ampm}`;
         }
 
         function renderQuizzes(quizzes) {
@@ -629,51 +685,127 @@
                 <div class="quiz-card">
                     <div class="quiz-header">
                         <span class="status-badge status-${q.status}">${q.status}</span>
-                        <button style="background:none; border:none; color:var(--danger); cursor:pointer;" onclick="deleteQuiz(${q.id})">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <div style="display:flex; gap:8px;">
+                            <button style="background:none; border:none; color:var(--primary); cursor:pointer;" onclick="openEditQuizModal(${q.id})">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button style="background:none; border:none; color:var(--danger); cursor:pointer;" onclick="deleteQuiz(${q.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="quiz-title">${escapeHtml(q.title)}</div>
-                    <div class="quiz-subject">${escapeHtml(q.subject || 'General')}</div>
+                    <div class="quiz-subject">${escapeHtml(q.subject || 'General')} • ${escapeHtml(q.instructor || 'Faculty')}</div>
+
+                    ${q.scheduled_at ? `
+                        <div class="quiz-schedule-badge">
+                            <i class="fa-regular fa-calendar-check"></i> ${formatDateTimeAmPm(q.scheduled_at)}
+                        </div>
+                    ` : ''}
+
                     <div class="quiz-meta">
-                        <span><i class="fa-solid fa-circle-question"></i> ${q.questions_count || 0} Questions</span>
+                        <span><i class="fa-solid fa-circle-question"></i> ${q.questions_count || 0} Qs</span>
                         <span><i class="fa-solid fa-clock"></i> ${q.duration_minutes} Mins</span>
                     </div>
                     <div class="quiz-actions">
                         <button class="btn btn-secondary" onclick="openManageQuestionsModal(${q.id})">
-                            <i class="fa-solid fa-list"></i> Manage Questions
+                            <i class="fa-solid fa-list"></i> Questions
                         </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function handleCreateQuiz(e) {
+        function openCreateQuizModal() {
+            document.getElementById('editingQuizId').value = '';
+            document.getElementById('quizModalTitleText').innerText = 'Create New Quiz';
+            document.getElementById('createQuizForm').reset();
+            toggleScheduledDateInput();
+            openModal('createQuizModal');
+        }
+
+        function openEditQuizModal(quizId) {
+            const quiz = allFetchedQuizzes.find(q => q.id === quizId);
+            if (!quiz) return;
+
+            document.getElementById('editingQuizId').value = quiz.id;
+            document.getElementById('quizModalTitleText').innerText = 'Edit Quiz';
+            document.getElementById('quizTitle').value = quiz.title;
+            document.getElementById('quizSubject').value = quiz.subject || '';
+            document.getElementById('quizInstructor').value = quiz.instructor || '';
+            document.getElementById('quizDuration').value = quiz.duration_minutes;
+            document.getElementById('quizStatus').value = quiz.status;
+            document.getElementById('quizDescription').value = quiz.description || '';
+
+            if (quiz.scheduled_at) {
+                const d = new Date(quiz.scheduled_at);
+                const isoStr = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                document.getElementById('quizScheduledAt').value = isoStr;
+            } else {
+                document.getElementById('quizScheduledAt').value = '';
+            }
+
+            toggleScheduledDateInput();
+            openModal('createQuizModal');
+        }
+
+        async function handleSaveQuiz(e) {
             e.preventDefault();
+            const editId = document.getElementById('editingQuizId').value;
+
             const data = {
                 title: document.getElementById('quizTitle').value,
                 subject: document.getElementById('quizSubject').value,
+                instructor: document.getElementById('quizInstructor').value,
                 duration_minutes: parseInt(document.getElementById('quizDuration').value),
                 status: document.getElementById('quizStatus').value,
+                scheduled_at: document.getElementById('quizScheduledAt').value || null,
                 description: document.getElementById('quizDescription').value,
             };
 
+            const url = editId ? `${API_BASE}/quizzes/${editId}` : `${API_BASE}/quizzes`;
+            const method = editId ? 'PUT' : 'POST';
+
             try {
-                const res = await fetch(`${API_BASE}/quizzes`, {
-                    method: 'POST',
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 const json = await res.json();
 
                 if (json.success) {
-                    showToast('Quiz created successfully!');
+                    showToast(editId ? 'Quiz updated successfully!' : 'Quiz created successfully!');
                     closeModal('createQuizModal');
                     document.getElementById('createQuizForm').reset();
                     fetchQuizzes();
                 }
             } catch (err) {
-                showToast('Error creating quiz');
+                showToast('Error saving quiz');
+            }
+        }
+
+        function renderOptionInputs() {
+            const qType = document.getElementById('qType').value;
+            const container = document.getElementById('optionsContainer');
+            const label = document.getElementById('optionsLabelText');
+
+            if (qType === 'multiple') {
+                label.innerText = 'Options (Check checkbox for all correct answers)';
+                container.innerHTML = [0, 1, 2, 3].map(i => `
+                    <div class="option-item">
+                        <input type="checkbox" name="correctOptMulti" value="${i}" class="option-checkbox">
+                        <input type="text" class="form-control q-opt" placeholder="Option ${i + 1}" required>
+                    </div>
+                `).join('');
+            } else {
+                label.innerText = 'Options (Select radio for correct answer)';
+                container.innerHTML = [0, 1, 2, 3].map(i => `
+                    <div class="option-item">
+                        <input type="radio" name="correctOptSingle" value="${i}" class="option-radio" ${i === 0 ? 'checked' : ''}>
+                        <input type="text" class="form-control q-opt" placeholder="Option ${i + 1}" required>
+                    </div>
+                `).join('');
             }
         }
 
@@ -689,7 +821,7 @@
                 if (json.success) {
                     const quiz = json.data;
                     document.getElementById('manageModalQuizTitle').innerText = quiz.title;
-                    document.getElementById('manageModalQuizSub').innerText = quiz.subject || 'General';
+                    document.getElementById('manageModalQuizSub').innerText = `${quiz.subject || 'General'} • ${quiz.instructor || 'Faculty'}`;
                     renderQuestionsList(quiz.questions || []);
                 }
             } catch (err) {
@@ -704,29 +836,53 @@
                 return;
             }
 
-            container.innerHTML = questions.map((q, idx) => `
-                <div class="question-box">
-                    <button class="delete-q" onclick="deleteQuestion(${q.id})"><i class="fa-solid fa-trash"></i></button>
-                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">Q${idx + 1}. ${escapeHtml(q.question)}</div>
-                    <div style="font-size: 13px; color: var(--text-muted);">
-                        ${(Array.isArray(q.options) ? q.options : JSON.parse(q.options)).map(opt => `
-                            <span style="display:inline-block; margin-right:12px; padding: 2px 8px; background:white; border-radius:6px; border:1px solid #E2E8F0; ${opt === q.correct_option ? 'font-weight:bold; color:var(--secondary); border-color:var(--secondary);' : ''}">
-                                ${escapeHtml(opt)} ${opt === q.correct_option ? '✓' : ''}
-                            </span>
-                        `).join('')}
+            container.innerHTML = questions.map((q, idx) => {
+                const isMulti = q.type === 'multiple';
+                const opts = Array.isArray(q.options) ? q.options : JSON.parse(q.options);
+                const correctArr = Array.isArray(q.correct_option) ? q.correct_option : [q.correct_option];
+
+                return `
+                    <div class="question-box">
+                        <button class="delete-q" onclick="deleteQuestion(${q.id})"><i class="fa-solid fa-trash"></i></button>
+                        <span class="q-type-badge ${isMulti ? 'q-type-multiple' : 'q-type-single'}">
+                            ${isMulti ? 'Multiple Choice' : 'Single Choice'}
+                        </span>
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">Q${idx + 1}. ${escapeHtml(q.question)}</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">
+                            ${opts.map(opt => {
+                                const isCorrect = correctArr.includes(opt);
+                                return `
+                                    <span style="display:inline-block; margin-right:10px; margin-bottom:6px; padding: 3px 10px; background:white; border-radius:6px; border:1px solid #E2E8F0; ${isCorrect ? 'font-weight:bold; color:var(--secondary); border-color:var(--secondary); background:#E6FFFA;' : ''}">
+                                        ${escapeHtml(opt)} ${isCorrect ? '✓' : ''}
+                                    </span>
+                                `;
+                            }).join('')}
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function handleAddQuestion(e) {
             e.preventDefault();
             const quizId = document.getElementById('activeQuizId').value;
             const qText = document.getElementById('qText').value;
+            const qType = document.getElementById('qType').value;
             const optInputs = document.querySelectorAll('.q-opt');
             const options = Array.from(optInputs).map(inp => inp.value.trim()).filter(v => v !== '');
-            const selectedRadioIdx = document.querySelector('input[name="correctOpt"]:checked').value;
-            const correctOption = optInputs[selectedRadioIdx].value.trim();
+
+            let correctOption;
+            if (qType === 'multiple') {
+                const checkedBoxes = document.querySelectorAll('input[name="correctOptMulti"]:checked');
+                if (checkedBoxes.length === 0) {
+                    showToast('Please select at least 1 correct answer for multiple choice');
+                    return;
+                }
+                correctOption = Array.from(checkedBoxes).map(cb => optInputs[cb.value].value.trim());
+            } else {
+                const selectedRadio = document.querySelector('input[name="correctOptSingle"]:checked');
+                correctOption = optInputs[selectedRadio.value].value.trim();
+            }
 
             if (options.length < 2) {
                 showToast('Please provide at least 2 options');
@@ -737,13 +893,19 @@
                 const res = await fetch(`${API_BASE}/quizzes/${quizId}/questions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: qText, options: options, correct_option: correctOption })
+                    body: JSON.stringify({
+                        question: qText,
+                        type: qType,
+                        options: options,
+                        correct_option: correctOption,
+                    })
                 });
                 const json = await res.json();
 
                 if (json.success) {
-                    showToast('Question added!');
+                    showToast('Question added successfully!');
                     document.getElementById('addQuestionForm').reset();
+                    renderOptionInputs();
                     openManageQuestionsModal(quizId);
                     fetchQuizzes();
                 }
@@ -781,10 +943,6 @@
             } catch (err) {
                 showToast('Error deleting quiz');
             }
-        }
-
-        function openCreateQuizModal() {
-            openModal('createQuizModal');
         }
 
         function openModal(id) {

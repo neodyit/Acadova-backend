@@ -13,6 +13,13 @@ class Quiz extends Model
         'description',
         'duration_minutes',
         'status',
+        'scheduled_at',
+        'instructor',
+        'passing_marks',
+    ];
+
+    protected $casts = [
+        'scheduled_at' => 'datetime',
     ];
 
     public function questions(): HasMany

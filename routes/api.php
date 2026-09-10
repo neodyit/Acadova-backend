@@ -12,6 +12,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/quizzes', [QuizController::class, 'index']);
 Route::get('/quizzes/{id}', [QuizController::class, 'show']);
 Route::post('/quizzes', [QuizController::class, 'store']);
+Route::put('/quizzes/{id}', [QuizController::class, 'update']);
 Route::delete('/quizzes/{id}', [QuizController::class, 'destroy']);
 Route::post('/quizzes/{id}/questions', [QuizController::class, 'addQuestion']);
 Route::delete('/questions/{id}', [QuizController::class, 'deleteQuestion']);

@@ -10,12 +10,14 @@ class Question extends Model
     protected $fillable = [
         'quiz_id',
         'question',
+        'type',
         'options',
         'correct_option',
     ];
 
     protected $casts = [
         'options' => 'array',
+        'correct_option' => 'json',
     ];
 
     public function quiz(): BelongsTo

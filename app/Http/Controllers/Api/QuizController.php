@@ -58,39 +58,57 @@ class QuizController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'subject' => 'nullable|string|max:255',
+            'instructor' => 'nullable|string|max:255',
+            'scheduled_at' => 'nullable|date',
             'description' => 'nullable|string',
             'duration_minutes' => 'required|integer|min:1',
             'status' => 'required|in:active,upcoming,completed',
-            'questions' => 'nullable|array',
-            'questions.*.question' => 'required_with:questions|string',
-            'questions.*.options' => 'required_with:questions|array|min:2',
-            'questions.*.correct_option' => 'required_with:questions|string',
         ]);
 
         $quiz = Quiz::create([
             'title' => $validated['title'],
             'subject' => $validated['subject'] ?? 'General',
+            'instructor' => $validated['instructor'] ?? 'Faculty',
+            'scheduled_at' => $validated['scheduled_at'] ?? null,
             'description' => $validated['description'] ?? '',
             'duration_minutes' => $validated['duration_minutes'],
             'status' => $validated['status'],
         ]);
-
-        if (!empty($validated['questions'])) {
-            foreach ($validated['questions'] as $q) {
-                Question::create([
-                    'quiz_id' => $quiz->id,
-                    'question' => $q['question'],
-                    'options' => $q['options'],
-                    'correct_option' => $q['correct_option'],
-                ]);
-            }
-        }
 
         return response()->json([
             'success' => true,
             'message' => 'Quiz created successfully.',
             'data' => $quiz->load('questions'),
         ], 201);
+    }
+
+    /**
+     * Update an existing Quiz
+     */
+    public function update(Request $request, $id)
+    {
+        $quiz = Quiz::find($id);
+        if (!$quiz) {
+            return response()->json(['success' => false, 'message' => 'Quiz not found.'], 404);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'subject' => 'nullable|string|max:255',
+            'instructor' => 'nullable|string|max:255',
+            'scheduled_at' => 'nullable|date',
+            'description' => 'nullable|string',
+            'duration_minutes' => 'required|integer|min:1',
+            'status' => 'required|in:active,upcoming,completed',
+        ]);
+
+        $quiz->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz updated successfully.',
+            'data' => $quiz->load('questions'),
+        ]);
     }
 
     /**
@@ -105,13 +123,15 @@ class QuizController extends Controller
 
         $validated = $request->validate([
             'question' => 'required|string',
+            'type' => 'required|in:single,multiple',
             'options' => 'required|array|min:2',
-            'correct_option' => 'required|string',
+            'correct_option' => 'required',
         ]);
 
         $question = Question::create([
             'quiz_id' => $quiz->id,
             'question' => $validated['question'],
+            'type' => $validated['type'],
             'options' => $validated['options'],
             'correct_option' => $validated['correct_option'],
         ]);
@@ -183,8 +203,23 @@ class QuizController extends Controller
 
         foreach ($quiz->questions as $question) {
             $userAns = $userAnswers[$question->id] ?? null;
-            if ($userAns && $userAns === $question->correct_option) {
-                $score++;
+
+            if ($question->type === 'multiple') {
+                // Multiple choice checking: compare array elements
+                $correctAnsArr = is_array($question->correct_option) ? $question->correct_option : [$question->correct_option];
+                $userAnsArr = is_array($userAns) ? $userAns : ($userAns ? [$userAns] : []);
+                
+                sort($correctAnsArr);
+                sort($userAnsArr);
+
+                if ($correctAnsArr === $userAnsArr) {
+                    $score++;
+                }
+            } else {
+                // Single choice checking
+                if ($userAns && (string)$userAns === (string)$question->correct_option) {
+                    $score++;
+                }
             }
         }
 
