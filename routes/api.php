@@ -4,8 +4,14 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\QuizController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\MediaController;
+
+// Admin Stats & Users API
+Route::get('/admin/stats', [AdminController::class, 'stats']);
+Route::get('/admin/users', [AdminController::class, 'users']);
+Route::get('/admin/attempts', [AdminController::class, 'attempts']);
 
 // Public Auth Endpoints
 Route::post('/register', [AuthController::class, 'register']);

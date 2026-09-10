@@ -2,13 +2,22 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/admin', function () {
-    return view('admin');
+Route::get('/', function () {
+    return redirect('/admin/dashboard');
 });
 
-Route::get('/', function () {
-    return view('admin');
+Route::get('/admin', function () {
+    return redirect('/admin/dashboard');
 });
+
+// Explicit Page Routes for Web Panel
+Route::get('/admin/{section?}', function ($section = 'dashboard') {
+    $allowed = ['dashboard', 'quizzes', 'campaigns', 'users', 'media', 'settings'];
+    if (!in_array($section, $allowed)) {
+        return redirect('/admin/dashboard');
+    }
+    return view('admin', ['activeSection' => $section]);
+})->where('section', 'dashboard|quizzes|campaigns|users|media|settings');
 
 Route::get('/sample-csv', function () {
     $csvContent = "Question,Type,Option1,Option2,Option3,Option4,Correct_Option\n"
