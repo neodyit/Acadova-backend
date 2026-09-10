@@ -36,6 +36,9 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Ensure role column allows 'admin'
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN role VARCHAR(30) NOT NULL DEFAULT 'student'");
+
         // Admin Account
         User::updateOrCreate(
             ['email' => 'mayank@neodyit.in'],
