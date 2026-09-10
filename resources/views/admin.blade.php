@@ -579,7 +579,7 @@
 
     <!-- View & Add Questions Modal -->
     <div class="modal-overlay" id="manageQuestionsModal">
-        <div class="modal-container" style="max-width: 750px;">
+        <div class="modal-container" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
                     <div class="modal-title" id="manageModalQuizTitle">Manage Questions</div>
@@ -588,17 +588,30 @@
                 <button class="close-btn" onclick="closeModal('manageQuestionsModal')">&times;</button>
             </div>
 
+            <!-- CSV Import Action Box -->
+            <div style="background: var(--bg-light); border: 1px dashed var(--primary); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <div style="font-weight: 700; font-size: 14px; color: var(--dark);"><i class="fa-solid fa-file-csv" style="color: var(--primary);"></i> Bulk Import Questions via CSV</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Upload a CSV file to add questions instantly. <a href="https://acadova.neodyit.com/sample_questions.csv" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;"><i class="fa-solid fa-download"></i> Download Sample CSV</a></div>
+                </div>
+                <form id="csvImportForm" style="display: flex; gap: 8px; align-items: center;" onsubmit="handleImportCsv(event)">
+                    <input type="file" id="csvFileInput" accept=".csv" class="form-control" style="padding: 6px 12px; font-size: 12px; max-width: 220px;" required>
+                    <button type="submit" class="btn btn-secondary" style="font-size: 12px; padding: 8px 16px;"><i class="fa-solid fa-upload"></i> Import CSV</button>
+                </form>
+            </div>
+
             <!-- Existing Questions List -->
             <div id="questionsList"></div>
 
             <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
 
             <!-- Add Question Form -->
-            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--primary);">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--primary);" id="questionFormHeader">
                 <i class="fa-solid fa-plus-circle"></i> Add New Question
             </h3>
-            <form id="addQuestionForm" onsubmit="handleAddQuestion(event)">
+            <form id="addQuestionForm" onsubmit="handleAddOrUpdateQuestion(event)">
                 <input type="hidden" id="activeQuizId">
+                <input type="hidden" id="editingQuestionId">
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 2;">
@@ -621,8 +634,9 @@
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Add Question</button>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                    <button type="button" id="cancelEditQBtn" class="btn btn-secondary" style="display: none;" onclick="resetQuestionForm()"><i class="fa-solid fa-xmark"></i> Cancel Edit</button>
+                    <button type="submit" id="saveQBtn" class="btn btn-primary"><i class="fa-solid fa-check"></i> Add Question</button>
                 </div>
             </form>
         </div>
@@ -821,9 +835,12 @@
             }
         }
 
+        let currentQuizQuestions = [];
+
         async function openManageQuestionsModal(quizId) {
             currentActiveQuiz = quizId;
             document.getElementById('activeQuizId').value = quizId;
+            resetQuestionForm();
             openModal('manageQuestionsModal');
 
             try {
@@ -834,7 +851,8 @@
                     const quiz = json.data;
                     document.getElementById('manageModalQuizTitle').innerText = quiz.title;
                     document.getElementById('manageModalQuizSub').innerText = `${quiz.subject || 'General'} • ${quiz.instructor || 'Faculty'}`;
-                    renderQuestionsList(quiz.questions || []);
+                    currentQuizQuestions = quiz.questions || [];
+                    renderQuestionsList(currentQuizQuestions);
                 }
             } catch (err) {
                 showToast('Failed to load questions');
@@ -851,6 +869,7 @@
             container.innerHTML = questions.map((q, idx) => {
                 const isMulti = q.type === 'multiple';
                 const opts = Array.isArray(q.options) ? q.options : JSON.parse(q.options);
+                
                 let correctArr = [];
                 if (Array.isArray(q.correct_option)) {
                     correctArr = q.correct_option;
@@ -867,11 +886,18 @@
 
                 return `
                     <div class="question-box">
-                        <button class="delete-q" onclick="deleteQuestion(${q.id})"><i class="fa-solid fa-trash"></i></button>
+                        <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px;">
+                            <button style="background:none; border:none; color:var(--primary); cursor:pointer; font-size: 14px;" onclick="populateEditQuestion(${q.id})">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button class="delete-q" style="position:static;" onclick="deleteQuestion(${q.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
                         <span class="q-type-badge ${isMulti ? 'q-type-multiple' : 'q-type-single'}">
                             ${isMulti ? 'Multiple Choice' : 'Single Choice'}
                         </span>
-                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">Q${idx + 1}. ${escapeHtml(q.question)}</div>
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px; padding-right: 90px;">Q${idx + 1}. ${escapeHtml(q.question)}</div>
                         <div style="font-size: 13px; color: var(--text-muted);">
                             ${opts.map(opt => {
                                 const isCorrect = correctArr.includes(opt);
@@ -887,9 +913,72 @@
             }).join('');
         }
 
-        async function handleAddQuestion(e) {
+        function populateEditQuestion(questionId) {
+            const q = currentQuizQuestions.find(item => item.id === questionId);
+            if (!q) return;
+
+            document.getElementById('editingQuestionId').value = q.id;
+            document.getElementById('questionFormHeader').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Question';
+            document.getElementById('qText').value = q.question;
+            document.getElementById('qType').value = q.type;
+            document.getElementById('cancelEditQBtn').style.display = 'inline-block';
+            document.getElementById('saveQBtn').innerHTML = '<i class="fa-solid fa-check"></i> Update Question';
+
+            const opts = Array.isArray(q.options) ? q.options : JSON.parse(q.options);
+            let correctArr = [];
+            if (Array.isArray(q.correct_option)) {
+                correctArr = q.correct_option;
+            } else if (typeof q.correct_option === 'string') {
+                try {
+                    const parsed = JSON.parse(q.correct_option);
+                    correctArr = Array.isArray(parsed) ? parsed : [q.correct_option];
+                } catch (_) {
+                    correctArr = [q.correct_option];
+                }
+            } else {
+                correctArr = [q.correct_option];
+            }
+
+            renderOptionInputs();
+
+            const optInputs = document.querySelectorAll('.q-opt');
+            opts.forEach((optVal, idx) => {
+                if (optInputs[idx]) {
+                    optInputs[idx].value = optVal;
+                }
+            });
+
+            if (q.type === 'multiple') {
+                const checkboxes = document.querySelectorAll('input[name="correctOptMulti"]');
+                checkboxes.forEach((cb) => {
+                    const optVal = optInputs[cb.value] ? optInputs[cb.value].value.trim() : '';
+                    cb.checked = correctArr.includes(optVal);
+                });
+            } else {
+                const radios = document.querySelectorAll('input[name="correctOptSingle"]');
+                radios.forEach((r) => {
+                    const optVal = optInputs[r.value] ? optInputs[r.value].value.trim() : '';
+                    r.checked = correctArr.includes(optVal) || (correctArr.length > 0 && correctArr[0] === optVal);
+                });
+            }
+
+            // Scroll form into view
+            document.getElementById('addQuestionForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetQuestionForm() {
+            document.getElementById('editingQuestionId').value = '';
+            document.getElementById('questionFormHeader').innerHTML = '<i class="fa-solid fa-plus-circle"></i> Add New Question';
+            document.getElementById('addQuestionForm').reset();
+            document.getElementById('cancelEditQBtn').style.display = 'none';
+            document.getElementById('saveQBtn').innerHTML = '<i class="fa-solid fa-check"></i> Add Question';
+            renderOptionInputs();
+        }
+
+        async function handleAddOrUpdateQuestion(e) {
             e.preventDefault();
             const quizId = document.getElementById('activeQuizId').value;
+            const editQId = document.getElementById('editingQuestionId').value;
             const qText = document.getElementById('qText').value;
             const qType = document.getElementById('qType').value;
             const optInputs = document.querySelectorAll('.q-opt');
@@ -913,9 +1002,12 @@
                 return;
             }
 
+            const url = editQId ? `${API_BASE}/questions/${editQId}` : `${API_BASE}/quizzes/${quizId}/questions`;
+            const method = editQId ? 'PUT' : 'POST';
+
             try {
-                const res = await fetch(`${API_BASE}/quizzes/${quizId}/questions`, {
-                    method: 'POST',
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         question: qText,
@@ -927,14 +1019,46 @@
                 const json = await res.json();
 
                 if (json.success) {
-                    showToast('Question added successfully!');
-                    document.getElementById('addQuestionForm').reset();
-                    renderOptionInputs();
+                    showToast(editQId ? 'Question updated successfully!' : 'Question added successfully!');
+                    resetQuestionForm();
                     openManageQuestionsModal(quizId);
                     fetchQuizzes();
                 }
             } catch (err) {
-                showToast('Failed to add question');
+                showToast('Failed to save question');
+            }
+        }
+
+        async function handleImportCsv(e) {
+            e.preventDefault();
+            const quizId = document.getElementById('activeQuizId').value;
+            const fileInput = document.getElementById('csvFileInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showToast('Please select a CSV file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csv_file', fileInput.files[0]);
+
+            try {
+                showToast('Uploading and parsing CSV...');
+                const res = await fetch(`${API_BASE}/quizzes/${quizId}/import-csv`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    showToast(json.message || 'Questions imported successfully!');
+                    document.getElementById('csvImportForm').reset();
+                    openManageQuestionsModal(quizId);
+                    fetchQuizzes();
+                } else {
+                    showToast(json.message || 'Failed to import CSV');
+                }
+            } catch (err) {
+                showToast('Error importing CSV file');
             }
         }
 

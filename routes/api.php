@@ -15,7 +15,9 @@ Route::post('/quizzes', [QuizController::class, 'store']);
 Route::put('/quizzes/{id}', [QuizController::class, 'update']);
 Route::delete('/quizzes/{id}', [QuizController::class, 'destroy']);
 Route::post('/quizzes/{id}/questions', [QuizController::class, 'addQuestion']);
+Route::put('/questions/{id}', [QuizController::class, 'updateQuestion']);
 Route::delete('/questions/{id}', [QuizController::class, 'deleteQuestion']);
+Route::post('/quizzes/{id}/import-csv', [QuizController::class, 'importQuestionsCsv']);
 
 // Protected Endpoints
 Route::middleware('auth:sanctum')->group(function () {

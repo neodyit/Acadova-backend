@@ -144,6 +144,135 @@ class QuizController extends Controller
     }
 
     /**
+     * Update an existing question
+     */
+    public function updateQuestion(Request $request, $id)
+    {
+        $question = Question::find($id);
+        if (!$question) {
+            return response()->json(['success' => false, 'message' => 'Question not found.'], 404);
+        }
+
+        $validated = $request->validate([
+            'question' => 'sometimes|required|string',
+            'type' => 'sometimes|required|in:single,multiple',
+            'options' => 'sometimes|required|array|min:2',
+            'correct_option' => 'sometimes|required',
+        ]);
+
+        $question->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Question updated successfully.',
+            'data' => $question,
+        ]);
+    }
+
+    /**
+     * Import questions from CSV file
+     */
+    public function importQuestionsCsv(Request $request, $id)
+    {
+        $quiz = Quiz::find($id);
+        if (!$quiz) {
+            return response()->json(['success' => false, 'message' => 'Quiz not found.'], 404);
+        }
+
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file->getRealPath(), 'r');
+        if (!$handle) {
+            return response()->json(['success' => false, 'message' => 'Unable to read CSV file.'], 400);
+        }
+
+        $header = fgetcsv($handle, 1000, ',');
+        if (!$header) {
+            fclose($handle);
+            return response()->json(['success' => false, 'message' => 'CSV file is empty.'], 400);
+        }
+
+        // Clean headers: lowercase and trimmed
+        $header = array_map(function($h) {
+            return strtolower(trim($h));
+        }, $header);
+
+        $importedCount = 0;
+        while (($row = fgetcsv($handle, 2000, ',')) !== false) {
+            if (count($row) < 4) continue;
+
+            $data = array_combine(array_slice($header, 0, count($row)), $row);
+
+            $qText = $data['question'] ?? null;
+            if (!$qText) continue;
+
+            $type = isset($data['type']) && strtolower(trim($data['type'])) === 'multiple' ? 'multiple' : 'single';
+            
+            // Extract options
+            $options = [];
+            for ($i = 1; $i <= 6; $i++) {
+                $key = "option{$i}";
+                if (!empty($data[$key])) {
+                    $options[] = trim($data[$key]);
+                }
+            }
+
+            if (empty($options) && isset($data['options'])) {
+                $options = array_map('trim', explode('|', $data['options']));
+            }
+
+            if (count($options) < 2) continue;
+
+            $rawCorrect = $data['correct_option'] ?? ($data['correct'] ?? '');
+            $correctOption = null;
+
+            if ($type === 'multiple') {
+                $correctParts = array_map('trim', explode('|', $rawCorrect));
+                $correctOption = [];
+                foreach ($correctParts as $part) {
+                    if (is_numeric($part) && isset($options[(int)$part - 1])) {
+                        $correctOption[] = $options[(int)$part - 1];
+                    } else if (in_array($part, $options)) {
+                        $correctOption[] = $part;
+                    }
+                }
+                if (empty($correctOption)) {
+                    $correctOption = [$options[0]];
+                }
+            } else {
+                if (is_numeric($rawCorrect) && isset($options[(int)$rawCorrect - 1])) {
+                    $correctOption = $options[(int)$rawCorrect - 1];
+                } else if (in_array($rawCorrect, $options)) {
+                    $correctOption = $rawCorrect;
+                } else {
+                    $correctOption = $options[0];
+                }
+            }
+
+            Question::create([
+                'quiz_id' => $quiz->id,
+                'question' => $qText,
+                'type' => $type,
+                'options' => $options,
+                'correct_option' => $correctOption,
+            ]);
+
+            $importedCount++;
+        }
+
+        fclose($handle);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Successfully imported {$importedCount} questions from CSV.",
+            'imported_count' => $importedCount,
+        ]);
+    }
+
+    /**
      * Delete a question
      */
     public function deleteQuestion($id)
