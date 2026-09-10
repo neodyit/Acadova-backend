@@ -371,5 +371,23 @@ class QuizController extends Controller
                 'total_questions' => $quiz->questions->count(),
             ],
         ]);
+    /**
+     * Get attempts history for current user or all attempts
+     */
+    public function getAttempts(Request $request)
+    {
+        $userId = $request->user() ? $request->user()->id : null;
+
+        $query = QuizAttempt::with('quiz');
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+
+        $attempts = $query->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $attempts,
+        ]);
     }
 }

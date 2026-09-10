@@ -23,5 +23,6 @@ Route::post('/quizzes/{id}/import-csv', [QuizController::class, 'importQuestions
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/attempts', [QuizController::class, 'getAttempts']);
     Route::post('/quizzes/{id}/submit', [QuizController::class, 'submitAttempt']);
 });
