@@ -1587,12 +1587,12 @@
         }
 
         function editUser(id) {
-            const u = usersData.find(item => item.id === id);
+            const u = usersData.find(item => item.id == id);
             if (!u) return;
             document.getElementById('editingUserId').value = u.id;
             document.getElementById('userName').value = u.name || '';
             document.getElementById('userEmail').value = u.email || '';
-            document.getElementById('userRole').value = u.role.toLowerCase();
+            document.getElementById('userRole').value = (u.role || 'student').toLowerCase();
             document.getElementById('userRollOrFaculty').value = u.roll_number || u.faculty_id || '';
             document.getElementById('userDept').value = u.department || '';
             document.getElementById('userPhone').value = u.phone || '';
