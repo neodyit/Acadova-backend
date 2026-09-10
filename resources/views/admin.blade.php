@@ -811,10 +811,15 @@
             <div class="page-section" id="section-users">
                 <div class="action-bar">
                     <div>
-                        <h1 style="font-size: 24px; font-weight: 800;">Users Directory</h1>
-                        <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Registered student & faculty accounts synchronized with database.</p>
+                        <h1 style="font-size: 24px; font-weight: 800;">Users Directory & Management</h1>
+                        <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Manage student & faculty accounts, edit profiles, and reset passwords.</p>
                     </div>
-                    <input type="text" id="userSearchInput" onkeyup="searchUsers()" placeholder="Search name or email..." class="form-control" style="max-width: 280px;">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input type="text" id="userSearchInput" onkeyup="searchUsers()" placeholder="Search name, email, dept..." class="form-control" style="max-width: 260px;">
+                        <button class="btn btn-primary" onclick="openCreateUserModal()">
+                            <i class="fa-solid fa-user-plus"></i> Add New User
+                        </button>
+                    </div>
                 </div>
 
                 <div class="table-card">
@@ -828,10 +833,11 @@
                                     <th>Department</th>
                                     <th>Quizzes Taken</th>
                                     <th>Joined Date</th>
+                                    <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
-                                <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading users directory...</td></tr>
+                                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading users directory...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1028,6 +1034,68 @@
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('createCampaignModal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Campaign</button>
+                </div>
+    </div>
+
+    <!-- Create / Edit User Modal -->
+    <div class="modal-overlay" id="createUserModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title" id="userModalTitleText">Add New User</div>
+                <button class="close-btn" onclick="closeModal('createUserModal')">&times;</button>
+            </div>
+            <form id="createUserForm" onsubmit="handleSaveUser(event)">
+                <input type="hidden" id="editingUserId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="userName" class="form-control" placeholder="e.g. Aman Sharma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="userEmail" class="form-control" placeholder="e.g. aman@acadova.com" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="userRole" class="form-control" onchange="toggleUserRoleFields()">
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty / Instructor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label id="userRollLabel">Roll Number</label>
+                        <input type="text" id="userRollOrFaculty" class="form-control" placeholder="e.g. CS2026001">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Department / Branch</label>
+                        <input type="text" id="userDept" class="form-control" placeholder="e.g. Computer Science">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="userPhone" class="form-control" placeholder="e.g. +91 9876543210">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="userPasswordLabel">Password</label>
+                    <input type="password" id="userPassword" class="form-control" placeholder="Minimum 6 characters">
+                    <small id="userPasswordHelp" style="color: var(--text-muted); font-size: 11.5px; display: none;">Leave empty to keep current password.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Bio / Note (Optional)</label>
+                    <textarea id="userBio" class="form-control" rows="2" placeholder="Student or faculty notes..."></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createUserModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save User</button>
                 </div>
             </form>
         </div>
@@ -1322,7 +1390,7 @@
         function renderUsersTable(list) {
             const tbody = document.getElementById('usersTableBody');
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No users found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No users found.</td></tr>`;
                 return;
             }
 
@@ -1337,6 +1405,10 @@
                     <td>${u.department || 'Not Specified'}</td>
                     <td><strong>${u.attempts_count}</strong> Quizzes</td>
                     <td>${u.created_at}</td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 12px;" onclick="editUser(${u.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+                        <button class="btn btn-danger" style="padding: 6px 10px; font-size: 12px;" onclick="deleteUser(${u.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -1349,6 +1421,102 @@
                 (u.department && u.department.toLowerCase().includes(query))
             );
             renderUsersTable(filtered);
+        }
+
+        // User Management CRUD Handlers
+        function openCreateUserModal() {
+            document.getElementById('editingUserId').value = '';
+            document.getElementById('createUserForm').reset();
+            document.getElementById('userModalTitleText').innerText = 'Add New User';
+            document.getElementById('userPassword').required = true;
+            document.getElementById('userPasswordHelp').style.display = 'none';
+            toggleUserRoleFields();
+            openModal('createUserModal');
+        }
+
+        function editUser(id) {
+            const u = usersData.find(item => item.id === id);
+            if (!u) return;
+            document.getElementById('editingUserId').value = u.id;
+            document.getElementById('userName').value = u.name || '';
+            document.getElementById('userEmail').value = u.email || '';
+            document.getElementById('userRole').value = u.role.toLowerCase();
+            document.getElementById('userRollOrFaculty').value = u.roll_number || u.faculty_id || '';
+            document.getElementById('userDept').value = u.department || '';
+            document.getElementById('userPhone').value = u.phone || '';
+            document.getElementById('userBio').value = u.bio || '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userPassword').required = false;
+            document.getElementById('userPasswordHelp').style.display = 'block';
+            document.getElementById('userModalTitleText').innerText = 'Edit User Details';
+            toggleUserRoleFields();
+            openModal('createUserModal');
+        }
+
+        function toggleUserRoleFields() {
+            const role = document.getElementById('userRole').value;
+            const label = document.getElementById('userRollLabel');
+            label.innerText = (role === 'faculty') ? 'Faculty ID' : 'Roll Number';
+        }
+
+        async function handleSaveUser(e) {
+            e.preventDefault();
+            const userId = document.getElementById('editingUserId').value;
+            const role = document.getElementById('userRole').value;
+            const rollVal = document.getElementById('userRollOrFaculty').value;
+
+            const payload = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                role: role,
+                department: document.getElementById('userDept').value,
+                phone: document.getElementById('userPhone').value,
+                bio: document.getElementById('userBio').value,
+                roll_number: role === 'student' ? rollVal : null,
+                faculty_id: role === 'faculty' ? rollVal : null,
+            };
+
+            const pwd = document.getElementById('userPassword').value;
+            if (pwd) payload.password = pwd;
+
+            const url = userId ? `/api/admin/users/${userId}` : '/api/admin/users';
+            const method = userId ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast(userId ? 'User updated successfully!' : 'User created successfully!');
+                    closeModal('createUserModal');
+                    loadUsers();
+                    loadDashboardStats();
+                } else {
+                    showToast(json.message || 'Failed to save user');
+                }
+            } catch (err) {
+                showToast('Error saving user');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Are you sure you want to delete this user? All their quiz attempt records will also be removed.')) return;
+            try {
+                const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast('User account deleted');
+                    loadUsers();
+                    loadDashboardStats();
+                } else {
+                    showToast(json.message || 'Failed to delete user');
+                }
+            } catch (e) {
+                showToast('Error deleting user');
+            }
         }
 
         async function loadMediaFiles() {
