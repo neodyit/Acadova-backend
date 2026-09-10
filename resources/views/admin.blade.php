@@ -821,11 +821,37 @@
                     <span class="dot"></span> Backend Live
                 </div>
             </div>
-            <div class="user-badge">
-                <div class="user-avatar">A</div>
-                <span>Administrator</span>
+            <div class="user-badge" style="cursor: pointer;" onclick="handleLogout()">
+                <div class="user-avatar" id="headerAvatar">M</div>
+                <span id="headerAdminName">Mayank Admin</span>
+                <i class="fa-solid fa-right-from-bracket" style="margin-left: 8px; color: var(--danger);" title="Logout"></i>
             </div>
         </header>
+
+        <!-- Login Required Overlay Modal -->
+        <div class="modal-overlay" id="adminLoginModal" style="z-index: 9999; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);">
+            <div class="modal-container" style="max-width: 440px; padding: 40px 32px; text-align: center;">
+                <div class="brand-icon" style="margin: 0 auto 20px auto; width: 56px; height: 56px; font-size: 26px;">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 8px;">Admin Authentication</h2>
+                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 28px;">Please enter your admin credentials to access the Acadova control panel.</p>
+                
+                <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                    <div class="form-group" style="text-align: left;">
+                        <label>Admin Email</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="mayank@neodyit.in" required>
+                    </div>
+                    <div class="form-group" style="text-align: left; margin-bottom: 24px;">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 15px;">
+                        <i class="fa-solid fa-shield-halved"></i> Sign In to Portal
+                    </button>
+                </form>
+            </div>
+        </div>
 
         <!-- Dynamic Content Sections -->
         <div class="content">
@@ -1337,13 +1363,75 @@
         let usersData = [];
         let currentFilter = 'all';
 
+        let authToken = localStorage.getItem('acadova_admin_token') || '';
+        let currentUser = null;
+
         document.addEventListener('DOMContentLoaded', () => {
+            checkAuthSession();
             navigateToSection(INITIAL_SECTION, null, false);
             window.addEventListener('popstate', (e) => {
                 const path = window.location.pathname.replace('/admin/', '').replace('/admin', '') || 'dashboard';
                 navigateToSection(path, null, false);
             });
         });
+
+        function checkAuthSession() {
+            const userStr = localStorage.getItem('acadova_admin_user');
+            if (authToken && userStr) {
+                try {
+                    currentUser = JSON.parse(userStr);
+                    document.getElementById('headerAdminName').innerText = currentUser.name || 'Admin';
+                    document.getElementById('headerAvatar').innerText = (currentUser.name || 'A').charAt(0).toUpperCase();
+                    closeModal('adminLoginModal');
+                    return true;
+                } catch(e) {}
+            }
+            openModal('adminLoginModal');
+            return false;
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    authToken = json.data.token;
+                    currentUser = json.data.user;
+                    localStorage.setItem('acadova_admin_token', authToken);
+                    localStorage.setItem('acadova_admin_user', JSON.stringify(currentUser));
+                    
+                    document.getElementById('headerAdminName').innerText = currentUser.name || 'Admin';
+                    document.getElementById('headerAvatar').innerText = (currentUser.name || 'A').charAt(0).toUpperCase();
+                    closeModal('adminLoginModal');
+                    showToast('Welcome back, ' + currentUser.name);
+                    loadDashboardStats();
+                } else {
+                    showToast(json.message || 'Invalid credentials');
+                }
+            } catch (err) {
+                showToast('Login request failed');
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to log out from the Admin Panel?')) {
+                localStorage.removeItem('acadova_admin_token');
+                localStorage.removeItem('acadova_admin_user');
+                authToken = '';
+                currentUser = null;
+                openModal('adminLoginModal');
+                showToast('Logged out successfully');
+            }
+        }
 
         function navigateToSection(section, event, updateHistory = true) {
             if (event) event.preventDefault();

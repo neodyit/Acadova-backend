@@ -35,5 +35,15 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('Mayank@881'),
             ]
         );
+
+        // Admin Account
+        User::updateOrCreate(
+            ['email' => 'mayank@neodyit.in'],
+            [
+                'name' => 'Mayank Admin',
+                'role' => 'admin',
+                'password' => Hash::make('Mayank123'),
+            ]
+        );
     }
 }
