@@ -23,9 +23,29 @@ $kernel->bootstrap();
 
 header('Content-Type: text/plain');
 
+// Support on-the-fly database credential override via URL GET parameters for easy setup
+if (!empty($_GET['db_name'])) {
+    config(['database.connections.mysql.database' => $_GET['db_name']]);
+}
+if (!empty($_GET['db_user'])) {
+    config(['database.connections.mysql.username' => $_GET['db_user']]);
+}
+if (!empty($_GET['db_pass'])) {
+    config(['database.connections.mysql.password' => $_GET['db_pass']]);
+}
+if (!empty($_GET['db_host'])) {
+    config(['database.connections.mysql.host' => $_GET['db_host']]);
+}
+
+// Clear cached config to ensure live .env changes take effect
+Artisan::call('config:clear');
+
 echo "========================================\n";
 echo "  Acadova Live Migration Runner \n";
 echo "========================================\n\n";
+echo "Active DB Host: " . config('database.connections.mysql.host') . "\n";
+echo "Active DB Name: " . config('database.connections.mysql.database') . "\n";
+echo "Active DB User: " . config('database.connections.mysql.username') . "\n\n";
 
 try {
     echo "[1/2] Running pending migrations...\n";
