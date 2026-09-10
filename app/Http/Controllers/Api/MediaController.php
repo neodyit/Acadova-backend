@@ -47,7 +47,16 @@ class MediaController extends Controller
             ], 500);
         }
 
-        $publicUrl = asset('storage/' . $storedPath);
+        $fullPath = storage_path('app/public/' . $storedPath);
+        if (file_exists($fullPath)) {
+            @chmod($fullPath, 0644);
+            @chmod(dirname($fullPath), 0755);
+            @chmod(dirname(dirname($fullPath)), 0755);
+            @chmod(dirname(dirname(dirname($fullPath))), 0755);
+        }
+
+        // Return secure direct API media URL to prevent LiteSpeed/Apache 403 storage block
+        $publicUrl = url('api/media/file/' . $storedPath);
 
         return response()->json([
             'success' => true,
@@ -61,6 +70,33 @@ class MediaController extends Controller
                 'size_bytes' => $file->getSize(),
             ]
         ], 201);
+    }
+
+    /**
+     * Publicly serve media file with cross-origin headers.
+     */
+    public function showFile($path)
+    {
+        $fullPath = storage_path('app/public/' . $path);
+
+        if (!file_exists($fullPath)) {
+            $fullPath = storage_path('app/' . $path);
+        }
+
+        if (!file_exists($fullPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Media file not found: ' . $path,
+            ], 404);
+        }
+
+        $mime = mime_content_type($fullPath) ?: 'image/jpeg';
+
+        return response()->file($fullPath, [
+            'Content-Type' => $mime,
+            'Cache-Control' => 'public, max-age=31536000',
+            'Access-Control-Allow-Origin' => '*',
+        ]);
     }
 
     /**

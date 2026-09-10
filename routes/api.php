@@ -14,6 +14,7 @@ Route::post('/login', [AuthController::class, 'login']);
 // Structured Media & File Upload API
 Route::post('/upload', [MediaController::class, 'store']);
 Route::get('/media', [MediaController::class, 'index']);
+Route::get('/media/file/{path}', [MediaController::class, 'showFile'])->where('path', '.*');
 
 // Public/Protected Quizzes & Campaigns API
 Route::get('/quizzes', [QuizController::class, 'index']);

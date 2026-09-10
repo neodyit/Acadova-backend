@@ -25,10 +25,4 @@ Route::get('/sample-csv', function () {
 });
 
 // Fallback Media Serving Route for production environments
-Route::get('/storage/{path}', function ($path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath)) {
-        abort(404);
-    }
-    return response()->file($fullPath);
-})->where('path', '.*');
+Route::get('/storage/{path}', [App\Http\Controllers\Api\MediaController::class, 'showFile'])->where('path', '.*');
