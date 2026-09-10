@@ -475,8 +475,11 @@
         </div>
 
         <ul class="nav-menu">
-            <li class="nav-item active">
-                <a href="#"><i class="fa-solid fa-list-check"></i> Quizzes & Exams</a>
+            <li class="nav-item active" id="navQuizzesTab">
+                <a href="javascript:void(0)" onclick="switchTab('quizzes')"><i class="fa-solid fa-list-check"></i> Quizzes & Exams</a>
+            </li>
+            <li class="nav-item" id="navCampaignsTab">
+                <a href="javascript:void(0)" onclick="switchTab('campaigns')"><i class="fa-solid fa-bullhorn"></i> Campaigns & Notices</a>
             </li>
             <li class="nav-item">
                 <a href="#"><i class="fa-solid fa-user-graduate"></i> Student Records</a>
@@ -493,14 +496,14 @@
     <!-- Main Wrapper -->
     <div class="main-wrapper">
         <div class="header">
-            <div class="header-title">Quiz & Question Management</div>
+            <div class="header-title" id="pageHeaderTitle">Quiz & Question Management</div>
             <div class="user-badge">
                 <div class="user-avatar">A</div>
                 <span>Administrator</span>
             </div>
         </div>
 
-        <div class="content">
+        <div class="content" id="quizzesSection">
             <div class="action-bar">
                 <div>
                     <h1 style="font-size: 24px; font-weight: 800; color: var(--dark);">Manage Quizzes</h1>
@@ -513,6 +516,23 @@
 
             <!-- Quiz Cards Grid -->
             <div class="quiz-grid" id="quizGrid">
+                <!-- Rendered dynamically via JS -->
+            </div>
+        </div>
+
+        <div class="content" id="campaignsSection" style="display: none;">
+            <div class="action-bar">
+                <div>
+                    <h1 style="font-size: 24px; font-weight: 800; color: var(--dark);">Manage Campaigns & Announcements</h1>
+                    <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Broadcast banners, promotional events, and notices to student app dashboard.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openCreateCampaignModal()">
+                    <i class="fa-solid fa-plus"></i> Create Campaign
+                </button>
+            </div>
+
+            <!-- Campaign Cards Grid -->
+            <div class="quiz-grid" id="campaignGrid">
                 <!-- Rendered dynamically via JS -->
             </div>
         </div>
@@ -572,6 +592,60 @@
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('createQuizModal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Quiz</button>
+                </div>
+    <!-- Create / Edit Campaign Modal -->
+    <div class="modal-overlay" id="createCampaignModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title" id="campaignModalTitleText">Create Campaign / Notice</div>
+                <button class="close-btn" onclick="closeModal('createCampaignModal')">&times;</button>
+            </div>
+            <form id="createCampaignForm" onsubmit="handleSaveCampaign(event)">
+                <input type="hidden" id="editingCampaignId">
+                <div class="form-group">
+                    <label>Campaign Title</label>
+                    <input type="text" id="campaignTitle" class="form-control" placeholder="e.g. 🏆 Annual Tech Quiz League 2026" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Badge / Category</label>
+                        <input type="text" id="campaignBadge" class="form-control" placeholder="e.g. Featured Event" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Banner Theme Color</label>
+                        <select id="campaignColor" class="form-control">
+                            <option value="purple">Purple Gradient</option>
+                            <option value="orange">Orange / Coral</option>
+                            <option value="teal">Teal / Emerald</option>
+                            <option value="blue">Ocean Blue</option>
+                            <option value="pink">Pink / Rose</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="campaignStatus" class="form-control">
+                            <option value="active">Active (Visible on Dashboard)</option>
+                            <option value="inactive">Inactive (Hidden)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Action Link URL (Optional)</label>
+                        <input type="url" id="campaignLink" class="form-control" placeholder="https://example.com/register">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description / Notice Body</label>
+                    <textarea id="campaignDescription" class="form-control" rows="3" placeholder="Write detailed notice or event description..." required></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createCampaignModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Campaign</button>
                 </div>
             </form>
         </div>
@@ -649,11 +723,147 @@
         const API_BASE = 'https://acadova.neodyit.com/api';
         let currentActiveQuiz = null;
         let allFetchedQuizzes = [];
+        let allFetchedCampaigns = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchQuizzes();
+            fetchCampaigns();
             renderOptionInputs();
         });
+
+        function switchTab(tab) {
+            document.getElementById('navQuizzesTab').classList.remove('active');
+            document.getElementById('navCampaignsTab').classList.remove('active');
+            document.getElementById('quizzesSection').style.display = 'none';
+            document.getElementById('campaignsSection').style.display = 'none';
+
+            if (tab === 'quizzes') {
+                document.getElementById('navQuizzesTab').classList.add('active');
+                document.getElementById('quizzesSection').style.display = 'block';
+                document.getElementById('pageHeaderTitle').innerText = 'Quiz & Question Management';
+            } else if (tab === 'campaigns') {
+                document.getElementById('navCampaignsTab').classList.add('active');
+                document.getElementById('campaignsSection').style.display = 'block';
+                document.getElementById('pageHeaderTitle').innerText = 'Campaigns & Announcements Management';
+            }
+        }
+
+        async function fetchCampaigns() {
+            try {
+                const res = await fetch(`${API_BASE}/campaigns?status=all`);
+                const json = await res.json();
+
+                if (json.success) {
+                    allFetchedCampaigns = json.data;
+                    renderCampaigns(json.data);
+                }
+            } catch (err) {
+                showToast('Failed to load campaigns');
+            }
+        }
+
+        function renderCampaigns(campaigns) {
+            const grid = document.getElementById('campaignGrid');
+            if (!campaigns || campaigns.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-muted); font-size: 14px;">No campaigns found. Create your first campaign or announcement banner!</p>';
+                return;
+            }
+
+            grid.innerHTML = campaigns.map(c => `
+                <div class="quiz-card">
+                    <div class="quiz-header">
+                        <span class="status-badge status-${c.status}">${c.status}</span>
+                        <div style="display:flex; gap:8px;">
+                            <button style="background:none; border:none; color:var(--primary); cursor:pointer;" onclick="openEditCampaignModal(${c.id})">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button style="background:none; border:none; color:var(--danger); cursor:pointer;" onclick="deleteCampaign(${c.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="quiz-title">${escapeHtml(c.title)}</div>
+                    <div class="quiz-subject" style="color: var(--primary); font-weight:700;">${escapeHtml(c.badge || 'Notice')} • Color: ${escapeHtml(c.banner_color || 'purple')}</div>
+                    <p style="font-size:13px; color:var(--text-muted); margin: 8px 0 14px 0; line-height:1.4;">${escapeHtml(c.description)}</p>
+                    ${c.link_url ? `<div style="font-size:12px; color:var(--primary); word-break:break-all;"><i class="fa-solid fa-link"></i> ${escapeHtml(c.link_url)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function openCreateCampaignModal() {
+            document.getElementById('editingCampaignId').value = '';
+            document.getElementById('campaignModalTitleText').innerText = 'Create Campaign / Notice';
+            document.getElementById('createCampaignForm').reset();
+            openModal('createCampaignModal');
+        }
+
+        function openEditCampaignModal(campaignId) {
+            const c = allFetchedCampaigns.find(item => item.id === campaignId);
+            if (!c) return;
+
+            document.getElementById('editingCampaignId').value = c.id;
+            document.getElementById('campaignModalTitleText').innerText = 'Edit Campaign';
+            document.getElementById('campaignTitle').value = c.title;
+            document.getElementById('campaignBadge').value = c.badge || '';
+            document.getElementById('campaignColor').value = c.banner_color || 'purple';
+            document.getElementById('campaignStatus').value = c.status || 'active';
+            document.getElementById('campaignLink').value = c.link_url || '';
+            document.getElementById('campaignDescription').value = c.description || '';
+
+            openModal('createCampaignModal');
+        }
+
+        async function handleSaveCampaign(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editingCampaignId').value;
+
+            const data = {
+                title: document.getElementById('campaignTitle').value,
+                badge: document.getElementById('campaignBadge').value,
+                banner_color: document.getElementById('campaignColor').value,
+                status: document.getElementById('campaignStatus').value,
+                link_url: document.getElementById('campaignLink').value,
+                description: document.getElementById('campaignDescription').value,
+            };
+
+            const url = editId ? `${API_BASE}/campaigns/${editId}` : `${API_BASE}/campaigns`;
+            const method = editId ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    showToast(editId ? 'Campaign updated successfully!' : 'Campaign created successfully!');
+                    closeModal('createCampaignModal');
+                    document.getElementById('createCampaignForm').reset();
+                    fetchCampaigns();
+                } else {
+                    showToast(json.message || 'Error saving campaign');
+                }
+            } catch (err) {
+                showToast('Error saving campaign');
+            }
+        }
+
+        async function deleteCampaign(campaignId) {
+            if (!confirm('Are you sure you want to delete this campaign?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/campaigns/${campaignId}`, { method: 'DELETE' });
+                const json = await res.json();
+
+                if (json.success) {
+                    showToast('Campaign deleted');
+                    fetchCampaigns();
+                }
+            } catch (err) {
+                showToast('Error deleting campaign');
+            }
+        }
 
         function toggleScheduledDateInput() {
             const status = document.getElementById('quizStatus').value;
