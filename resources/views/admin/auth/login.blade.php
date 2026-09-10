@@ -160,8 +160,8 @@
 
     <div class="login-card">
         <div class="brand-header">
-            <div class="brand-icon" style="background: linear-gradient(135deg, #00B894, #6C5CE7); box-shadow: 0 8px 22px rgba(0, 184, 148, 0.4);">
-                <i class="fa-solid fa-code-branch"></i>
+            <div class="brand-icon" style="background: white; overflow: hidden; padding: 6px; box-shadow: 0 8px 22px rgba(108, 92, 231, 0.3); border: 1px solid var(--border);">
+                <img src="{{ asset('logo.png') }}" alt="Acadova Logo" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
             <h1>Acadova Admin</h1>
             <p style="color: #00B894; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-top: 4px; text-transform: uppercase;">Powered by Neody IT</p>

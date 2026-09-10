@@ -391,8 +391,8 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
         <div class="brand">
-            <div class="brand-icon" style="background: linear-gradient(135deg, #00B894, #6C5CE7); box-shadow: 0 6px 16px rgba(0, 184, 148, 0.35);">
-                <i class="fa-solid fa-code-branch"></i>
+            <div class="brand-icon" style="background: white; overflow: hidden; padding: 4px; box-shadow: 0 6px 16px rgba(108, 92, 231, 0.25); border: 1px solid var(--border);">
+                <img src="{{ asset('logo.png') }}" alt="Acadova Logo" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
             <div class="brand-text">
                 <h2>Acadova</h2>
