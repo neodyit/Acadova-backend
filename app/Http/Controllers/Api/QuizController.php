@@ -334,8 +334,16 @@ class QuizController extends Controller
             $userAns = $userAnswers[$question->id] ?? null;
 
             if ($question->type === 'multiple') {
-                // Multiple choice checking: compare array elements
-                $correctAnsArr = is_array($question->correct_option) ? $question->correct_option : [$question->correct_option];
+                $correctAnsArr = [];
+                if (is_array($question->correct_option)) {
+                    $correctAnsArr = $question->correct_option;
+                } else if (is_string($question->correct_option)) {
+                    $decoded = json_decode($question->correct_option, true);
+                    $correctAnsArr = is_array($decoded) ? $decoded : [$question->correct_option];
+                } else {
+                    $correctAnsArr = [$question->correct_option];
+                }
+
                 $userAnsArr = is_array($userAns) ? $userAns : ($userAns ? [$userAns] : []);
                 
                 sort($correctAnsArr);
@@ -345,8 +353,7 @@ class QuizController extends Controller
                     $score++;
                 }
             } else {
-                // Single choice checking
-                if ($userAns && (string)$userAns === (string)$question->correct_option) {
+                if ($userAns !== null && (string)$userAns === (string)$question->correct_option) {
                     $score++;
                 }
             }
