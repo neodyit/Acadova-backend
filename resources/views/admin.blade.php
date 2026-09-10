@@ -592,7 +592,7 @@
             <div style="background: var(--bg-light); border: 1px dashed var(--primary); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                 <div>
                     <div style="font-weight: 700; font-size: 14px; color: var(--dark);"><i class="fa-solid fa-file-csv" style="color: var(--primary);"></i> Bulk Import Questions via CSV</div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Upload a CSV file to add questions instantly. <a href="https://acadova.neodyit.com/sample_questions.csv" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;"><i class="fa-solid fa-download"></i> Download Sample CSV</a></div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Upload a CSV file to add questions instantly. <a href="/sample-csv" download="sample_questions.csv" style="color: var(--primary); font-weight: 600; text-decoration: underline;"><i class="fa-solid fa-download"></i> Download Sample CSV</a></div>
                 </div>
                 <form id="csvImportForm" style="display: flex; gap: 8px; align-items: center;" onsubmit="handleImportCsv(event)">
                     <input type="file" id="csvFileInput" accept=".csv" class="form-control" style="padding: 6px 12px; font-size: 12px; max-width: 220px;" required>
