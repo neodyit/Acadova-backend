@@ -180,7 +180,8 @@
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
-                    <button type="submit" class="btn btn-primary">Add Question</button>
+                    <button type="button" id="cancelEditQuestionBtn" class="btn btn-secondary" style="display: none;" onclick="cancelEditQuestion()">Cancel Edit</button>
+                    <button type="submit" id="submitQuestionBtn" class="btn btn-primary">Add Question</button>
                 </div>
             </form>
         </div>
@@ -190,6 +191,8 @@
 
 @section('scripts')
 <script>
+    window.currentQuestions = [];
+
     function openCreateQuizModal() {
         document.getElementById('editingQuizId').value = '';
         document.getElementById('createQuizForm').reset();
@@ -266,8 +269,18 @@
         document.getElementById('activeQuizId').value = quizId;
         document.getElementById('manageModalQuizTitle').innerText = title;
         document.getElementById('manageModalQuizSub').innerText = subject;
+        cancelEditQuestion();
         openModal('manageQuestionsModal');
         loadQuestionsList(quizId);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
     async function loadQuestionsList(quizId) {
@@ -278,63 +291,165 @@
             const json = await res.json();
             const data = json.data || json;
             const questions = data.questions || [];
+            window.currentQuestions = questions;
 
             if (questions.length === 0) {
                 container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No questions added yet.</div>';
                 return;
             }
 
-            container.innerHTML = questions.map((q, idx) => `
-                <div style="background: var(--bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                        <span style="font-weight: 800; font-size: 14px;">Q${idx + 1}. ${q.question_text}</span>
-                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteQuestion(${q.id})"><i class="fa-solid fa-trash"></i></button>
+            container.innerHTML = questions.map((q, idx) => {
+                const qText = q.question || q.question_text || 'No question text';
+                let opts = q.options;
+                if (typeof opts === 'string') {
+                    try { opts = JSON.parse(opts); } catch(e) { opts = []; }
+                }
+                if (!Array.isArray(opts)) {
+                    opts = [q.option_1, q.option_2, q.option_3, q.option_4].filter(Boolean);
+                }
+
+                let correctStr = '';
+                if (Array.isArray(q.correct_option)) {
+                    correctStr = q.correct_option.join(', ');
+                } else if (typeof q.correct_option === 'object' && q.correct_option !== null) {
+                    correctStr = Object.values(q.correct_option).join(', ');
+                } else {
+                    correctStr = q.correct_option || 'N/A';
+                }
+
+                return `
+                    <div style="background: var(--bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <span style="font-weight: 800; font-size: 14px;">Q${idx + 1}. ${escapeHtml(qText)}</span>
+                            <div style="display: flex; gap: 6px;">
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="editQuestion(${q.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+                                <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteQuestion(${q.id})"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Type: <strong>${q.type === 'multiple' ? 'Multiple Answers' : 'Single Answer'}</strong></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12.5px;">
+                            ${opts.map((opt, i) => `<div>${i + 1}. ${escapeHtml(opt)}</div>`).join('')}
+                        </div>
+                        <div style="margin-top: 8px; font-weight: 700; color: var(--secondary); font-size: 12px;">Correct Option: ${escapeHtml(correctStr)}</div>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Type: <strong>${q.type === 'multiple' ? 'Multiple Answers' : 'Single Answer'}</strong></div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12.5px;">
-                        <div>1. ${q.option_1}</div><div>2. ${q.option_2}</div><div>3. ${q.option_3}</div><div>4. ${q.option_4}</div>
-                    </div>
-                    <div style="margin-top: 8px; font-weight: 700; color: var(--secondary); font-size: 12px;">Correct Option: ${q.correct_option}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         } catch (e) {
             container.innerHTML = '<div style="color: var(--danger);">Failed to load questions.</div>';
         }
     }
 
+    function editQuestion(qId) {
+        const q = window.currentQuestions ? window.currentQuestions.find(item => item.id == qId) : null;
+        if (!q) return;
+
+        document.getElementById('editingQuestionId').value = q.id;
+        document.getElementById('qText').value = q.question || q.question_text || '';
+        document.getElementById('qType').value = q.type || 'single';
+        toggleQuestionTypeUI();
+
+        let opts = q.options;
+        if (typeof opts === 'string') {
+            try { opts = JSON.parse(opts); } catch(e) { opts = []; }
+        }
+        if (!Array.isArray(opts)) {
+            opts = [q.option_1, q.option_2, q.option_3, q.option_4];
+        }
+
+        document.getElementById('qOpt1').value = opts[0] || '';
+        document.getElementById('qOpt2').value = opts[1] || '';
+        document.getElementById('qOpt3').value = opts[2] || '';
+        document.getElementById('qOpt4').value = opts[3] || '';
+
+        if (q.type === 'multiple') {
+            let correctArr = Array.isArray(q.correct_option) ? q.correct_option : [];
+            if (typeof q.correct_option === 'string') {
+                try { correctArr = JSON.parse(q.correct_option); } catch(e) { correctArr = [q.correct_option]; }
+            }
+            document.querySelectorAll('.multi-check').forEach(cb => {
+                const val = cb.value; // '1', '2', '3', '4'
+                const optText = opts[parseInt(val) - 1];
+                cb.checked = correctArr.includes(val) || correctArr.includes(optText) || correctArr.includes(parseInt(val));
+            });
+        } else {
+            let corr = q.correct_option;
+            if (Array.isArray(corr)) corr = corr[0];
+            let foundIdx = opts.findIndex(o => o === corr);
+            if (foundIdx !== -1) {
+                document.getElementById('qCorrectSingle').value = (foundIdx + 1).toString();
+            } else if (['1','2','3','4'].includes(String(corr))) {
+                document.getElementById('qCorrectSingle').value = String(corr);
+            } else {
+                document.getElementById('qCorrectSingle').value = '1';
+            }
+        }
+
+        document.getElementById('questionFormTitle').innerText = 'Edit Question & Options';
+        document.getElementById('submitQuestionBtn').innerText = 'Update Question';
+        document.getElementById('cancelEditQuestionBtn').style.display = 'inline-block';
+    }
+
+    function cancelEditQuestion() {
+        document.getElementById('editingQuestionId').value = '';
+        document.getElementById('addQuestionForm').reset();
+        document.getElementById('questionFormTitle').innerText = 'Add Single Question';
+        document.getElementById('submitQuestionBtn').innerText = 'Add Question';
+        document.getElementById('cancelEditQuestionBtn').style.display = 'none';
+        toggleQuestionTypeUI();
+    }
+
     async function handleAddOrUpdateQuestion(e) {
         e.preventDefault();
         const quizId = document.getElementById('activeQuizId').value;
+        const qId = document.getElementById('editingQuestionId').value;
         const qType = document.getElementById('qType').value;
-        let correctOption = document.getElementById('qCorrectSingle').value;
+
+        const opt1 = document.getElementById('qOpt1').value.trim();
+        const opt2 = document.getElementById('qOpt2').value.trim();
+        const opt3 = document.getElementById('qOpt3').value.trim();
+        const opt4 = document.getElementById('qOpt4').value.trim();
+        const options = [opt1, opt2, opt3, opt4].filter(o => o !== '');
+
+        if (options.length < 2) {
+            showToast('Please enter at least 2 options');
+            return;
+        }
+
+        let correctOption = null;
         if (qType === 'multiple') {
-            const selected = Array.from(document.querySelectorAll('.multi-check:checked')).map(c => c.value);
-            if (selected.length === 0) { showToast('Select at least one option'); return; }
-            correctOption = selected.join('|');
+            const selectedIndices = Array.from(document.querySelectorAll('.multi-check:checked')).map(c => parseInt(c.value) - 1);
+            if (selectedIndices.length === 0) { showToast('Select at least one correct option'); return; }
+            correctOption = selectedIndices.map(idx => [opt1, opt2, opt3, opt4][idx]).filter(Boolean);
+        } else {
+            const singleVal = parseInt(document.getElementById('qCorrectSingle').value) - 1;
+            correctOption = [opt1, opt2, opt3, opt4][singleVal] || opt1;
         }
 
         const payload = {
-            question_text: document.getElementById('qText').value,
+            question: document.getElementById('qText').value,
             type: qType,
-            option_1: document.getElementById('qOpt1').value,
-            option_2: document.getElementById('qOpt2').value,
-            option_3: document.getElementById('qOpt3').value,
-            option_4: document.getElementById('qOpt4').value,
+            options: [opt1, opt2, opt3, opt4],
             correct_option: correctOption,
         };
 
+        const url = qId ? `/api/questions/${qId}` : `/api/quizzes/${quizId}/questions`;
+        const method = qId ? 'PUT' : 'POST';
+
         try {
-            const res = await fetch(`/api/quizzes/${quizId}/questions`, {
-                method: 'POST',
+            const res = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
                 body: JSON.stringify(payload)
             });
-            if (res.ok) {
-                showToast('Question added!');
-                document.getElementById('addQuestionForm').reset();
+            const json = await res.json();
+            if (res.ok || json.success) {
+                showToast(qId ? 'Question updated successfully!' : 'Question added successfully!');
+                cancelEditQuestion();
                 loadQuestionsList(quizId);
+            } else {
+                showToast(json.message || 'Failed to save question');
             }
-        } catch (e) { showToast('Error adding question'); }
+        } catch (e) { showToast('Error saving question'); }
     }
 
     async function deleteQuestion(qId) {
