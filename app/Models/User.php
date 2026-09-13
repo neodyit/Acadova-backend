@@ -56,6 +56,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the session logs for the user.
+     */
+    public function sessionLogs()
+    {
+        return $this->hasMany(UserSessionLog::class);
+    }
+
+    /**
      * Convert legacy storage URLs to secure API media streaming URLs
      */
     public function getAvatarAttribute($value)

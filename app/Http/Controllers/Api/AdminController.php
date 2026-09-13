@@ -264,13 +264,52 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
 
-        // Clean up attempts
+        // Clean up attempts & session logs
         QuizAttempt::where('user_id', $user->id)->delete();
+        \App\Models\UserSessionLog::where('user_id', $user->id)->delete();
         $user->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'User account deleted successfully'
+        ]);
+    }
+
+    /**
+     * Get user session logs for admin panel.
+     */
+    public function sessions(Request $request)
+    {
+        $query = \App\Models\UserSessionLog::with('user')->orderBy('created_at', 'desc');
+
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->query('user_id'));
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        $sessions = $query->limit(100)->get()->map(function ($log) {
+            return [
+                'id' => $log->id,
+                'user_id' => $log->user_id,
+                'user_name' => $log->user ? $log->user->name : 'Unknown',
+                'user_email' => $log->user ? $log->user->email : 'N/A',
+                'user_role' => $log->user ? strtoupper($log->user->role) : 'N/A',
+                'login_method' => $log->login_method,
+                'login_at' => $log->login_at ? $log->login_at->format('M d, Y H:i:s') : null,
+                'logout_at' => $log->logout_at ? $log->logout_at->format('M d, Y H:i:s') : null,
+                'ip_address' => $log->ip_address ?? 'N/A',
+                'user_agent' => $log->user_agent ?? 'N/A',
+                'device_info' => $log->device_info ?? 'N/A',
+                'status' => $log->status,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $sessions,
         ]);
     }
 }

@@ -18,6 +18,7 @@ Route::put('/admin/users/{id}', [AdminController::class, 'updateUser']);
 Route::delete('/admin/users/{id}', [AdminController::class, 'destroyUser']);
 Route::get('/admin/attempts', [AdminController::class, 'attempts']);
 Route::delete('/admin/attempts/{id}', [AdminController::class, 'deleteAttempt']);
+Route::get('/admin/sessions', [AdminController::class, 'sessions']);
 
 // Academic Hierarchy & Structure CRUD API
 Route::prefix('academic')->group(function () {

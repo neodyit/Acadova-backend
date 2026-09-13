@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserSessionLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -44,7 +46,20 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('acadova_token')->plainTextToken;
+        $tokenResult = $user->createToken('acadova_token');
+        $token = $tokenResult->plainTextToken;
+
+        // Record session log in DB
+        UserSessionLog::create([
+            'user_id' => $user->id,
+            'token_id' => $tokenResult->accessToken->id,
+            'login_method' => 'register',
+            'login_at' => now(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
+            'device_info' => $request->header('X-Device-Info', $request->header('User-Agent')),
+            'status' => 'active',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -82,7 +97,20 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', strtolower(trim($request->email)))->firstOrFail();
-        $token = $user->createToken('acadova_token')->plainTextToken;
+        $tokenResult = $user->createToken('acadova_token');
+        $token = $tokenResult->plainTextToken;
+
+        // Record login session in DB
+        UserSessionLog::create([
+            'user_id' => $user->id,
+            'token_id' => $tokenResult->accessToken->id,
+            'login_method' => 'password',
+            'login_at' => now(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
+            'device_info' => $request->header('X-Device-Info', $request->header('User-Agent')),
+            'status' => 'active',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -267,7 +295,20 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('acadova_token')->plainTextToken;
+        $tokenResult = $user->createToken('acadova_token');
+        $token = $tokenResult->plainTextToken;
+
+        // Record Google login session in DB
+        UserSessionLog::create([
+            'user_id' => $user->id,
+            'token_id' => $tokenResult->accessToken->id,
+            'login_method' => 'google',
+            'login_at' => now(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
+            'device_info' => $request->header('X-Device-Info', $request->header('User-Agent')),
+            'status' => 'active',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -285,7 +326,21 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        $token = $user->currentAccessToken();
+
+        if ($token) {
+            // Update session log for this token to logged_out status
+            UserSessionLog::where('user_id', $user->id)
+                ->where('token_id', $token->id)
+                ->where('status', 'active')
+                ->update([
+                    'logout_at' => now(),
+                    'status' => 'logged_out',
+                ]);
+
+            $token->delete();
+        }
 
         return response()->json([
             'success' => true,
