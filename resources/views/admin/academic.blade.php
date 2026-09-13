@@ -280,8 +280,9 @@
         if (modal) modal.classList.add('active');
     }
 
-    function closeModal() {
-        const modal = document.getElementById('crudModal');
+    function closeModal(id) {
+        const targetId = typeof id === 'string' ? id : 'crudModal';
+        const modal = document.getElementById(targetId) || document.querySelector('.modal-overlay.active');
         if (modal) {
             modal.classList.remove('active');
         }

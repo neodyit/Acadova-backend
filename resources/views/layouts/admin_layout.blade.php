@@ -495,16 +495,21 @@
         const CSRF_TOKEN = '{{ csrf_token() }}';
 
         function toggleMobileSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('sidebarOverlay').classList.toggle('active');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('active');
+            if (overlay) overlay.classList.toggle('active');
         }
 
         function openModal(id) {
-            document.getElementById(id).classList.add('active');
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('active');
         }
 
         function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
+            const targetId = id || 'crudModal';
+            const modal = document.getElementById(targetId) || document.querySelector('.modal-overlay.active');
+            if (modal) modal.classList.remove('active');
         }
 
         function showToast(msg) {
