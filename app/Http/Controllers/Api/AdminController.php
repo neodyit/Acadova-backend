@@ -319,7 +319,7 @@ class AdminController extends Controller
     public function getFacultyAllocations(Request $request, $facultyId = null)
     {
         $id = $facultyId ?: $request->query('faculty_id');
-        $query = \App\Models\FacultySubjectAllocation::with(['faculty', 'subjectModel', 'sectionModel']);
+        $query = \App\Models\FacultySubjectAllocation::with(['faculty', 'branchModel', 'subjectModel', 'sectionModel']);
 
         if ($id) {
             $query->where('faculty_id', $id);
@@ -340,12 +340,20 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'faculty_id' => 'required|exists:users,id',
+            'branch_id' => 'nullable|exists:branches,id',
+            'branch_name' => 'nullable|string|max:255',
             'subject_id' => 'nullable|exists:subjects,id',
             'section_id' => 'nullable|exists:sections,id',
             'subject_name' => 'nullable|string|max:255',
             'section_name' => 'nullable|string|max:255',
             'semester' => 'nullable|string|max:255',
         ]);
+
+        $branchName = $validated['branch_name'] ?? null;
+        if (!empty($validated['branch_id'])) {
+            $br = \App\Models\Branch::find($validated['branch_id']);
+            if ($br) $branchName = $br->name;
+        }
 
         $subjectName = $validated['subject_name'] ?? null;
         if (!empty($validated['subject_id'])) {
@@ -361,6 +369,8 @@ class AdminController extends Controller
 
         $allocation = \App\Models\FacultySubjectAllocation::create([
             'faculty_id' => $validated['faculty_id'],
+            'branch_id' => $validated['branch_id'] ?? null,
+            'branch_name' => $branchName ?? 'All Branches',
             'subject_id' => $validated['subject_id'] ?? null,
             'section_id' => $validated['section_id'] ?? null,
             'subject_name' => $subjectName ?? 'General',
@@ -371,7 +381,7 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Faculty allocation created successfully.',
-            'data' => $allocation->load(['faculty', 'subjectModel', 'sectionModel']),
+            'data' => $allocation->load(['faculty', 'branchModel', 'subjectModel', 'sectionModel']),
         ], 201);
     }
 
@@ -404,7 +414,7 @@ class AdminController extends Controller
         }
 
         $allocations = \App\Models\FacultySubjectAllocation::where('faculty_id', $user->id)
-            ->with(['subjectModel', 'sectionModel'])
+            ->with(['branchModel', 'subjectModel', 'sectionModel'])
             ->latest()
             ->get();
 

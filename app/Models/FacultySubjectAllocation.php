@@ -9,6 +9,8 @@ class FacultySubjectAllocation extends Model
 {
     protected $fillable = [
         'faculty_id',
+        'branch_id',
+        'branch_name',
         'subject_id',
         'section_id',
         'subject_name',
@@ -19,6 +21,11 @@ class FacultySubjectAllocation extends Model
     public function faculty(): BelongsTo
     {
         return $this->belongsTo(User::class, 'faculty_id');
+    }
+
+    public function branchModel(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 
     public function subjectModel(): BelongsTo

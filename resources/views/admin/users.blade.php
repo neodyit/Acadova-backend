@@ -104,7 +104,15 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Predefined Section / Batch</label>
+                        <label>Predefined Branch</label>
+                        <select id="allocBranchSelect" class="form-control" onchange="toggleCustomBranchInput()">
+                            <option value="">-- Loading Branches --</option>
+                        </select>
+                        <input type="text" id="allocBranchNameCustom" class="form-control" placeholder="Or enter custom branch..." style="display: none; margin-top: 8px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Predefined Section</label>
                         <select id="allocSectionSelect" class="form-control" onchange="toggleCustomSectionInput()">
                             <option value="">-- Loading Sections --</option>
                         </select>
@@ -123,13 +131,14 @@
                     <thead>
                         <tr style="background: var(--bg-surface-secondary, #f1f5f9);">
                             <th style="padding: 8px 12px;">Semester</th>
+                            <th style="padding: 8px 12px;">Branch</th>
                             <th style="padding: 8px 12px;">Subject Name</th>
                             <th style="padding: 8px 12px;">Section Name</th>
                             <th style="padding: 8px 12px; text-align: right;">Action</th>
                         </tr>
                     </thead>
                     <tbody id="allocationsTableBody">
-                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 16px;">Loading allocations...</td></tr>
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Loading allocations...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -303,19 +312,25 @@
         });
     }
 
+    let globalPredefinedBranches = [];
     let globalPredefinedSubjects = [];
     let globalPredefinedSections = [];
 
     async function loadPredefinedAcademicData() {
         try {
-            const [subRes, secRes] = await Promise.all([
+            const [brRes, subRes, secRes] = await Promise.all([
+                fetch('/api/academic/branches'),
                 fetch('/api/academic/subjects'),
                 fetch('/api/academic/sections')
             ]);
             
+            const brJson = await brRes.json();
             const subJson = await subRes.json();
             const secJson = await secRes.json();
 
+            if (brJson.success) {
+                globalPredefinedBranches = brJson.data || [];
+            }
             if (subJson.success) {
                 globalPredefinedSubjects = subJson.data || [];
             }
@@ -329,8 +344,19 @@
     }
 
     function populateAllocationDropdowns() {
+        const brSelect = document.getElementById('allocBranchSelect');
         const subSelect = document.getElementById('allocSubjectSelect');
         const secSelect = document.getElementById('allocSectionSelect');
+
+        if (globalPredefinedBranches.length > 0) {
+            brSelect.innerHTML = `
+                <option value="">-- Select Predefined Branch --</option>
+                ${globalPredefinedBranches.map(b => `<option value="${b.id}" data-name="${b.name}">${b.name} (${b.code || 'N/A'})</option>`).join('')}
+                <option value="CUSTOM">+ Enter Custom Branch Name</option>
+            `;
+        } else {
+            brSelect.innerHTML = `<option value="CUSTOM">+ Enter Custom Branch Name</option>`;
+        }
 
         if (globalPredefinedSubjects.length > 0) {
             subSelect.innerHTML = `
@@ -352,8 +378,21 @@
             secSelect.innerHTML = `<option value="CUSTOM">+ Enter Custom Section Name</option>`;
         }
 
+        toggleCustomBranchInput();
         toggleCustomSubjectInput();
         toggleCustomSectionInput();
+    }
+
+    function toggleCustomBranchInput() {
+        const select = document.getElementById('allocBranchSelect');
+        const customInput = document.getElementById('allocBranchNameCustom');
+        if (select.value === 'CUSTOM') {
+            customInput.style.display = 'block';
+            customInput.required = true;
+        } else {
+            customInput.style.display = 'none';
+            customInput.required = false;
+        }
     }
 
     function toggleCustomSubjectInput() {
@@ -391,19 +430,20 @@
 
     async function loadFacultyAllocations(facultyId) {
         const tbody = document.getElementById('allocationsTableBody');
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 16px;">Loading allocations...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Loading allocations...</td></tr>';
         
         try {
             const res = await fetch(`/api/admin/faculty/${facultyId}/allocations`);
             const json = await res.json();
             if (res.ok && json.success) {
                 if (json.data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 16px;">No subject/section allocations assigned yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">No subject/section allocations assigned yet.</td></tr>';
                     return;
                 }
                 tbody.innerHTML = json.data.map(item => `
                     <tr>
                         <td style="padding: 8px 12px;"><span class="badge" style="background: #E0E7FF; color: #3730A3; font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: 700;">${item.semester || 'Semester 1'}</span></td>
+                        <td style="padding: 8px 12px; font-weight: 600; color: #4F46E5;">${item.branch_name || (item.branch_model ? item.branch_model.name : 'All Branches')}</td>
                         <td style="padding: 8px 12px; font-weight: 600;">${item.subject_name || 'N/A'}</td>
                         <td style="padding: 8px 12px;">${item.section_name || 'All Sections'}</td>
                         <td style="padding: 8px 12px; text-align: right;">
@@ -412,10 +452,10 @@
                     </tr>
                 `).join('');
             } else {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 16px;">Failed to load allocations.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Failed to load allocations.</td></tr>';
             }
         } catch (e) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 16px;">Error loading allocations.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Error loading allocations.</td></tr>';
         }
     }
 
@@ -423,8 +463,19 @@
         e.preventDefault();
         const facultyId = document.getElementById('allocFacultyId').value;
         const semester = document.getElementById('allocSemesterSelect').value;
+        const brSelect = document.getElementById('allocBranchSelect');
         const subSelect = document.getElementById('allocSubjectSelect');
         const secSelect = document.getElementById('allocSectionSelect');
+
+        let branchId = null;
+        let branchName = '';
+        if (brSelect.value === 'CUSTOM') {
+            branchName = document.getElementById('allocBranchNameCustom').value.trim();
+        } else if (brSelect.value) {
+            branchId = brSelect.value;
+            const opt = brSelect.options[brSelect.selectedIndex];
+            branchName = opt ? opt.getAttribute('data-name') : '';
+        }
 
         let subjectId = null;
         let subjectName = '';
@@ -461,6 +512,8 @@
                 body: JSON.stringify({
                     faculty_id: facultyId,
                     semester: semester,
+                    branch_id: branchId,
+                    branch_name: branchName || 'All Branches',
                     subject_id: subjectId,
                     subject_name: subjectName,
                     section_id: sectionId,
@@ -470,10 +523,13 @@
             const json = await res.json();
             if (res.ok && json.success) {
                 showToast('Subject & Section allocation assigned!');
+                document.getElementById('allocBranchNameCustom').value = '';
                 document.getElementById('allocSubjectNameCustom').value = '';
                 document.getElementById('allocSectionNameCustom').value = '';
+                brSelect.value = '';
                 subSelect.value = '';
                 secSelect.value = '';
+                toggleCustomBranchInput();
                 toggleCustomSubjectInput();
                 toggleCustomSectionInput();
                 loadFacultyAllocations(facultyId);
