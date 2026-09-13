@@ -81,11 +81,24 @@
                 </div>
                 <div class="form-group">
                     <label>Status</label>
-                    <select id="quizStatus" class="form-control">
+                    <select id="quizStatus" class="form-control" onchange="toggleScheduleInputs()">
                         <option value="active">Active (Live for Students)</option>
-                        <option value="upcoming">Upcoming (Scheduled)</option>
+                        <option value="upcoming">Upcoming (Scheduled Start & End Time)</option>
                         <option value="completed">Completed / Archived</option>
                     </select>
+                </div>
+            </div>
+
+            <div class="form-row" id="scheduleInputsRow" style="display: none; background: #F8FAFC; padding: 14px; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 16px;">
+                <div class="form-group">
+                    <label style="color: var(--primary); font-weight: 700;">Quiz Start Date & Time</label>
+                    <input type="datetime-local" id="quizStartsAt" class="form-control">
+                    <small style="color: var(--text-muted); font-size: 11px;">Students can ONLY start after this time</small>
+                </div>
+                <div class="form-group">
+                    <label style="color: #E17055; font-weight: 700;">Quiz End Date & Time</label>
+                    <input type="datetime-local" id="quizEndsAt" class="form-control">
+                    <small style="color: var(--text-muted); font-size: 11px;">Students CANNOT start after this time (Missed)</small>
                 </div>
             </div>
 
@@ -193,10 +206,17 @@
 <script>
     window.currentQuestions = [];
 
+    function toggleScheduleInputs() {
+        const status = document.getElementById('quizStatus').value;
+        const row = document.getElementById('scheduleInputsRow');
+        row.style.display = (status === 'upcoming' || status === 'active') ? 'flex' : 'none';
+    }
+
     function openCreateQuizModal() {
         document.getElementById('editingQuizId').value = '';
         document.getElementById('createQuizForm').reset();
         document.getElementById('quizModalTitleText').innerText = 'Create New Quiz';
+        toggleScheduleInputs();
         openModal('createQuizModal');
     }
 
@@ -208,6 +228,22 @@
         document.getElementById('quizDuration').value = q.duration_minutes || 15;
         document.getElementById('quizStatus').value = q.status || 'active';
         document.getElementById('quizDescription').value = q.description || '';
+
+        if (q.starts_at || q.scheduled_at) {
+            const startDate = new Date(q.starts_at || q.scheduled_at);
+            document.getElementById('quizStartsAt').value = startDate.toISOString().slice(0, 16);
+        } else {
+            document.getElementById('quizStartsAt').value = '';
+        }
+
+        if (q.ends_at) {
+            const endDate = new Date(q.ends_at);
+            document.getElementById('quizEndsAt').value = endDate.toISOString().slice(0, 16);
+        } else {
+            document.getElementById('quizEndsAt').value = '';
+        }
+
+        toggleScheduleInputs();
         document.getElementById('quizModalTitleText').innerText = 'Edit Quiz Details';
         openModal('createQuizModal');
     }
@@ -215,6 +251,9 @@
     async function handleSaveQuiz(e) {
         e.preventDefault();
         const quizId = document.getElementById('editingQuizId').value;
+        const startsAtVal = document.getElementById('quizStartsAt').value;
+        const endsAtVal = document.getElementById('quizEndsAt').value;
+
         const payload = {
             title: document.getElementById('quizTitle').value,
             subject: document.getElementById('quizSubject').value,
@@ -222,6 +261,9 @@
             duration_minutes: parseInt(document.getElementById('quizDuration').value),
             status: document.getElementById('quizStatus').value,
             description: document.getElementById('quizDescription').value,
+            starts_at: startsAtVal ? startsAtVal : null,
+            scheduled_at: startsAtVal ? startsAtVal : null,
+            ends_at: endsAtVal ? endsAtVal : null,
         };
 
         const url = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';

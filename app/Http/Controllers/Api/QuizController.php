@@ -60,6 +60,8 @@ class QuizController extends Controller
             'subject' => 'nullable|string|max:255',
             'instructor' => 'nullable|string|max:255',
             'scheduled_at' => 'nullable|date',
+            'starts_at' => 'nullable|date',
+            'ends_at' => 'nullable|date',
             'description' => 'nullable|string',
             'duration_minutes' => 'required|integer|min:1',
             'status' => 'required|in:active,upcoming,completed',
@@ -69,7 +71,9 @@ class QuizController extends Controller
             'title' => $validated['title'],
             'subject' => $validated['subject'] ?? 'General',
             'instructor' => $validated['instructor'] ?? 'Faculty',
-            'scheduled_at' => $validated['scheduled_at'] ?? null,
+            'scheduled_at' => $validated['scheduled_at'] ?? $validated['starts_at'] ?? null,
+            'starts_at' => $validated['starts_at'] ?? $validated['scheduled_at'] ?? null,
+            'ends_at' => $validated['ends_at'] ?? null,
             'description' => $validated['description'] ?? '',
             'duration_minutes' => $validated['duration_minutes'],
             'status' => $validated['status'],
@@ -97,10 +101,16 @@ class QuizController extends Controller
             'subject' => 'nullable|string|max:255',
             'instructor' => 'nullable|string|max:255',
             'scheduled_at' => 'nullable|date',
+            'starts_at' => 'nullable|date',
+            'ends_at' => 'nullable|date',
             'description' => 'nullable|string',
             'duration_minutes' => 'required|integer|min:1',
             'status' => 'required|in:active,upcoming,completed',
         ]);
+
+        if (isset($validated['starts_at']) && !isset($validated['scheduled_at'])) {
+            $validated['scheduled_at'] = $validated['starts_at'];
+        }
 
         $quiz->update($validated);
 

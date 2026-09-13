@@ -14,12 +14,16 @@ class Quiz extends Model
         'duration_minutes',
         'status',
         'scheduled_at',
+        'starts_at',
+        'ends_at',
         'instructor',
         'passing_marks',
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
     ];
 
     public function questions(): HasMany
