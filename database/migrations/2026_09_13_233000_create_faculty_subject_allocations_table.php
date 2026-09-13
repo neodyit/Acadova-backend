@@ -24,10 +24,19 @@ return new class extends Migration
             });
         }
 
-        if (Schema::hasTable('faculty_subject_allocations') && !Schema::hasColumn('faculty_subject_allocations', 'semester')) {
-            Schema::table('faculty_subject_allocations', function (Blueprint $table) {
-                $table->string('semester')->nullable()->after('section_name');
-            });
+        if (Schema::hasTable('faculty_subject_allocations')) {
+            if (!Schema::hasColumn('faculty_subject_allocations', 'branch_id')) {
+                Schema::table('faculty_subject_allocations', function (Blueprint $table) {
+                    $table->foreignId('branch_id')->nullable()->after('faculty_id')->constrained('branches')->onDelete('cascade');
+                    $table->string('branch_name')->nullable()->after('branch_id');
+                });
+            }
+
+            if (!Schema::hasColumn('faculty_subject_allocations', 'semester')) {
+                Schema::table('faculty_subject_allocations', function (Blueprint $table) {
+                    $table->string('semester')->nullable()->after('section_name');
+                });
+            }
         }
 
         if (Schema::hasTable('quizzes') && !Schema::hasColumn('quizzes', 'section')) {
