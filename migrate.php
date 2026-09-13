@@ -59,23 +59,48 @@ echo "Active DB Name: " . config('database.connections.mysql.database') . "\n";
 echo "Active DB User: " . config('database.connections.mysql.username') . "\n\n";
 
 try {
-    echo "[1/2] Running pending migrations...\n";
+    echo "[1/3] Running pending migrations...\n";
     $exitCode = Artisan::call('migrate', [
         '--force' => true,
     ]);
     echo Artisan::output();
     echo "Migration Exit Code: " . $exitCode . "\n\n";
 
+    echo "[2/3] Checking & ensuring dynamic table column updates...\n";
+    if (\Illuminate\Support\Facades\Schema::hasTable('faculty_subject_allocations')) {
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('faculty_subject_allocations', 'branch_id')) {
+            \Illuminate\Support\Facades\Schema::table('faculty_subject_allocations', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->foreignId('branch_id')->nullable()->after('faculty_id')->constrained('branches')->onDelete('cascade');
+                $table->string('branch_name')->nullable()->after('branch_id');
+            });
+            echo " -> Added 'branch_id' and 'branch_name' to faculty_subject_allocations.\n";
+        }
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('faculty_subject_allocations', 'semester')) {
+            \Illuminate\Support\Facades\Schema::table('faculty_subject_allocations', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->string('semester')->nullable()->after('section_name');
+            });
+            echo " -> Added 'semester' to faculty_subject_allocations.\n";
+        }
+    }
+
+    if (\Illuminate\Support\Facades\Schema::hasTable('quizzes') && !\Illuminate\Support\Facades\Schema::hasColumn('quizzes', 'section')) {
+        \Illuminate\Support\Facades\Schema::table('quizzes', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->string('section')->nullable()->after('subject');
+        });
+        echo " -> Added 'section' to quizzes table.\n";
+    }
+    echo "Dynamic column checks complete.\n\n";
+
     $runSeed = isset($_GET['seed']) ? filter_var($_GET['seed'], FILTER_VALIDATE_BOOLEAN) : false;
     if ($runSeed) {
-        echo "[2/2] Running database seeders...\n";
+        echo "[3/3] Running database seeders...\n";
         $seedExitCode = Artisan::call('db:seed', [
             '--force' => true,
         ]);
         echo Artisan::output();
         echo "Seeding Exit Code: " . $seedExitCode . "\n\n";
     } else {
-        echo "[2/2] Skipping database seeders (pass ?seed=1 to run seeders).\n\n";
+        echo "[3/3] Skipping database seeders (pass ?seed=1 to run seeders).\n\n";
     }
 
     echo "========================================\n";
