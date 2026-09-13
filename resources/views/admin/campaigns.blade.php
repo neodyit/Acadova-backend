@@ -10,6 +10,7 @@
     .quiz-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
     .quiz-title { font-size: 17px; font-weight: 800; color: var(--dark); margin-bottom: 6px; }
     .quiz-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; font-weight: 500; }
+    .quiz-meta { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 20px; padding: 12px; background: var(--bg); border-radius: 12px; }
     .quiz-actions { margin-top: auto; display: flex; gap: 10px; }
     .quiz-actions .btn { flex: 1; justify-content: center; padding: 10px 14px; font-size: 13px; }
 </style>
@@ -33,8 +34,14 @@
             </div>
             <div class="quiz-title">{{ $c->title }}</div>
             <div class="quiz-sub">{{ $c->description }}</div>
+            @if($c->ends_at)
+                <div class="quiz-meta">
+                    <span><i class="fa-regular fa-clock" style="color: #E17055;"></i> Auto-Expires: <strong>{{ \Carbon\Carbon::parse($c->ends_at)->format('d-m-Y H:i') }}</strong></span>
+                </div>
+            @endif
             <div class="quiz-actions">
-                <button class="btn btn-secondary" onclick="toggleCampaignStatus({{ $c->id }}, '{{ $c->status === 'active' ? 'inactive' : 'active' }}')">{{ $c->status === 'active' ? 'Hide Banner' : 'Activate' }}</button>
+                <button class="btn btn-secondary" onclick="editCampaign({{ json_encode($c) }})"><i class="fa-solid fa-pen"></i> Edit</button>
+                <button class="btn btn-secondary" onclick="toggleCampaignStatus({{ $c->id }}, '{{ $c->status === 'active' ? 'inactive' : 'active' }}')">{{ $c->status === 'active' ? 'Hide' : 'Activate' }}</button>
                 <button class="btn btn-danger" onclick="deleteCampaign({{ $c->id }})"><i class="fa-solid fa-trash"></i></button>
             </div>
         </div>
@@ -65,11 +72,11 @@
                 <div class="form-group">
                     <label>Banner Theme Color</label>
                     <select id="campaignColor" class="form-control">
-                        <option value="purple">Purple Gradient</option>
-                        <option value="orange">Orange / Coral</option>
-                        <option value="teal">Teal / Emerald</option>
-                        <option value="blue">Ocean Blue</option>
-                        <option value="pink">Pink / Rose</option>
+                        <option value="amber">Warm Amber / Terracotta (Brand Default)</option>
+                        <option value="orange">Rust Coral / Terracotta Orange</option>
+                        <option value="teal">Forest Emerald</option>
+                        <option value="blue">Deep Ocean Blue</option>
+                        <option value="brown">Deep Warm Chocolate</option>
                     </select>
                 </div>
             </div>
@@ -89,6 +96,12 @@
             </div>
 
             <div class="form-group">
+                <label style="color: #E17055; font-weight: 700;"><i class="fa-regular fa-clock"></i> Expiration End Date & Time (Optional)</label>
+                <input type="datetime-local" id="campaignEndsAt" class="form-control">
+                <small style="color: var(--text-muted); font-size: 11px;">Notice will auto-hide from dashboard after this time</small>
+            </div>
+
+            <div class="form-group">
                 <label>Description / Notice Body</label>
                 <textarea id="campaignDescription" class="form-control" rows="3" placeholder="Write detailed notice..." required></textarea>
             </div>
@@ -104,14 +117,44 @@
 
 @section('scripts')
 <script>
+    function formatLocalDatetimeInput(dateVal) {
+        if (!dateVal) return '';
+        let str = String(dateVal);
+        if (str.includes(' ') && !str.includes('T')) {
+            str = str.replace(' ', 'T');
+        }
+        const d = new Date(str);
+        if (isNaN(d.getTime())) return '';
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
     function openCreateCampaignModal() {
         document.getElementById('editingCampaignId').value = '';
         document.getElementById('createCampaignForm').reset();
+        document.getElementById('campaignEndsAt').value = '';
+        document.getElementById('campaignModalTitleText').innerText = 'Create Campaign / Notice';
+        openModal('createCampaignModal');
+    }
+
+    function editCampaign(c) {
+        document.getElementById('editingCampaignId').value = c.id;
+        document.getElementById('campaignTitle').value = c.title || '';
+        document.getElementById('campaignBadge').value = c.badge || '';
+        document.getElementById('campaignColor').value = c.banner_color || 'amber';
+        document.getElementById('campaignStatus').value = c.status || 'active';
+        document.getElementById('campaignLink').value = c.link_url || '';
+        document.getElementById('campaignEndsAt').value = formatLocalDatetimeInput(c.ends_at);
+        document.getElementById('campaignDescription').value = c.description || '';
+        document.getElementById('campaignModalTitleText').innerText = 'Edit Campaign Details';
         openModal('createCampaignModal');
     }
 
     async function handleSaveCampaign(e) {
         e.preventDefault();
+        const campaignId = document.getElementById('editingCampaignId').value;
+        const endsAtVal = document.getElementById('campaignEndsAt').value;
+
         const payload = {
             title: document.getElementById('campaignTitle').value,
             badge: document.getElementById('campaignBadge').value,
@@ -119,17 +162,21 @@
             status: document.getElementById('campaignStatus').value,
             link_url: document.getElementById('campaignLink').value || null,
             description: document.getElementById('campaignDescription').value,
+            ends_at: endsAtVal ? endsAtVal : null,
         };
 
+        const url = campaignId ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+        const method = campaignId ? 'PUT' : 'POST';
+
         try {
-            const res = await fetch('/api/campaigns', {
-                method: 'POST',
+            const res = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
                 body: JSON.stringify(payload)
             });
             const json = await res.json();
             if (res.ok || json.success) {
-                showToast('Campaign saved!');
+                showToast(campaignId ? 'Campaign updated!' : 'Campaign saved!');
                 closeModal('createCampaignModal');
                 location.reload();
             } else { showToast(json.message || 'Failed to save campaign'); }
