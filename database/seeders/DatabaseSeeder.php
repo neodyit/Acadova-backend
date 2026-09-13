@@ -48,5 +48,17 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('Mayank123'),
             ]
         );
+
+        // Seed 8 Default Semesters if empty
+        if (\App\Models\Semester::count() === 0) {
+            for ($i = 1; $i <= 8; $i++) {
+                \App\Models\Semester::create([
+                    'name' => "Semester $i",
+                    'code' => "SEM$i",
+                    'semester_number' => $i,
+                    'status' => 'active',
+                ]);
+            }
+        }
     }
 }

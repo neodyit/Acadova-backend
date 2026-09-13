@@ -11,6 +11,7 @@ use App\Models\Branch;
 use App\Models\Subject;
 use App\Models\Section;
 use App\Models\Subsection;
+use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -305,5 +306,41 @@ class AcademicController extends Controller
     {
         Subsection::destroy($id);
         return response()->json(['success' => true, 'message' => 'Subsection deleted']);
+    }
+
+    // --- SEMESTERS ---
+    public function getSemesters()
+    {
+        return response()->json(['success' => true, 'data' => Semester::orderBy('semester_number', 'asc')->get()]);
+    }
+
+    public function storeSemester(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'code' => 'nullable|string',
+            'semester_number' => 'nullable|integer',
+            'status' => 'nullable|in:active,inactive',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $sem = Semester::create($request->all());
+        return response()->json(['success' => true, 'message' => 'Semester created', 'data' => $sem], 201);
+    }
+
+    public function updateSemester(Request $request, $id)
+    {
+        $sem = Semester::findOrFail($id);
+        $sem->update($request->all());
+        return response()->json(['success' => true, 'message' => 'Semester updated', 'data' => $sem]);
+    }
+
+    public function deleteSemester($id)
+    {
+        Semester::destroy($id);
+        return response()->json(['success' => true, 'message' => 'Semester deleted']);
     }
 }

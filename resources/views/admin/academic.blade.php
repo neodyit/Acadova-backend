@@ -24,6 +24,7 @@
     <button class="tab-btn" data-entity="subjects" onclick="switchEntity('subjects', this)"><i class="fa-solid fa-book-open"></i> Subjects</button>
     <button class="tab-btn" data-entity="sections" onclick="switchEntity('sections', this)"><i class="fa-solid fa-users-rectangle"></i> Sections</button>
     <button class="tab-btn" data-entity="subsections" onclick="switchEntity('subsections', this)"><i class="fa-solid fa-user-group"></i> Subsections</button>
+    <button class="tab-btn" data-entity="semesters" onclick="switchEntity('semesters', this)"><i class="fa-solid fa-calendar-days"></i> Semesters</button>
 </div>
 
 <!-- Main Data Table Container -->
@@ -198,6 +199,9 @@
             case 'subsections':
                 cols = ['ID', 'Subsection / Batch', 'Parent Section', 'Status', 'Actions'];
                 break;
+            case 'semesters':
+                cols = ['ID', 'Semester Name', 'Code', 'Semester Number', 'Status', 'Actions'];
+                break;
         }
 
         header.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
@@ -253,6 +257,8 @@
                     return `<tr><td>#${item.id}</td><td><strong>${item.name}</strong></td><td>${item.branch?.name || '-'}</td><td>${item.academic_year || '-'}</td><td>${statusBadge}</td><td>${item.subsections_count || 0}</td><td>${actions}</td></tr>`;
                 case 'subsections':
                     return `<tr><td>#${item.id}</td><td><strong>${item.name}</strong></td><td>${item.section?.name || '-'}</td><td>${statusBadge}</td><td>${actions}</td></tr>`;
+                case 'semesters':
+                    return `<tr><td>#${item.id}</td><td><strong>${item.name}</strong></td><td>${item.code || '-'}</td><td>Semester ${item.semester_number || '-'}</td><td>${statusBadge}</td><td>${actions}</td></tr>`;
             }
         }).join('');
     }
@@ -424,6 +430,16 @@
                             <option value="">-- Select Section --</option>
                             ${lookupOptions.sections.map(s => `<option value="${s.id}" ${data.section_id == s.id ? 'selected' : ''}>${s.name}</option>`).join('')}
                         </select>
+                    </div>
+                    ${statusSelect}
+                `;
+                break;
+            case 'semesters':
+                fields = `
+                    <div class="form-group"><label>Semester Name *</label><input type="text" name="name" class="form-control" value="${data.name || ''}" required placeholder="e.g. Semester 1"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Semester Code</label><input type="text" name="code" class="form-control" value="${data.code || ''}" placeholder="e.g. SEM1"></div>
+                        <div class="form-group"><label>Semester Number</label><input type="number" name="semester_number" class="form-control" value="${data.semester_number || 1}" placeholder="1"></div>
                     </div>
                     ${statusSelect}
                 `;

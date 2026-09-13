@@ -75,6 +75,12 @@ Route::prefix('academic')->group(function () {
     Route::post('/subsections', [AcademicController::class, 'storeSubsection']);
     Route::put('/subsections/{id}', [AcademicController::class, 'updateSubsection']);
     Route::delete('/subsections/{id}', [AcademicController::class, 'deleteSubsection']);
+
+    // Semesters
+    Route::get('/semesters', [AcademicController::class, 'getSemesters']);
+    Route::post('/semesters', [AcademicController::class, 'storeSemester']);
+    Route::put('/semesters/{id}', [AcademicController::class, 'updateSemester']);
+    Route::delete('/semesters/{id}', [AcademicController::class, 'deleteSemester']);
 });
 
 // Public Auth Endpoints
