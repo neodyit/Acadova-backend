@@ -171,10 +171,19 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user->update($request->only([
-            'name', 'phone', 'roll_number', 'faculty_id', 'department', 'bio', 'avatar',
-            'university_id', 'college_id', 'department_id', 'course_id', 'branch_id', 'section_id', 'subsection_id'
-        ]));
+        $fieldsToUpdate = array_filter(
+            $request->only([
+                'name', 'phone', 'roll_number', 'faculty_id', 'department', 'bio', 'avatar',
+                'university_id', 'college_id', 'department_id', 'course_id', 'branch_id', 'section_id', 'subsection_id'
+            ]),
+            function ($value, $key) use ($request) {
+                // Allow null values for fields explicitly sent in request (e.g. academic IDs), but do not overwrite avatar if key wasn't sent
+                return $request->has($key);
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        $user->update($fieldsToUpdate);
 
         return response()->json([
             'success' => true,
