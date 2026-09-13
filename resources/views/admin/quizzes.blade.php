@@ -228,6 +228,21 @@
         openModal('createQuizModal');
     }
 
+    function formatLocalDatetimeInput(dateVal) {
+        if (!dateVal) return '';
+        const str = String(dateVal);
+        if (str.includes('T')) {
+            return str.slice(0, 16);
+        }
+        if (str.includes(' ')) {
+            return str.replace(' ', 'T').slice(0, 16);
+        }
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return '';
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
     function editQuiz(q) {
         document.getElementById('editingQuizId').value = q.id;
         document.getElementById('quizTitle').value = q.title || '';
@@ -237,19 +252,8 @@
         document.getElementById('quizStatus').value = q.status || 'active';
         document.getElementById('quizDescription').value = q.description || '';
 
-        if (q.starts_at || q.scheduled_at) {
-            const startDate = new Date(q.starts_at || q.scheduled_at);
-            document.getElementById('quizStartsAt').value = startDate.toISOString().slice(0, 16);
-        } else {
-            document.getElementById('quizStartsAt').value = '';
-        }
-
-        if (q.ends_at) {
-            const endDate = new Date(q.ends_at);
-            document.getElementById('quizEndsAt').value = endDate.toISOString().slice(0, 16);
-        } else {
-            document.getElementById('quizEndsAt').value = '';
-        }
+        document.getElementById('quizStartsAt').value = formatLocalDatetimeInput(q.starts_at || q.scheduled_at);
+        document.getElementById('quizEndsAt').value = formatLocalDatetimeInput(q.ends_at);
 
         toggleScheduleInputs();
         document.getElementById('quizModalTitleText').innerText = 'Edit Quiz Details';
