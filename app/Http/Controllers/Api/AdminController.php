@@ -82,7 +82,7 @@ class AdminController extends Controller
     {
         $attempts = QuizAttempt::with(['user', 'quiz'])
             ->orderBy('created_at', 'desc')
-            ->limit(20)
+            ->limit(50)
             ->get()
             ->map(function ($att) {
                 return [
@@ -92,6 +92,13 @@ class AdminController extends Controller
                     'quiz_title' => $att->quiz ? $att->quiz->title : 'Quiz #' . $att->quiz_id,
                     'score' => $att->score,
                     'total_questions' => $att->total_questions,
+                    'violations_count' => $att->violations_count ?? 0,
+                    'ip_address' => $att->ip_address ?? 'N/A',
+                    'location' => $att->location ?? 'N/A',
+                    'latitude' => $att->latitude,
+                    'longitude' => $att->longitude,
+                    'submission_type' => $att->submission_type ?? 'manual',
+                    'auto_submit_reason' => $att->auto_submit_reason ?? '-',
                     'created_at' => $att->created_at ? $att->created_at->format('M d, Y H:i') : 'N/A',
                 ];
             });

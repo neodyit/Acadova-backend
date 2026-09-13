@@ -14,6 +14,12 @@ class QuizAttempt extends Model
         'total_questions',
         'user_answers',
         'violations_count',
+        'ip_address',
+        'location',
+        'latitude',
+        'longitude',
+        'submission_type',
+        'auto_submit_reason',
         'submitted_at',
     ];
 

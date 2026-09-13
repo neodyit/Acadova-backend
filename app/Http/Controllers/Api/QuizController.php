@@ -343,6 +343,12 @@ class QuizController extends Controller
         $validated = $request->validate([
             'user_answers' => 'nullable|array',
             'violations_count' => 'nullable|integer',
+            'ip_address' => 'nullable|string',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|string',
+            'longitude' => 'nullable|string',
+            'submission_type' => 'nullable|in:manual,auto',
+            'auto_submit_reason' => 'nullable|string',
         ]);
 
         $userAnswers = $validated['user_answers'] ?? [];
@@ -377,6 +383,8 @@ class QuizController extends Controller
             }
         }
 
+        $ipAddress = $request->ip_address ?? $request->ip();
+
         $attempt = QuizAttempt::create([
             'user_id' => $request->user() ? $request->user()->id : 1,
             'quiz_id' => $quiz->id,
@@ -384,6 +392,12 @@ class QuizController extends Controller
             'total_questions' => $quiz->questions->count(),
             'user_answers' => $userAnswers,
             'violations_count' => $validated['violations_count'] ?? 0,
+            'ip_address' => $ipAddress,
+            'location' => $validated['location'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'submission_type' => $validated['submission_type'] ?? 'manual',
+            'auto_submit_reason' => $validated['auto_submit_reason'] ?? null,
             'submitted_at' => now(),
         ]);
 

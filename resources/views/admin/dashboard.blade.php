@@ -94,6 +94,9 @@
                     <th>Student Name</th>
                     <th>Quiz Title</th>
                     <th>Score</th>
+                    <th>Submission Type</th>
+                    <th>Auto Reason / Violations</th>
+                    <th>IP & Location</th>
                     <th>Date & Time</th>
                 </tr>
             </thead>
@@ -106,11 +109,30 @@
                         </td>
                         <td><strong>{{ $att->quiz->title ?? 'Quiz #'.$att->quiz_id }}</strong></td>
                         <td><span class="badge" style="background: #DEF7EC; color: #03543F; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px;">{{ $att->score }} / {{ $att->total_questions }}</span></td>
+                        <td>
+                            @if($att->submission_type === 'auto')
+                                <span style="background: #FFF5F5; color: #E53E3E; padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px;">AUTO</span>
+                            @else
+                                <span style="background: #E6FFFA; color: #047857; padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px;">MANUAL</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($att->submission_type === 'auto')
+                                <strong style="color: #E53E3E; font-size: 12px;">{{ $att->auto_submit_reason ?? 'Time Up / Violation' }}</strong><br>
+                                <span style="font-size: 11px; color: var(--text-muted);">Violations: {{ $att->violations_count }}</span>
+                            @else
+                                <span style="color: var(--text-muted); font-size: 12px;">Normal Submit</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span style="font-size: 12px; font-weight: 600;">{{ $att->ip_address ?? 'N/A' }}</span><br>
+                            <span style="font-size: 11px; color: var(--text-muted);">📍 {{ $att->location ?? 'Unknown' }}</span>
+                        </td>
                         <td>{{ $att->created_at ? $att->created_at->format('M d, Y H:i') : 'N/A' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No student submissions logged yet.</td>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No student submissions logged yet.</td>
                     </tr>
                 @endforelse
             </tbody>
