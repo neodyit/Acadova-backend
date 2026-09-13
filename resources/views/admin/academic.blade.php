@@ -258,24 +258,33 @@
     }
 
     function openCreateModal() {
-        document.getElementById('modalTitle').innerText = `Add New ${singularize(currentEntity)}`;
-        document.getElementById('entityId').value = '';
+        const titleEl = document.getElementById('modalTitle');
+        if (titleEl) titleEl.innerText = `Add New ${singularize(currentEntity)}`;
+        const idEl = document.getElementById('entityId');
+        if (idEl) idEl.value = '';
         generateFormFields();
-        document.getElementById('crudModal').classList.add('active');
+        const modal = document.getElementById('crudModal');
+        if (modal) modal.classList.add('active');
     }
 
     function openEditModal(id) {
         const item = entityData.find(x => x.id === id);
         if (!item) return;
 
-        document.getElementById('modalTitle').innerText = `Edit ${singularize(currentEntity)} #${id}`;
-        document.getElementById('entityId').value = id;
+        const titleEl = document.getElementById('modalTitle');
+        if (titleEl) titleEl.innerText = `Edit ${singularize(currentEntity)} #${id}`;
+        const idEl = document.getElementById('entityId');
+        if (idEl) idEl.value = id;
         generateFormFields(item);
-        document.getElementById('crudModal').classList.add('active');
+        const modal = document.getElementById('crudModal');
+        if (modal) modal.classList.add('active');
     }
 
     function closeModal() {
-        document.getElementById('crudModal').classList.remove('active');
+        const modal = document.getElementById('crudModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
     }
 
     function generateFormFields(data = {}) {
