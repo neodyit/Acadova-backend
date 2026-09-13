@@ -431,4 +431,51 @@ class QuizController extends Controller
             'data' => $attempts,
         ]);
     }
+
+    /**
+     * Get statistics summary for Faculty Dashboard
+     */
+    public function getFacultyStats(Request $request)
+    {
+        $totalQuizzes = Quiz::count();
+        $activeQuizzes = Quiz::where('status', 'active')->count();
+        $completedQuizzes = Quiz::where('status', 'completed')->count();
+        $totalSubmissions = QuizAttempt::count();
+
+        $attempts = QuizAttempt::all();
+        $totalScore = 0;
+        $totalQuestions = 0;
+        foreach ($attempts as $attempt) {
+            $totalScore += $attempt->score;
+            $totalQuestions += ($attempt->total_questions > 0 ? $attempt->total_questions : 1);
+        }
+
+        $avgAccuracy = $totalQuestions > 0 ? round(($totalScore / $totalQuestions) * 100, 1) : 0;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_quizzes' => $totalQuizzes,
+                'active_quizzes' => $activeQuizzes,
+                'completed_quizzes' => $completedQuizzes,
+                'total_submissions' => $totalSubmissions,
+                'avg_accuracy' => $avgAccuracy,
+            ]
+        ]);
+    }
+
+    /**
+     * Get all student submissions for Faculty Dashboard
+     */
+    public function getFacultySubmissions(Request $request)
+    {
+        $submissions = QuizAttempt::with(['user', 'quiz'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $submissions,
+        ]);
+    }
 }

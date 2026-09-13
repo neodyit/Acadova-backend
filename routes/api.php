@@ -107,4 +107,6 @@ Route::middleware(['auth:sanctum', 'validate.session'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/attempts', [QuizController::class, 'getAttempts']);
     Route::post('/quizzes/{id}/submit', [QuizController::class, 'submitAttempt']);
+    Route::get('/faculty/stats', [QuizController::class, 'getFacultyStats']);
+    Route::get('/faculty/submissions', [QuizController::class, 'getFacultySubmissions']);
 });
