@@ -1166,11 +1166,11 @@
                     <div class="form-group">
                         <label>Banner Theme Color</label>
                         <select id="campaignColor" class="form-control">
-                            <option value="purple">Purple Gradient</option>
-                            <option value="orange">Orange / Coral</option>
-                            <option value="teal">Teal / Emerald</option>
-                            <option value="blue">Ocean Blue</option>
-                            <option value="pink">Pink / Rose</option>
+                            <option value="amber">Warm Amber / Terracotta (Brand Default)</option>
+                            <option value="orange">Rust Coral / Terracotta Orange</option>
+                            <option value="teal">Forest Emerald</option>
+                            <option value="blue">Deep Ocean Blue</option>
+                            <option value="brown">Deep Warm Chocolate</option>
                         </select>
                     </div>
                 </div>
