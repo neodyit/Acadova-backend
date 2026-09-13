@@ -412,6 +412,11 @@
                     <i class="fa-solid fa-layer-group"></i> Quizzes
                 </a>
             </li>
+            <li class="nav-item {{ Request::is('neodyit/academic*') ? 'active' : '' }}">
+                <a href="{{ route('admin.academic') }}">
+                    <i class="fa-solid fa-sitemap"></i> Academic Structure
+                </a>
+            </li>
             <li class="nav-item {{ Request::is('neodyit/campaigns*') ? 'active' : '' }}">
                 <a href="{{ route('admin.campaigns') }}">
                     <i class="fa-solid fa-bullhorn"></i> Campaigns & Notices

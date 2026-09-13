@@ -111,6 +111,14 @@ class AdminWebController extends Controller
     }
 
     /**
+     * Academic Management Page (Universities, Colleges, Departments, Courses, Branches, Subjects, Sections, Subsections)
+     */
+    public function academic()
+    {
+        return view('admin.academic');
+    }
+
+    /**
      * Campaigns & Notices Page
      */
     public function campaigns()

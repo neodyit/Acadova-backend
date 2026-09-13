@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\QuizController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AcademicController;
 use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\MediaController;
 
@@ -16,6 +17,57 @@ Route::get('/admin/users/{id}', [AdminController::class, 'showUser']);
 Route::put('/admin/users/{id}', [AdminController::class, 'updateUser']);
 Route::delete('/admin/users/{id}', [AdminController::class, 'destroyUser']);
 Route::get('/admin/attempts', [AdminController::class, 'attempts']);
+
+// Academic Hierarchy & Structure CRUD API
+Route::prefix('academic')->group(function () {
+    // Universities
+    Route::get('/universities', [AcademicController::class, 'getUniversities']);
+    Route::post('/universities', [AcademicController::class, 'storeUniversity']);
+    Route::put('/universities/{id}', [AcademicController::class, 'updateUniversity']);
+    Route::delete('/universities/{id}', [AcademicController::class, 'deleteUniversity']);
+
+    // Colleges
+    Route::get('/colleges', [AcademicController::class, 'getColleges']);
+    Route::post('/colleges', [AcademicController::class, 'storeCollege']);
+    Route::put('/colleges/{id}', [AcademicController::class, 'updateCollege']);
+    Route::delete('/colleges/{id}', [AcademicController::class, 'deleteCollege']);
+
+    // Departments
+    Route::get('/departments', [AcademicController::class, 'getDepartments']);
+    Route::post('/departments', [AcademicController::class, 'storeDepartment']);
+    Route::put('/departments/{id}', [AcademicController::class, 'updateDepartment']);
+    Route::delete('/departments/{id}', [AcademicController::class, 'deleteDepartment']);
+
+    // Courses
+    Route::get('/courses', [AcademicController::class, 'getCourses']);
+    Route::post('/courses', [AcademicController::class, 'storeCourse']);
+    Route::put('/courses/{id}', [AcademicController::class, 'updateCourse']);
+    Route::delete('/courses/{id}', [AcademicController::class, 'deleteCourse']);
+
+    // Branches
+    Route::get('/branches', [AcademicController::class, 'getBranches']);
+    Route::post('/branches', [AcademicController::class, 'storeBranch']);
+    Route::put('/branches/{id}', [AcademicController::class, 'updateBranch']);
+    Route::delete('/branches/{id}', [AcademicController::class, 'deleteBranch']);
+
+    // Subjects
+    Route::get('/subjects', [AcademicController::class, 'getSubjects']);
+    Route::post('/subjects', [AcademicController::class, 'storeSubject']);
+    Route::put('/subjects/{id}', [AcademicController::class, 'updateSubject']);
+    Route::delete('/subjects/{id}', [AcademicController::class, 'deleteSubject']);
+
+    // Sections
+    Route::get('/sections', [AcademicController::class, 'getSections']);
+    Route::post('/sections', [AcademicController::class, 'storeSection']);
+    Route::put('/sections/{id}', [AcademicController::class, 'updateSection']);
+    Route::delete('/sections/{id}', [AcademicController::class, 'deleteSection']);
+
+    // Subsections
+    Route::get('/subsections', [AcademicController::class, 'getSubsections']);
+    Route::post('/subsections', [AcademicController::class, 'storeSubsection']);
+    Route::put('/subsections/{id}', [AcademicController::class, 'updateSubsection']);
+    Route::delete('/subsections/{id}', [AcademicController::class, 'deleteSubsection']);
+});
 
 // Public Auth Endpoints
 Route::post('/register', [AuthController::class, 'register']);
