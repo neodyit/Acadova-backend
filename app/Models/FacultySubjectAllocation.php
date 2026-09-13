@@ -13,6 +13,7 @@ class FacultySubjectAllocation extends Model
         'section_id',
         'subject_name',
         'section_name',
+        'semester',
     ];
 
     public function faculty(): BelongsTo

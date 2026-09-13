@@ -19,7 +19,14 @@ return new class extends Migration
                 $table->foreignId('section_id')->nullable()->constrained('sections')->onDelete('cascade');
                 $table->string('subject_name')->nullable();
                 $table->string('section_name')->nullable();
+                $table->string('semester')->nullable();
                 $table->timestamps();
+            });
+        }
+
+        if (Schema::hasTable('faculty_subject_allocations') && !Schema::hasColumn('faculty_subject_allocations', 'semester')) {
+            Schema::table('faculty_subject_allocations', function (Blueprint $table) {
+                $table->string('semester')->nullable()->after('section_name');
             });
         }
 

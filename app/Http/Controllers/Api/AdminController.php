@@ -344,16 +344,17 @@ class AdminController extends Controller
             'section_id' => 'nullable|exists:sections,id',
             'subject_name' => 'nullable|string|max:255',
             'section_name' => 'nullable|string|max:255',
+            'semester' => 'nullable|string|max:255',
         ]);
 
         $subjectName = $validated['subject_name'] ?? null;
-        if (!$subjectName && !empty($validated['subject_id'])) {
+        if (!empty($validated['subject_id'])) {
             $sub = \App\Models\Subject::find($validated['subject_id']);
             if ($sub) $subjectName = $sub->name;
         }
 
         $sectionName = $validated['section_name'] ?? null;
-        if (!$sectionName && !empty($validated['section_id'])) {
+        if (!empty($validated['section_id'])) {
             $sec = \App\Models\Section::find($validated['section_id']);
             if ($sec) $sectionName = $sec->name;
         }
@@ -364,6 +365,7 @@ class AdminController extends Controller
             'section_id' => $validated['section_id'] ?? null,
             'subject_name' => $subjectName ?? 'General',
             'section_name' => $sectionName ?? 'All Sections',
+            'semester' => $validated['semester'] ?? 'Semester 1',
         ]);
 
         return response()->json([
