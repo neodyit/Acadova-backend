@@ -66,12 +66,17 @@ try {
     echo Artisan::output();
     echo "Migration Exit Code: " . $exitCode . "\n\n";
 
-    echo "[2/2] Running database seeders...\n";
-    $seedExitCode = Artisan::call('db:seed', [
-        '--force' => true,
-    ]);
-    echo Artisan::output();
-    echo "Seeding Exit Code: " . $seedExitCode . "\n\n";
+    $runSeed = isset($_GET['seed']) ? filter_var($_GET['seed'], FILTER_VALIDATE_BOOLEAN) : false;
+    if ($runSeed) {
+        echo "[2/2] Running database seeders...\n";
+        $seedExitCode = Artisan::call('db:seed', [
+            '--force' => true,
+        ]);
+        echo Artisan::output();
+        echo "Seeding Exit Code: " . $seedExitCode . "\n\n";
+    } else {
+        echo "[2/2] Skipping database seeders (pass ?seed=1 to run seeders).\n\n";
+    }
 
     echo "========================================\n";
     echo "  SUCCESS: Database is ready!\n";
