@@ -54,4 +54,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Convert legacy storage URLs to secure API media streaming URLs
+     */
+    public function getAvatarAttribute($value)
+    {
+        if (!$value) return null;
+        if (str_contains($value, '/storage/')) {
+            return str_replace('/storage/', '/api/media/file/', $value);
+        }
+        return $value;
+    }
 }

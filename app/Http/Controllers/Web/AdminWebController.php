@@ -119,6 +119,14 @@ class AdminWebController extends Controller
     }
 
     /**
+     * Quiz Attempts & Re-attempt Reset Management Page
+     */
+    public function attemptsPage()
+    {
+        return view('admin.attempts');
+    }
+
+    /**
      * Campaigns & Notices Page
      */
     public function campaigns()

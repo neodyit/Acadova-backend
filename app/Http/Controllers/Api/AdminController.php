@@ -110,6 +110,27 @@ class AdminController extends Controller
     }
 
     /**
+     * Delete/reset a student quiz attempt to allow reattempt.
+     */
+    public function deleteAttempt($id)
+    {
+        $attempt = QuizAttempt::find($id);
+        if (!$attempt) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Quiz attempt record not found.',
+            ], 404);
+        }
+
+        $attempt->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz attempt deleted successfully. Student can now reattempt this quiz.',
+        ]);
+    }
+
+    /**
      * Create a new User (Student or Faculty) from admin web panel.
      */
     public function storeUser(Request $request)

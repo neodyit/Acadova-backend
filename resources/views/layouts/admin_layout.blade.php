@@ -412,6 +412,11 @@
                     <i class="fa-solid fa-layer-group"></i> Quizzes
                 </a>
             </li>
+            <li class="nav-item {{ Request::is('neodyit/attempts*') ? 'active' : '' }}">
+                <a href="{{ route('admin.attempts') }}">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Quiz Attempts & Re-attempts
+                </a>
+            </li>
             <li class="nav-item {{ Request::is('neodyit/academic*') ? 'active' : '' }}">
                 <a href="{{ route('admin.academic') }}">
                     <i class="fa-solid fa-sitemap"></i> Academic Structure

@@ -20,6 +20,7 @@ Route::get('/neodyit', function () {
 Route::middleware(['auth:web', 'admin'])->prefix('neodyit')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminWebController::class, 'dashboard'])->name('dashboard');
     Route::get('/academic', [AdminWebController::class, 'academic'])->name('academic');
+    Route::get('/attempts', [AdminWebController::class, 'attemptsPage'])->name('attempts');
     Route::get('/quizzes', [AdminWebController::class, 'quizzes'])->name('quizzes');
     Route::get('/campaigns', [AdminWebController::class, 'campaigns'])->name('campaigns');
     Route::get('/users', [AdminWebController::class, 'users'])->name('users');
