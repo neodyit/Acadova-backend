@@ -222,6 +222,7 @@ class AuthController extends Controller
             $user = User::where('email', $email)->first();
         }
 
+        $isNewUser = false;
         if ($user) {
             // Update existing user with google_id and avatar if missing
             $updates = [];
@@ -235,6 +236,7 @@ class AuthController extends Controller
                 $user->update($updates);
             }
         } else {
+            $isNewUser = true;
             // Register new user authenticated via Google
             $user = User::create([
                 'name' => $name,
@@ -243,6 +245,8 @@ class AuthController extends Controller
                 'avatar' => $avatar,
                 'role' => $role,
                 'roll_number' => $request->roll_number,
+                'faculty_id' => $request->faculty_id,
+                'department' => $request->department,
                 'password' => null,
             ]);
         }
@@ -254,6 +258,7 @@ class AuthController extends Controller
             'message' => 'Signed in via Google successfully',
             'data' => [
                 'token' => $token,
+                'is_new' => $isNewUser,
                 'user' => $user->fresh(),
             ]
         ], 200);
