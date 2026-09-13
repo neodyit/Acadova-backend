@@ -128,7 +128,7 @@ class MediaController extends Controller
 
         foreach ($allFiles as $filePath) {
             $mediaList[] = [
-                'url' => asset('storage/' . $filePath),
+                'url' => url('api/media/file/' . $filePath),
                 'relative_path' => $filePath,
                 'file_name' => basename($filePath),
                 'size_bytes' => Storage::disk('public')->size($filePath),

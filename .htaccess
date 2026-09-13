@@ -1,5 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Prevent 403 Forbidden error on public/storage directory requests by passing to front controller
+    RewriteRule ^storage/(.*)$ public/index.php [L,QSA]
+    RewriteRule ^api/media/file/(.*)$ public/index.php [L,QSA]
+
     RewriteRule ^$ public/ [L]
     RewriteRule (.*) public/$1 [L]
 </IfModule>
