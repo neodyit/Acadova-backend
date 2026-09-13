@@ -1189,6 +1189,14 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="color: #E17055; font-weight: 700;"><i class="fa-regular fa-clock"></i> Expiration End Date & Time (Optional)</label>
+                        <input type="datetime-local" id="campaignEndsAt" class="form-control">
+                        <small style="color: var(--text-muted); font-size: 11px;">Notice will auto-hide from dashboard after this time</small>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Description / Notice Body</label>
                     <textarea id="campaignDescription" class="form-control" rows="3" placeholder="Write detailed notice..." required></textarea>
@@ -2057,11 +2065,16 @@
         function openCreateCampaignModal() {
             document.getElementById('editingCampaignId').value = '';
             document.getElementById('createCampaignForm').reset();
+            document.getElementById('campaignEndsAt').value = '';
+            document.getElementById('campaignModalTitleText').innerText = 'Create Campaign / Notice';
             openModal('createCampaignModal');
         }
 
         async function handleSaveCampaign(e) {
             e.preventDefault();
+            const campaignId = document.getElementById('editingCampaignId').value;
+            const endsAtVal = document.getElementById('campaignEndsAt').value;
+
             const payload = {
                 title: document.getElementById('campaignTitle').value,
                 badge: document.getElementById('campaignBadge').value,
@@ -2069,16 +2082,20 @@
                 status: document.getElementById('campaignStatus').value,
                 link_url: document.getElementById('campaignLink').value || null,
                 description: document.getElementById('campaignDescription').value,
+                ends_at: endsAtVal ? endsAtVal : null,
             };
 
+            const url = campaignId ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+            const method = campaignId ? 'PUT' : 'POST';
+
             try {
-                const res = await fetch('/api/campaigns', {
-                    method: 'POST',
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    showToast('Campaign created!');
+                    showToast(campaignId ? 'Campaign updated!' : 'Campaign created!');
                     closeModal('createCampaignModal');
                     loadCampaigns();
                 }
