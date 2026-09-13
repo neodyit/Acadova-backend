@@ -186,6 +186,80 @@ class AuthController extends Controller
     }
 
     /**
+     * Handle Google Sign-In / Authentication and sync with MySQL.
+     */
+    public function googleLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'name' => 'required|string',
+            'google_id' => 'nullable|string',
+            'avatar' => 'nullable|string',
+            'role' => 'nullable|string|in:student,faculty',
+            'roll_number' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors occurred',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $email = strtolower(trim($request->email));
+        $googleId = $request->google_id;
+        $name = $request->name;
+        $avatar = $request->avatar;
+        $role = $request->role ?? 'student';
+
+        // Check if user exists by google_id or email
+        $user = null;
+        if ($googleId) {
+            $user = User::where('google_id', $googleId)->first();
+        }
+        if (!$user) {
+            $user = User::where('email', $email)->first();
+        }
+
+        if ($user) {
+            // Update existing user with google_id and avatar if missing
+            $updates = [];
+            if ($googleId && !$user->google_id) {
+                $updates['google_id'] = $googleId;
+            }
+            if ($avatar && !$user->avatar) {
+                $updates['avatar'] = $avatar;
+            }
+            if (!empty($updates)) {
+                $user->update($updates);
+            }
+        } else {
+            // Register new user authenticated via Google
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'google_id' => $googleId,
+                'avatar' => $avatar,
+                'role' => $role,
+                'roll_number' => $request->roll_number,
+                'password' => null,
+            ]);
+        }
+
+        $token = $user->createToken('acadova_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Signed in via Google successfully',
+            'data' => [
+                'token' => $token,
+                'user' => $user->fresh(),
+            ]
+        ], 200);
+    }
+
+    /**
      * Logout user and revoke tokens.
      */
     public function logout(Request $request)

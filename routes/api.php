@@ -20,6 +20,7 @@ Route::get('/admin/attempts', [AdminController::class, 'attempts']);
 // Public Auth Endpoints
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/google-login', [AuthController::class, 'googleLogin']);
 
 // Structured Media & File Upload API
 Route::post('/upload', [MediaController::class, 'store']);
