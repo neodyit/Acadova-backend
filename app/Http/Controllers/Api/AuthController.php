@@ -148,9 +148,9 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|min:2|max:255',
-            'phone' => 'nullable|string|max:30',
+            'phone' => 'nullable|string|max:30|unique:users,phone,' . $user->id,
             'roll_number' => 'nullable|string|unique:users,roll_number,' . $user->id,
-            'faculty_id' => 'nullable|string',
+            'faculty_id' => 'nullable|string|unique:users,faculty_id,' . $user->id,
             'department' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
             'avatar' => 'nullable|string',
@@ -161,6 +161,10 @@ class AuthController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
             'section_id' => 'nullable|exists:sections,id',
             'subsection_id' => 'nullable|exists:subsections,id',
+        ], [
+            'phone.unique' => 'This phone number is already linked with another account.',
+            'roll_number.unique' => 'This roll number is already linked with another account.',
+            'faculty_id.unique' => 'This Faculty ID is already linked with another account.',
         ]);
 
         if ($validator->fails()) {
@@ -200,7 +204,7 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'old_password' => 'required|string',
+            'old_password' => 'nullable|string',
             'new_password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -214,7 +218,7 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        if (!Hash::check($request->old_password, $user->password)) {
+        if ($request->filled('old_password') && !Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Current password does not match',
