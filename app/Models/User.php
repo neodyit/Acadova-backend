@@ -30,6 +30,13 @@ class User extends Authenticatable
         'avatar',
         'google_id',
         'password',
+        'university_id',
+        'college_id',
+        'department_id',
+        'course_id',
+        'branch_id',
+        'section_id',
+        'subsection_id',
     ];
 
     /**
@@ -61,6 +68,41 @@ class User extends Authenticatable
     public function sessionLogs()
     {
         return $this->hasMany(UserSessionLog::class);
+    }
+
+    public function university()
+    {
+        return $this->belongsTo(University::class);
+    }
+
+    public function college()
+    {
+        return $this->belongsTo(College::class);
+    }
+
+    public function departmentModel()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
+    }
+
+    public function subsection()
+    {
+        return $this->belongsTo(Subsection::class);
     }
 
     /**

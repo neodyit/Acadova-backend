@@ -126,14 +126,15 @@ class AuthController extends Controller
      * Get authenticated user profile.
      */
     /**
-     * Get authenticated user profile.
+     * Get authenticated user profile with loaded academic structure relationships.
      */
     public function me(Request $request)
     {
+        $user = $request->user()->load(['university', 'college', 'departmentModel', 'course', 'branch', 'section', 'subsection']);
         return response()->json([
             'success' => true,
             'data' => [
-                'user' => $request->user(),
+                'user' => $user,
             ]
         ], 200);
     }
@@ -153,6 +154,13 @@ class AuthController extends Controller
             'department' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
             'avatar' => 'nullable|string',
+            'university_id' => 'nullable|exists:universities,id',
+            'college_id' => 'nullable|exists:colleges,id',
+            'department_id' => 'nullable|exists:departments,id',
+            'course_id' => 'nullable|exists:courses,id',
+            'branch_id' => 'nullable|exists:branches,id',
+            'section_id' => 'nullable|exists:sections,id',
+            'subsection_id' => 'nullable|exists:subsections,id',
         ]);
 
         if ($validator->fails()) {
@@ -164,14 +172,15 @@ class AuthController extends Controller
         }
 
         $user->update($request->only([
-            'name', 'phone', 'roll_number', 'faculty_id', 'department', 'bio', 'avatar'
+            'name', 'phone', 'roll_number', 'faculty_id', 'department', 'bio', 'avatar',
+            'university_id', 'college_id', 'department_id', 'course_id', 'branch_id', 'section_id', 'subsection_id'
         ]));
 
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully',
             'data' => [
-                'user' => $user->fresh(),
+                'user' => $user->fresh(['university', 'college', 'departmentModel', 'course', 'branch', 'section', 'subsection']),
             ]
         ], 200);
     }
