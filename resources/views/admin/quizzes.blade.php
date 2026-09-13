@@ -230,14 +230,11 @@
 
     function formatLocalDatetimeInput(dateVal) {
         if (!dateVal) return '';
-        const str = String(dateVal);
-        if (str.includes('T')) {
-            return str.slice(0, 16);
+        let str = String(dateVal);
+        if (str.includes(' ') && !str.includes('T')) {
+            str = str.replace(' ', 'T');
         }
-        if (str.includes(' ')) {
-            return str.replace(' ', 'T').slice(0, 16);
-        }
-        const d = new Date(dateVal);
+        const d = new Date(str);
         if (isNaN(d.getTime())) return '';
         const pad = n => String(n).padStart(2, '0');
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
