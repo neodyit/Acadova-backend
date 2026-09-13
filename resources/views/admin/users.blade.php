@@ -94,7 +94,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Predefined Subject</label>
+                        <label>Subject</label>
                         <select id="allocSubjectSelect" class="form-control" onchange="toggleCustomSubjectInput()">
                             <option value="">-- Loading Subjects --</option>
                         </select>
@@ -104,7 +104,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Predefined Branch</label>
+                        <label>Branch</label>
                         <select id="allocBranchSelect" class="form-control" onchange="toggleCustomBranchInput()">
                             <option value="">-- Loading Branches --</option>
                         </select>
@@ -112,7 +112,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Predefined Section</label>
+                        <label>Section</label>
                         <select id="allocSectionSelect" class="form-control" onchange="toggleCustomSectionInput()">
                             <option value="">-- Loading Sections --</option>
                         </select>
@@ -350,7 +350,7 @@
 
         if (globalPredefinedBranches.length > 0) {
             brSelect.innerHTML = `
-                <option value="">-- Select Predefined Branch --</option>
+                <option value="">-- Select Branch --</option>
                 ${globalPredefinedBranches.map(b => `<option value="${b.id}" data-name="${b.name}">${b.name} (${b.code || 'N/A'})</option>`).join('')}
                 <option value="CUSTOM">+ Enter Custom Branch Name</option>
             `;
@@ -360,7 +360,7 @@
 
         if (globalPredefinedSubjects.length > 0) {
             subSelect.innerHTML = `
-                <option value="">-- Select Predefined Subject --</option>
+                <option value="">-- Select Subject --</option>
                 ${globalPredefinedSubjects.map(s => `<option value="${s.id}" data-name="${s.name}">${s.name} (${s.code || 'N/A'})</option>`).join('')}
                 <option value="CUSTOM">+ Enter Custom Subject Name</option>
             `;
@@ -370,7 +370,7 @@
 
         if (globalPredefinedSections.length > 0) {
             secSelect.innerHTML = `
-                <option value="">-- Select Predefined Section --</option>
+                <option value="">-- Select Section --</option>
                 ${globalPredefinedSections.map(s => `<option value="${s.id}" data-name="${s.name}">${s.name} (${s.code || 'N/A'})</option>`).join('')}
                 <option value="CUSTOM">+ Enter Custom Section Name</option>
             `;
