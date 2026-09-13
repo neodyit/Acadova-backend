@@ -46,6 +46,9 @@
                         <td><strong>{{ $u->attempts_count }}</strong> Quizzes</td>
                         <td>{{ $u->created_at ? $u->created_at->format('M d, Y') : 'N/A' }}</td>
                         <td style="text-align: right;">
+                            @if(strtolower($u->role) === 'faculty')
+                                <button class="btn btn-primary" style="padding: 6px 10px; font-size: 12px; background: #6366F1; border-color: #6366F1;" onclick="openAllocationModal({{ $u->id }}, '{{ addslashes($u->name) }}')"><i class="fa-solid fa-book-bookmark"></i> Allocations</button>
+                            @endif
                             <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 12px;" onclick="editUser({{ json_encode($u) }})"><i class="fa-solid fa-pen"></i> Edit</button>
                             <button class="btn btn-danger" style="padding: 6px 10px; font-size: 12px;" onclick="deleteUser({{ $u->id }})"><i class="fa-solid fa-trash"></i></button>
                         </td>
@@ -57,6 +60,54 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal: Faculty Subject & Section Allocations -->
+<div class="modal-overlay" id="facultyAllocationModal">
+    <div class="modal-container" style="max-width: 650px;">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title" id="allocationModalTitle">Faculty Allocations</div>
+                <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;" id="allocationModalSubtitle">Assign subjects & sections to this faculty</div>
+            </div>
+            <button class="close-btn" onclick="closeModal('facultyAllocationModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <form id="addAllocationForm" onsubmit="handleAddAllocation(event)" style="background: var(--bg-surface-secondary, #f8fafc); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); margin-bottom: 20px;">
+                <input type="hidden" id="allocFacultyId">
+                <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; color: var(--text-main);">Add New Subject & Section Allocation</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Subject Name</label>
+                        <input type="text" id="allocSubjectName" class="form-control" placeholder="e.g. Data Structures & Algorithms" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Section / Batch</label>
+                        <input type="text" id="allocSectionName" class="form-control" placeholder="e.g. Section A (or All Sections)" required>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                    <button type="submit" class="btn btn-primary" style="font-size: 13px;"><i class="fa-solid fa-plus"></i> Assign Allocation</button>
+                </div>
+            </form>
+
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 10px;">Current Assigned Subject & Sections</div>
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px;">
+                <table style="width: 100%; font-size: 13px;">
+                    <thead>
+                        <tr style="background: var(--bg-surface-secondary, #f1f5f9);">
+                            <th style="padding: 8px 12px;">Subject Name</th>
+                            <th style="padding: 8px 12px;">Section Name</th>
+                            <th style="padding: 8px 12px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allocationsTableBody">
+                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 16px;">Loading allocations...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -224,6 +275,96 @@
             const text = row.innerText.toLowerCase();
             row.style.display = text.includes(query) ? '' : 'none';
         });
+    }
+
+    async function openAllocationModal(facultyId, facultyName) {
+        document.getElementById('allocFacultyId').value = facultyId;
+        document.getElementById('allocationModalTitle').innerText = `Allocations: ${facultyName}`;
+        document.getElementById('allocSubjectName').value = '';
+        document.getElementById('allocSectionName').value = '';
+        openModal('facultyAllocationModal');
+        await loadFacultyAllocations(facultyId);
+    }
+
+    async function loadFacultyAllocations(facultyId) {
+        const tbody = document.getElementById('allocationsTableBody');
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 16px;">Loading allocations...</td></tr>';
+        
+        try {
+            const res = await fetch(`/api/admin/faculty/${facultyId}/allocations`);
+            const json = await res.json();
+            if (res.ok && json.success) {
+                if (json.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 16px;">No subject/section allocations assigned yet.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = json.data.map(item => `
+                    <tr>
+                        <td style="padding: 8px 12px; font-weight: 600;">${item.subject_name || 'N/A'}</td>
+                        <td style="padding: 8px 12px;">${item.section_name || 'All Sections'}</td>
+                        <td style="padding: 8px 12px; text-align: right;">
+                            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteFacultyAllocation(${item.id}, ${facultyId})"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 16px;">Failed to load allocations.</td></tr>';
+            }
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 16px;">Error loading allocations.</td></tr>';
+        }
+    }
+
+    async function handleAddAllocation(e) {
+        e.preventDefault();
+        const facultyId = document.getElementById('allocFacultyId').value;
+        const subjectName = document.getElementById('allocSubjectName').value.trim();
+        const sectionName = document.getElementById('allocSectionName').value.trim();
+
+        try {
+            const res = await fetch('/api/admin/faculty/allocations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    faculty_id: facultyId,
+                    subject_name: subjectName,
+                    section_name: sectionName
+                })
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                showToast('Subject & Section allocation added!');
+                document.getElementById('allocSubjectName').value = '';
+                document.getElementById('allocSectionName').value = '';
+                loadFacultyAllocations(facultyId);
+            } else {
+                showToast(json.message || 'Failed to add allocation');
+            }
+        } catch (err) {
+            showToast('Error adding allocation');
+        }
+    }
+
+    async function deleteFacultyAllocation(id, facultyId) {
+        if (!confirm('Remove this subject and section allocation?')) return;
+        try {
+            const res = await fetch(`/api/admin/faculty/allocations/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': CSRF_TOKEN }
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                showToast('Allocation removed');
+                loadFacultyAllocations(facultyId);
+            } else {
+                showToast(json.message || 'Failed to remove allocation');
+            }
+        } catch (e) {
+            showToast('Error removing allocation');
+        }
     }
 </script>
 @endsection

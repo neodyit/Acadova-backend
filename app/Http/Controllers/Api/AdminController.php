@@ -312,4 +312,103 @@ class AdminController extends Controller
             'data' => $sessions,
         ]);
     }
+
+    /**
+     * Get allocations for all faculty or single faculty
+     */
+    public function getFacultyAllocations(Request $request, $facultyId = null)
+    {
+        $id = $facultyId ?: $request->query('faculty_id');
+        $query = \App\Models\FacultySubjectAllocation::with(['faculty', 'subjectModel', 'sectionModel']);
+
+        if ($id) {
+            $query->where('faculty_id', $id);
+        }
+
+        $allocations = $query->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $allocations,
+        ]);
+    }
+
+    /**
+     * Store a new subject & section allocation for a faculty member
+     */
+    public function storeFacultyAllocation(Request $request)
+    {
+        $validated = $request->validate([
+            'faculty_id' => 'required|exists:users,id',
+            'subject_id' => 'nullable|exists:subjects,id',
+            'section_id' => 'nullable|exists:sections,id',
+            'subject_name' => 'nullable|string|max:255',
+            'section_name' => 'nullable|string|max:255',
+        ]);
+
+        $subjectName = $validated['subject_name'] ?? null;
+        if (!$subjectName && !empty($validated['subject_id'])) {
+            $sub = \App\Models\Subject::find($validated['subject_id']);
+            if ($sub) $subjectName = $sub->name;
+        }
+
+        $sectionName = $validated['section_name'] ?? null;
+        if (!$sectionName && !empty($validated['section_id'])) {
+            $sec = \App\Models\Section::find($validated['section_id']);
+            if ($sec) $sectionName = $sec->name;
+        }
+
+        $allocation = \App\Models\FacultySubjectAllocation::create([
+            'faculty_id' => $validated['faculty_id'],
+            'subject_id' => $validated['subject_id'] ?? null,
+            'section_id' => $validated['section_id'] ?? null,
+            'subject_name' => $subjectName ?? 'General',
+            'section_name' => $sectionName ?? 'All Sections',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Faculty allocation created successfully.',
+            'data' => $allocation->load(['faculty', 'subjectModel', 'sectionModel']),
+        ], 201);
+    }
+
+    /**
+     * Delete a faculty allocation
+     */
+    public function deleteFacultyAllocation($id)
+    {
+        $allocation = \App\Models\FacultySubjectAllocation::find($id);
+        if (!$allocation) {
+            return response()->json(['success' => false, 'message' => 'Allocation not found.'], 404);
+        }
+
+        $allocation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Faculty allocation removed successfully.',
+        ]);
+    }
+
+    /**
+     * Get allocations for logged in faculty user
+     */
+    public function getMyFacultyAllocations(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
+        $allocations = \App\Models\FacultySubjectAllocation::where('faculty_id', $user->id)
+            ->with(['subjectModel', 'sectionModel'])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $allocations,
+        ]);
+    }
 }

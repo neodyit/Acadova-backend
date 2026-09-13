@@ -20,6 +20,12 @@ Route::get('/admin/attempts', [AdminController::class, 'attempts']);
 Route::delete('/admin/attempts/{id}', [AdminController::class, 'deleteAttempt']);
 Route::get('/admin/sessions', [AdminController::class, 'sessions']);
 
+// Faculty Allocations API
+Route::get('/admin/faculty/allocations', [AdminController::class, 'getFacultyAllocations']);
+Route::get('/admin/faculty/{id}/allocations', [AdminController::class, 'getFacultyAllocations']);
+Route::post('/admin/faculty/allocations', [AdminController::class, 'storeFacultyAllocation']);
+Route::delete('/admin/faculty/allocations/{id}', [AdminController::class, 'deleteFacultyAllocation']);
+
 // Academic Hierarchy & Structure CRUD API
 Route::prefix('academic')->group(function () {
     // Universities
@@ -109,4 +115,5 @@ Route::middleware(['auth:sanctum', 'validate.session'])->group(function () {
     Route::post('/quizzes/{id}/submit', [QuizController::class, 'submitAttempt']);
     Route::get('/faculty/stats', [QuizController::class, 'getFacultyStats']);
     Route::get('/faculty/submissions', [QuizController::class, 'getFacultySubmissions']);
+    Route::get('/faculty/my-allocations', [AdminController::class, 'getMyFacultyAllocations']);
 });

@@ -105,6 +105,11 @@ class User extends Authenticatable
         return $this->belongsTo(Subsection::class);
     }
 
+    public function facultyAllocations()
+    {
+        return $this->hasMany(FacultySubjectAllocation::class, 'faculty_id');
+    }
+
     /**
      * Convert legacy storage URLs to secure API media streaming URLs
      */
