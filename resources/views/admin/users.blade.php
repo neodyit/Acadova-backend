@@ -315,18 +315,21 @@
     let globalPredefinedBranches = [];
     let globalPredefinedSubjects = [];
     let globalPredefinedSections = [];
+    let globalPredefinedSemesters = [];
 
     async function loadPredefinedAcademicData() {
         try {
-            const [brRes, subRes, secRes] = await Promise.all([
+            const [brRes, subRes, secRes, semRes] = await Promise.all([
                 fetch('/api/academic/branches'),
                 fetch('/api/academic/subjects'),
-                fetch('/api/academic/sections')
+                fetch('/api/academic/sections'),
+                fetch('/api/academic/semesters')
             ]);
             
             const brJson = await brRes.json();
             const subJson = await subRes.json();
             const secJson = await secRes.json();
+            const semJson = await semRes.json();
 
             if (brJson.success) {
                 globalPredefinedBranches = brJson.data || [];
@@ -336,6 +339,9 @@
             }
             if (secJson.success) {
                 globalPredefinedSections = secJson.data || [];
+            }
+            if (semJson.success) {
+                globalPredefinedSemesters = semJson.data || [];
             }
             populateAllocationDropdowns();
         } catch (e) {
@@ -347,6 +353,13 @@
         const brSelect = document.getElementById('allocBranchSelect');
         const subSelect = document.getElementById('allocSubjectSelect');
         const secSelect = document.getElementById('allocSectionSelect');
+        const semSelect = document.getElementById('allocSemesterSelect');
+
+        if (globalPredefinedSemesters.length > 0) {
+            semSelect.innerHTML = globalPredefinedSemesters.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+        } else {
+            semSelect.innerHTML = [1,2,3,4,5,6,7,8].map(i => `<option value="Semester ${i}">Semester ${i}</option>`).join('');
+        }
 
         if (globalPredefinedBranches.length > 0) {
             brSelect.innerHTML = `
@@ -422,7 +435,6 @@
     async function openAllocationModal(facultyId, facultyName) {
         document.getElementById('allocFacultyId').value = facultyId;
         document.getElementById('allocationModalTitle').innerText = `Allocations: ${facultyName}`;
-        document.getElementById('allocSemesterSelect').value = 'Semester 1';
         openModal('facultyAllocationModal');
         await loadPredefinedAcademicData();
         await loadFacultyAllocations(facultyId);
