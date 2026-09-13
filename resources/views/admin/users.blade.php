@@ -371,7 +371,7 @@
         if (globalPredefinedSections.length > 0) {
             secSelect.innerHTML = `
                 <option value="">-- Select Section --</option>
-                ${globalPredefinedSections.map(s => `<option value="${s.id}" data-name="${s.name}">${s.name} (${s.code || 'N/A'})</option>`).join('')}
+                ${globalPredefinedSections.map(s => `<option value="${s.id}" data-name="${s.name}">${s.name}</option>`).join('')}
                 <option value="CUSTOM">+ Enter Custom Section Name</option>
             `;
         } else {
