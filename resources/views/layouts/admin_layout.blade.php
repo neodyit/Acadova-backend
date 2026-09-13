@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #6C5CE7;
-            --primary-hover: #5B4BC4;
-            --primary-light: #EEF2FF;
+            --primary: #B45309;
+            --primary-hover: #92400E;
+            --primary-light: #FEF3C7;
             --secondary: #00B894;
             --danger: #FF7675;
             --warning: #FFA502;
