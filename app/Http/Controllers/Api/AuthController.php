@@ -224,7 +224,7 @@ class AuthController extends Controller
 
         $isNewUser = false;
         if ($user) {
-            // Update existing user with google_id and avatar if missing
+            // Update existing user with details submitted during profile completion
             $updates = [];
             if ($googleId && !$user->google_id) {
                 $updates['google_id'] = $googleId;
@@ -232,8 +232,24 @@ class AuthController extends Controller
             if ($avatar && !$user->avatar) {
                 $updates['avatar'] = $avatar;
             }
+            if ($request->filled('role')) {
+                $updates['role'] = $role;
+            }
+            if ($request->filled('roll_number')) {
+                $updates['roll_number'] = $request->roll_number;
+            }
+            if ($request->filled('faculty_id')) {
+                $updates['faculty_id'] = $request->faculty_id;
+            }
+            if ($request->filled('department')) {
+                $updates['department'] = $request->department;
+            }
+            if ($request->filled('name')) {
+                $updates['name'] = $name;
+            }
             if (!empty($updates)) {
                 $user->update($updates);
+                $user->refresh();
             }
         } else {
             $isNewUser = true;

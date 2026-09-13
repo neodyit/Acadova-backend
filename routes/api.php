@@ -46,7 +46,7 @@ Route::put('/campaigns/{id}', [CampaignController::class, 'update']);
 Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy']);
 
 // Protected Endpoints
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'validate.session'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
