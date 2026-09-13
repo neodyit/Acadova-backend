@@ -161,6 +161,14 @@
                             <option value="multiple">Multiple Choice (Multiple Correct Options)</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Difficulty Level</label>
+                        <select id="qDifficulty" class="form-control">
+                            <option value="easy">🟢 Easy</option>
+                            <option value="medium">🟡 Medium</option>
+                            <option value="hard">🔴 Hard</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -359,10 +367,20 @@
                     correctStr = q.correct_option || 'N/A';
                 }
 
+                const diff = (q.difficulty || 'easy').toLowerCase();
+                const diffBadgeHtml = diff === 'hard'
+                    ? '<span style="background: #FEE2E2; color: #991B1B; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10px;">🔴 HARD</span>'
+                    : (diff === 'medium'
+                        ? '<span style="background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10px;">🟡 MEDIUM</span>'
+                        : '<span style="background: #D1FAE5; color: #065F46; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10px;">🟢 EASY</span>');
+
                 return `
                     <div style="background: var(--bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border);">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                            <span style="font-weight: 800; font-size: 14px;">Q${idx + 1}. ${escapeHtml(qText)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-weight: 800; font-size: 14px;">Q${idx + 1}. ${escapeHtml(qText)}</span>
+                                ${diffBadgeHtml}
+                            </div>
                             <div style="display: flex; gap: 6px;">
                                 <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="editQuestion(${q.id})"><i class="fa-solid fa-pen"></i> Edit</button>
                                 <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteQuestion(${q.id})"><i class="fa-solid fa-trash"></i></button>
@@ -388,6 +406,7 @@
         document.getElementById('editingQuestionId').value = q.id;
         document.getElementById('qText').value = q.question || q.question_text || '';
         document.getElementById('qType').value = q.type || 'single';
+        document.getElementById('qDifficulty').value = q.difficulty || 'easy';
         toggleQuestionTypeUI();
 
         let opts = q.options;
@@ -434,6 +453,7 @@
     function cancelEditQuestion() {
         document.getElementById('editingQuestionId').value = '';
         document.getElementById('addQuestionForm').reset();
+        document.getElementById('qDifficulty').value = 'easy';
         document.getElementById('questionFormTitle').innerText = 'Add Single Question';
         document.getElementById('submitQuestionBtn').innerText = 'Add Question';
         document.getElementById('cancelEditQuestionBtn').style.display = 'none';
@@ -445,32 +465,36 @@
         const quizId = document.getElementById('activeQuizId').value;
         const qId = document.getElementById('editingQuestionId').value;
         const qType = document.getElementById('qType').value;
+        const qDifficulty = document.getElementById('qDifficulty').value;
 
         const opt1 = document.getElementById('qOpt1').value.trim();
         const opt2 = document.getElementById('qOpt2').value.trim();
         const opt3 = document.getElementById('qOpt3').value.trim();
         const opt4 = document.getElementById('qOpt4').value.trim();
-        const options = [opt1, opt2, opt3, opt4].filter(o => o !== '');
 
-        if (options.length < 2) {
-            showToast('Please enter at least 2 options');
-            return;
-        }
+        const options = [opt1, opt2, opt3, opt4].filter(Boolean);
 
         let correctOption = null;
         if (qType === 'multiple') {
-            const selectedIndices = Array.from(document.querySelectorAll('.multi-check:checked')).map(c => parseInt(c.value) - 1);
-            if (selectedIndices.length === 0) { showToast('Select at least one correct option'); return; }
-            correctOption = selectedIndices.map(idx => [opt1, opt2, opt3, opt4][idx]).filter(Boolean);
+            const selectedIndices = [];
+            document.querySelectorAll('.multi-check:checked').forEach(cb => {
+                selectedIndices.push(cb.value);
+            });
+            if (selectedIndices.length === 0) {
+                showToast('Please select at least 1 correct option for multiple choice');
+                return;
+            }
+            correctOption = selectedIndices.map(idx => options[parseInt(idx) - 1]).filter(Boolean);
         } else {
-            const singleVal = parseInt(document.getElementById('qCorrectSingle').value) - 1;
-            correctOption = [opt1, opt2, opt3, opt4][singleVal] || opt1;
+            const singleVal = document.getElementById('qCorrectSingle').value;
+            correctOption = options[parseInt(singleVal) - 1] || options[0];
         }
 
         const payload = {
-            question: document.getElementById('qText').value,
+            question: document.getElementById('qText').value.trim(),
             type: qType,
-            options: [opt1, opt2, opt3, opt4],
+            difficulty: qDifficulty,
+            options: options,
             correct_option: correctOption,
         };
 

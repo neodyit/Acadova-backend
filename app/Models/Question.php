@@ -11,6 +11,7 @@ class Question extends Model
         'quiz_id',
         'question',
         'type',
+        'difficulty',
         'options',
         'correct_option',
     ];

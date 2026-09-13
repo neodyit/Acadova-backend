@@ -134,6 +134,7 @@ class QuizController extends Controller
         $validated = $request->validate([
             'question' => 'required|string',
             'type' => 'required|in:single,multiple',
+            'difficulty' => 'nullable|in:easy,medium,hard',
             'options' => 'required|array|min:2',
             'correct_option' => 'required',
         ]);
@@ -142,6 +143,7 @@ class QuizController extends Controller
             'quiz_id' => $quiz->id,
             'question' => $validated['question'],
             'type' => $validated['type'],
+            'difficulty' => $validated['difficulty'] ?? 'easy',
             'options' => $validated['options'],
             'correct_option' => $validated['correct_option'],
         ]);
@@ -166,6 +168,7 @@ class QuizController extends Controller
         $validated = $request->validate([
             'question' => 'sometimes|required|string',
             'type' => 'sometimes|required|in:single,multiple',
+            'difficulty' => 'nullable|in:easy,medium,hard',
             'options' => 'sometimes|required|array|min:2',
             'correct_option' => 'sometimes|required',
         ]);
@@ -221,6 +224,10 @@ class QuizController extends Controller
 
             $type = isset($data['type']) && strtolower(trim($data['type'])) === 'multiple' ? 'multiple' : 'single';
             
+            // Extract difficulty level (easy, medium, hard)
+            $rawDifficulty = isset($data['difficulty']) ? strtolower(trim($data['difficulty'])) : 'easy';
+            $difficulty = in_array($rawDifficulty, ['easy', 'medium', 'hard']) ? $rawDifficulty : 'easy';
+
             // Extract options
             $options = [];
             for ($i = 1; $i <= 6; $i++) {
@@ -266,6 +273,7 @@ class QuizController extends Controller
                 'quiz_id' => $quiz->id,
                 'question' => $qText,
                 'type' => $type,
+                'difficulty' => $difficulty,
                 'options' => $options,
                 'correct_option' => $correctOption,
             ]);
