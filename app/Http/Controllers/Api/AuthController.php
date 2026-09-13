@@ -161,6 +161,7 @@ class AuthController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
             'section_id' => 'nullable|exists:sections,id',
             'subsection_id' => 'nullable|exists:subsections,id',
+            'semester' => 'nullable|string|max:255',
         ], [
             'phone.unique' => 'This phone number is already linked with another account.',
             'roll_number.unique' => 'This roll number is already linked with another account.',
@@ -178,7 +179,7 @@ class AuthController extends Controller
         $fieldsToUpdate = array_filter(
             $request->only([
                 'name', 'phone', 'roll_number', 'faculty_id', 'department', 'bio', 'avatar',
-                'university_id', 'college_id', 'department_id', 'course_id', 'branch_id', 'section_id', 'subsection_id'
+                'university_id', 'college_id', 'department_id', 'course_id', 'branch_id', 'section_id', 'subsection_id', 'semester'
             ]),
             function ($value, $key) use ($request) {
                 // Allow null values for fields explicitly sent in request (e.g. academic IDs), but do not overwrite avatar if key wasn't sent

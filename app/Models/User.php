@@ -37,6 +37,7 @@ class User extends Authenticatable
         'branch_id',
         'section_id',
         'subsection_id',
+        'semester',
     ];
 
     /**

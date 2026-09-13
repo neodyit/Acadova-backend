@@ -89,6 +89,13 @@ try {
         });
         echo " -> Added 'section' to quizzes table.\n";
     }
+
+    if (\Illuminate\Support\Facades\Schema::hasTable('users') && !\Illuminate\Support\Facades\Schema::hasColumn('users', 'semester')) {
+        \Illuminate\Support\Facades\Schema::table('users', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->string('semester')->nullable()->after('subsection_id');
+        });
+        echo " -> Added 'semester' to users table.\n";
+    }
     echo "Dynamic column checks complete.\n\n";
 
     $runSeed = isset($_GET['seed']) ? filter_var($_GET['seed'], FILTER_VALIDATE_BOOLEAN) : false;
