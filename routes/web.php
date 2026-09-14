@@ -15,6 +15,15 @@ Route::get('/reset-password', function () {
     return view('reset_password');
 })->name('password.reset');
 
+// Public Privacy Policy Page
+Route::get('/page/privacy-policy', function () {
+    return view('privacy_policy');
+})->name('privacy.policy');
+
+Route::get('/privacy-policy', function () {
+    return redirect()->route('privacy.policy');
+});
+
 // Android App Links /.well-known/assetlinks.json route
 Route::get('/.well-known/assetlinks.json', function () {
     $filePath = public_path('.well-known/assetlinks.json');
