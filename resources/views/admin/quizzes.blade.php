@@ -114,25 +114,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="font-size: 12px; font-weight: 700;">Target Branches</label>
-                        <div style="background: white; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 120px; overflow-y: auto;">
-                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; margin-bottom: 6px; color: var(--primary); border-bottom: 1px solid #EDF2F7; padding-bottom: 4px;">
-                                <input type="checkbox" class="target-branch-all" checked onchange="toggleAllCheckboxes('target-branch', this.checked)"> -- ALL BRANCHES --
-                            </label>
-                            <div id="targetBranchContainer"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 12px; font-weight: 700;">Target Sections</label>
-                        <div style="background: white; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 120px; overflow-y: auto;">
-                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; margin-bottom: 6px; color: var(--primary); border-bottom: 1px solid #EDF2F7; padding-bottom: 4px;">
-                                <input type="checkbox" class="target-section-all" checked onchange="toggleAllCheckboxes('target-section', this.checked)"> -- ALL SECTIONS --
-                            </label>
-                            <div id="targetSectionContainer"></div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -296,8 +277,6 @@
 
             renderCheckboxGroup('targetDeptContainer', depts, 'target-dept', 'name');
             renderCheckboxGroup('targetCourseContainer', courses, 'target-course', 'name');
-            renderCheckboxGroup('targetBranchContainer', branches, 'target-branch', 'name');
-            renderCheckboxGroup('targetSectionContainer', sections, 'target-section', 'name');
 
             window.academicLoaded = true;
         } catch (e) {}
