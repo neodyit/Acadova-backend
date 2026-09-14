@@ -24,6 +24,28 @@ Route::get('/privacy-policy', function () {
     return redirect()->route('privacy.policy');
 });
 
+// Public Account Deletion Request Page
+Route::get('/page/delete-account', function () {
+    return view('delete_account');
+})->name('account.delete');
+
+Route::post('/page/delete-account', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'email' => 'required|email',
+        'name' => 'required|string|max:255',
+        'role' => 'required|string',
+        'reason' => 'nullable|string|max:1000',
+    ]);
+
+    \Illuminate\Support\Facades\Log::info("ACCOUNT DELETION REQUEST: ", $validated);
+
+    return back()->with('success', 'Your account deletion request has been submitted successfully. Our team will verify and process your request within 48 hours.');
+})->name('account.delete.submit');
+
+Route::get('/delete-account', function () {
+    return redirect()->route('account.delete');
+});
+
 // Android App Links /.well-known/assetlinks.json route
 Route::get('/.well-known/assetlinks.json', function () {
     $filePath = public_path('.well-known/assetlinks.json');
