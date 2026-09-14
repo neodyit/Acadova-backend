@@ -158,7 +158,7 @@
 
         try {
             showToast('Uploading banner image...');
-            const res = await fetch('/api/media/upload', {
+            const res = await fetch('/api/upload', {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': CSRF_TOKEN },
                 body: formData
