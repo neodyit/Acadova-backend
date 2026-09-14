@@ -437,8 +437,21 @@ class AuthController extends Controller
         $resetUrl = "$baseUrl/reset-password?token=$token&email=" . urlencode($email);
         $deepLink = "acadova://reset-password?token=$token&email=" . urlencode($email);
 
+        // Force Hostinger / dynamic .env SMTP configuration explicitly to prevent cached env issues
+        config([
+            'mail.default' => env('MAIL_MAILER', 'smtp'),
+            'mail.mailers.smtp.host' => env('MAIL_HOST', 'smtp.hostinger.com'),
+            'mail.mailers.smtp.port' => (int) env('MAIL_PORT', 465),
+            'mail.mailers.smtp.encryption' => env('MAIL_ENCRYPTION', 'ssl'),
+            'mail.mailers.smtp.username' => env('MAIL_USERNAME', 'acadova@neodyit.com'),
+            'mail.mailers.smtp.password' => env('MAIL_PASSWORD'),
+            'mail.from.address' => env('MAIL_FROM_ADDRESS', 'acadova@neodyit.com'),
+            'mail.from.name' => env('MAIL_FROM_NAME', 'Acadova'),
+        ]);
+
         // 4. Send Email via SMTP with Exception handling
         try {
+            Mail::purge();
             Mail::to($email)->send(new \App\Mail\PasswordResetMail($user->name, $resetUrl, $deepLink));
 
             return response()->json([
