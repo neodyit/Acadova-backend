@@ -460,7 +460,7 @@
                 <p>You have the right to access, update, or request the deletion of your personal information stored with Acadova:</p>
                 <ul>
                     <li><strong>Access & Update:</strong> You can review and edit your profile details directly within the mobile application settings.</li>
-                    <li><strong>Account & Data Deletion Request:</strong> If you wish to delete your account and associated personal data, you may submit a request through the app settings or by contacting our support team at <a href="mailto:support@neodyit.com" style="color: var(--primary); font-weight: 600;">support@neodyit.com</a>.</li>
+                    <li><strong>Account & Data Deletion Request:</strong> If you wish to delete your account and associated personal data, you may submit a request through the app settings or by contacting our support team at <a href="mailto:mayank@neodyit.in" style="color: var(--primary); font-weight: 600;">mayank@neodyit.in</a>.</li>
                 </ul>
             </section>
 
@@ -475,7 +475,7 @@
                 <div class="contact-box">
                     <p><strong>App Developer & Organization:</strong> Neody IT</p>
                     <p><strong>Application:</strong> Acadova Quiz App</p>
-                    <p><strong>Support Email:</strong> <a href="mailto:support@neodyit.com" style="color: var(--primary); font-weight:600;">support@neodyit.com</a></p>
+                    <p><strong>Support Email:</strong> <a href="mailto:mayank@neodyit.in" style="color: var(--primary); font-weight:600;">mayank@neodyit.in</a></p>
                     <p><strong>Website:</strong> <a href="https://neodyit.com" target="_blank" style="color: var(--primary); font-weight:600;">https://neodyit.com</a></p>
                 </div>
             </section>
