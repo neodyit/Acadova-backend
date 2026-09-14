@@ -202,8 +202,28 @@
             const password = document.getElementById('password').value;
             const passwordConfirmation = document.getElementById('password_confirmation').value;
 
-            if (password.length < 6) {
-                alertError.innerText = 'Password must be at least 6 characters long.';
+            if (password.length < 8) {
+                alertError.innerText = 'Password must be at least 8 characters long.';
+                alertError.style.display = 'block';
+                return;
+            }
+            if (!/[A-Z]/.test(password)) {
+                alertError.innerText = 'Password must contain at least 1 uppercase letter (A-Z).';
+                alertError.style.display = 'block';
+                return;
+            }
+            if (!/[a-z]/.test(password)) {
+                alertError.innerText = 'Password must contain at least 1 lowercase letter (a-z).';
+                alertError.style.display = 'block';
+                return;
+            }
+            if (!/[0-9]/.test(password)) {
+                alertError.innerText = 'Password must contain at least 1 number (0-9).';
+                alertError.style.display = 'block';
+                return;
+            }
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                alertError.innerText = 'Password must contain at least 1 special character (@, #, $, etc.).';
                 alertError.style.display = 'block';
                 return;
             }
