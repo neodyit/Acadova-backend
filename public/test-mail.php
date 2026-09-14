@@ -4,13 +4,18 @@
  * Access in browser: https://acadova.neodyit.com/test-mail.php
  */
 
-// Load Laravel .env environment variables manually if Laravel framework is not loaded
-$envFile = __DIR__ . '/.env';
+// Load Laravel .env environment variables manually from root directory
+$envFile = dirname(__DIR__) . '/.env';
+if (!file_exists($envFile)) {
+    $envFile = __DIR__ . '/.env';
+}
+
 $envVars = [];
 if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
+        $line = trim($line);
+        if (strpos($line, '#') === 0) continue;
         if (strpos($line, '=') !== false) {
             list($name, $value) = explode('=', $line, 2);
             $name = trim($name);
@@ -20,14 +25,24 @@ if (file_exists($envFile)) {
     }
 }
 
-$mailer = $envVars['MAIL_MAILER'] ?? getenv('MAIL_MAILER') ?? 'smtp';
-$host = $envVars['MAIL_HOST'] ?? getenv('MAIL_HOST') ?? 'smtp.hostinger.com';
-$port = $envVars['MAIL_PORT'] ?? getenv('MAIL_PORT') ?? '465';
-$username = $envVars['MAIL_USERNAME'] ?? getenv('MAIL_USERNAME') ?? 'noreply@acadova.neodyit.com';
-$password = $envVars['MAIL_PASSWORD'] ?? getenv('MAIL_PASSWORD') ?? '';
-$fromAddress = $envVars['MAIL_FROM_ADDRESS'] ?? getenv('MAIL_FROM_ADDRESS') ?? $username;
-$fromName = $envVars['MAIL_FROM_NAME'] ?? getenv('MAIL_FROM_NAME') ?? 'Acadova Test';
-$encryption = $envVars['MAIL_ENCRYPTION'] ?? getenv('MAIL_ENCRYPTION') ?? ($port == 465 ? 'ssl' : 'tls');
+// Bootstrap Laravel if available to get actual config values
+if (file_exists(dirname(__DIR__) . '/vendor/autoload.php') && file_exists(dirname(__DIR__) . '/bootstrap/app.php')) {
+    try {
+        require_once dirname(__DIR__) . '/vendor/autoload.php';
+        $app = require_once dirname(__DIR__) . '/bootstrap/app.php';
+        $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+        $kernel->bootstrap();
+    } catch (\Throwable $e) {}
+}
+
+$mailer = config('mail.default') ?: ($envVars['MAIL_MAILER'] ?? getenv('MAIL_MAILER') ?? '');
+$host = config('mail.mailers.smtp.host') ?: ($envVars['MAIL_HOST'] ?? getenv('MAIL_HOST') ?? '');
+$port = config('mail.mailers.smtp.port') ?: ($envVars['MAIL_PORT'] ?? getenv('MAIL_PORT') ?? '');
+$username = config('mail.mailers.smtp.username') ?: ($envVars['MAIL_USERNAME'] ?? getenv('MAIL_USERNAME') ?? '');
+$password = config('mail.mailers.smtp.password') ?: ($envVars['MAIL_PASSWORD'] ?? getenv('MAIL_PASSWORD') ?? '');
+$fromAddress = config('mail.from.address') ?: ($envVars['MAIL_FROM_ADDRESS'] ?? getenv('MAIL_FROM_ADDRESS') ?? '');
+$fromName = config('mail.from.name') ?: ($envVars['MAIL_FROM_NAME'] ?? getenv('MAIL_FROM_NAME') ?? '');
+$encryption = config('mail.mailers.smtp.encryption') ?: ($envVars['MAIL_ENCRYPTION'] ?? getenv('MAIL_ENCRYPTION') ?? ($port == 465 ? 'ssl' : 'tls'));
 
 $message = '';
 $statusClass = '';
