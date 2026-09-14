@@ -15,6 +15,7 @@ class QuizController extends Controller
      */
     public function index(Request $request)
     {
+        $status = $request->query('status', 'all');
         $user = auth('sanctum')->user() ?? $request->user();
 
         $query = Quiz::withCount('questions');
