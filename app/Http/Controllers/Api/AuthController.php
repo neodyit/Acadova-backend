@@ -433,10 +433,32 @@ class AuthController extends Controller
             'mail.from.name' => env('MAIL_FROM_NAME', 'Acadova'),
         ]);
 
-        // 4. Send Email via SMTP with Exception handling
+        // 4. Send Email via Native Symfony SMTP Transport (100% reliable Hostinger SSL/TLS dispatch)
         try {
-            Mail::purge();
-            Mail::to($email)->send(new \App\Mail\PasswordResetMail($user->name, $resetUrl, $deepLink));
+            $host = env('MAIL_HOST', 'smtp.hostinger.com');
+            $port = (int) env('MAIL_PORT', 465);
+            $username = env('MAIL_USERNAME', 'acadova@neodyit.com');
+            $password = env('MAIL_PASSWORD', '');
+            $fromAddress = env('MAIL_FROM_ADDRESS', 'acadova@neodyit.com');
+            $fromName = env('MAIL_FROM_NAME', 'Acadova');
+
+            $dsn = "smtps://{$username}:" . urlencode($password) . "@{$host}:{$port}";
+            $transport = \Symfony\Component\Mailer\Transport::fromDsn($dsn);
+            $mailer = new \Symfony\Component\Mailer\Mailer($transport);
+
+            $htmlContent = view('emails.password_reset', [
+                'userName' => $user->name,
+                'resetUrl' => $resetUrl,
+                'deepLink' => $deepLink,
+            ])->render();
+
+            $emailMessage = (new \Symfony\Component\Mime\Email())
+                ->from(new \Symfony\Component\Mime\Address($fromAddress, $fromName))
+                ->to($email)
+                ->subject('Reset Your Acadova Password')
+                ->html($htmlContent);
+
+            $mailer->send($emailMessage);
 
             return response()->json([
                 'success' => true,
