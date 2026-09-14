@@ -635,7 +635,7 @@ class QuizController extends Controller
     {
         $user = auth('sanctum')->user() ?? $request->user();
 
-        $query = QuizAttempt::with(['user', 'quiz']);
+        $query = QuizAttempt::with(['user.branch', 'user.section', 'user.course', 'quiz']);
 
         if ($user && strtolower($user->role) === 'faculty') {
             $facultyQuizIds = Quiz::where(function ($q) use ($user) {
