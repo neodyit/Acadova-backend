@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Quiz extends Model
 {
     protected $fillable = [
+        'user_id',
+        'created_by',
         'title',
         'subject',
         'description',
@@ -37,6 +39,11 @@ class Quiz extends Model
         'subject_ids' => 'array',
         'target_groups' => 'array',
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function questions(): HasMany
     {

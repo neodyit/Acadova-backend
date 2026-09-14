@@ -15,16 +15,26 @@ class QuizController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->query('status', 'all');
+        $user = auth('sanctum')->user() ?? $request->user();
 
         $query = Quiz::withCount('questions');
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
-        $quizzes = $query->latest()->get();
+        // Faculty role filter: only show quizzes created by this faculty member
+        if ($user && strtolower($user->role) === 'faculty') {
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('created_by', $user->id)
+                  ->orWhere('instructor', $user->name);
+                if (!empty($user->full_name)) {
+                    $q->orWhere('instructor', $user->full_name);
+                }
+            });
+        }
 
-        $user = auth('sanctum')->user() ?? $request->user();
+        $quizzes = $query->latest()->get();
         if ($user && strtolower($user->role) === 'student') {
             $quizzes = $quizzes->filter(function ($quiz) use ($user) {
                 // Priority 1: Explicit Target Combinations (e.g. CSE - E, AIDS - B)
@@ -174,10 +184,15 @@ class QuizController extends Controller
             'target_groups' => 'nullable|array',
         ]);
 
+        $user = auth('sanctum')->user() ?? $request->user();
+        $userId = $user ? $user->id : null;
+
         $quiz = Quiz::create([
+            'user_id' => $userId,
+            'created_by' => $userId,
             'title' => $validated['title'],
             'subject' => $validated['subject'] ?? 'General',
-            'instructor' => $validated['instructor'] ?? 'Faculty',
+            'instructor' => $validated['instructor'] ?? ($user ? ($user->name ?? $user->full_name ?? 'Faculty') : 'Faculty'),
             'scheduled_at' => $validated['scheduled_at'] ?? $validated['starts_at'] ?? null,
             'starts_at' => $validated['starts_at'] ?? $validated['scheduled_at'] ?? null,
             'ends_at' => $validated['ends_at'] ?? null,
@@ -556,12 +571,30 @@ class QuizController extends Controller
      */
     public function getFacultyStats(Request $request)
     {
-        $totalQuizzes = Quiz::count();
-        $activeQuizzes = Quiz::where('status', 'active')->count();
-        $completedQuizzes = Quiz::where('status', 'completed')->count();
-        $totalSubmissions = QuizAttempt::count();
+        $user = auth('sanctum')->user() ?? $request->user();
 
-        $attempts = QuizAttempt::all();
+        $quizQuery = Quiz::query();
+        if ($user && strtolower($user->role) === 'faculty') {
+            $quizQuery->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('created_by', $user->id)
+                  ->orWhere('instructor', $user->name);
+                if (!empty($user->full_name)) {
+                    $q->orWhere('instructor', $user->full_name);
+                }
+            });
+        }
+
+        $facultyQuizIds = (clone $quizQuery)->pluck('id');
+
+        $totalQuizzes = (clone $quizQuery)->count();
+        $activeQuizzes = (clone $quizQuery)->where('status', 'active')->count();
+        $completedQuizzes = (clone $quizQuery)->where('status', 'completed')->count();
+
+        $attemptQuery = QuizAttempt::whereIn('quiz_id', $facultyQuizIds);
+        $totalSubmissions = (clone $attemptQuery)->count();
+
+        $attempts = $attemptQuery->get();
         $totalScore = 0;
         $totalQuestions = 0;
         foreach ($attempts as $attempt) {
@@ -588,9 +621,24 @@ class QuizController extends Controller
      */
     public function getFacultySubmissions(Request $request)
     {
-        $submissions = QuizAttempt::with(['user', 'quiz'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $user = auth('sanctum')->user() ?? $request->user();
+
+        $query = QuizAttempt::with(['user', 'quiz']);
+
+        if ($user && strtolower($user->role) === 'faculty') {
+            $facultyQuizIds = Quiz::where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('created_by', $user->id)
+                  ->orWhere('instructor', $user->name);
+                if (!empty($user->full_name)) {
+                    $q->orWhere('instructor', $user->full_name);
+                }
+            })->pluck('id');
+
+            $query->whereIn('quiz_id', $facultyQuizIds);
+        }
+
+        $submissions = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'success' => true,
