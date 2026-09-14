@@ -185,7 +185,10 @@ class AuthController extends Controller
                 'university_id', 'college_id', 'department_id', 'course_id', 'branch_id', 'section_id', 'subsection_id', 'semester'
             ]),
             function ($value, $key) use ($request) {
-                // Allow null values for fields explicitly sent in request (e.g. academic IDs), but do not overwrite avatar if key wasn't sent
+                // Do not overwrite avatar with null if key wasn't sent or was null
+                if ($key === 'avatar' && $value === null) {
+                    return false;
+                }
                 return $request->has($key);
             },
             ARRAY_FILTER_USE_BOTH
@@ -484,7 +487,7 @@ class AuthController extends Controller
             'password' => [
                 'required',
                 'string',
-                'min:8',
+                'min:6',
                 'regex:/[A-Z]/',
                 'regex:/[a-z]/',
                 'regex:/[0-9]/',
@@ -492,14 +495,14 @@ class AuthController extends Controller
                 'confirmed',
             ],
         ], [
-            'password.min' => 'Password must be at least 8 characters long.',
+            'password.min' => 'Password must be at least 6 characters long.',
             'password.regex' => 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
+                'message' => $validator->errors()->first() ?? 'Validation error',
                 'errors' => $validator->errors(),
             ], 422);
         }
