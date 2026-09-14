@@ -393,14 +393,13 @@ class AuthController extends Controller
 
         $email = strtolower(trim($request->email));
 
-        // 1. Check if user exists and is Admin or Faculty (or Student)
+        // 1. Explicit DB User Existence Check
         $user = User::where('email', $email)->first();
         if (!$user) {
-            // For security, return success message without revealing user existence
             return response()->json([
-                'success' => true,
-                'message' => 'If an account exists with this email, a password reset link has been sent.',
-            ]);
+                'success' => false,
+                'message' => 'No account found registered with this email address. Please check your email and try again.',
+            ], 404);
         }
 
         // 2. Strict Rate Limiting Check (Max 3 requests per 10 minutes per email / IP to protect Hostinger SMTP 100 mails/2h limit)
