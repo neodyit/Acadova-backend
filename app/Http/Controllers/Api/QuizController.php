@@ -443,23 +443,6 @@ class QuizController extends Controller
         ]);
     }
 
-    /**
-     * Delete a question
-     */
-    public function deleteQuestion($id)
-    {
-        $question = Question::find($id);
-        if (!$question) {
-            return response()->json(['success' => false, 'message' => 'Question not found.'], 404);
-        }
-
-        $question->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Question deleted successfully.',
-        ]);
-    }
 
     /**
      * Delete a quiz
