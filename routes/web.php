@@ -15,6 +15,26 @@ Route::get('/reset-password', function () {
     return view('reset_password');
 })->name('password.reset');
 
+// Android App Links /.well-known/assetlinks.json route
+Route::get('/.well-known/assetlinks.json', function () {
+    $filePath = public_path('.well-known/assetlinks.json');
+    if (file_exists($filePath)) {
+        return response()->file($filePath, ['Content-Type' => 'application/json']);
+    }
+    return response()->json([
+        [
+            'relation' => ['delegate_permission/common.handle_all_urls'],
+            'target' => [
+                'namespace' => 'android_app',
+                'package_name' => 'com.neodyit.acadova',
+                'sha256_cert_fingerprints' => [
+                    'FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C'
+                ]
+            ]
+        ]
+    ]);
+});
+
 Route::get('/neodyit', function () {
     return redirect()->route('admin.dashboard');
 });
