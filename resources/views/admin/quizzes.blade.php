@@ -303,44 +303,81 @@
         } catch (e) {}
     }
 
-    function addTargetPairRow(branchVal = '', sectionVal = '') {
+    function addTargetPairRow(branchVal = '', sectionsVal = ['all']) {
         const container = document.getElementById('targetPairsContainer');
         if (!container) return;
 
         const rowId = 'pair_row_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        
+        let secList = [];
+        if (Array.isArray(sectionsVal)) {
+            secList = sectionsVal;
+        } else if (sectionsVal) {
+            secList = [sectionsVal];
+        } else {
+            secList = ['all'];
+        }
+
+        const isAllSec = secList.includes('all') || secList.length === 0;
+
         const branchesOptions = (window.dbBranchesList || []).map(b => {
             const val = b.name;
             const label = b.name + (b.code ? ` (${b.code})` : '');
             return `<option value="${escapeHtml(val)}" ${val === branchVal ? 'selected' : ''}>${escapeHtml(label)}</option>`;
         }).join('');
 
-        const sectionsOptions = (window.dbSectionsList || []).map(s => {
+        const sectionsCheckboxes = (window.dbSectionsList || []).map(s => {
             const val = s.name;
-            return `<option value="${escapeHtml(val)}" ${val === sectionVal ? 'selected' : ''}>Section ${escapeHtml(val)}</option>`;
+            const isChecked = isAllSec || secList.includes(val) || secList.includes(String(val));
+            return `
+                <label style="display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; margin-right: 10px; cursor: pointer;">
+                    <input type="checkbox" class="pair-sec-item" value="${escapeHtml(val)}" ${isChecked ? 'checked' : ''} onchange="onPairSectionChange('${rowId}')"> Sec ${escapeHtml(val)}
+                </label>
+            `;
         }).join('');
 
         const html = `
-            <div id="${rowId}" class="target-pair-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; background: white; padding: 8px 12px; border-radius: 10px; border: 1px solid #CBD5E1;">
-                <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: 700; color: #475569;">Target Branch</label>
-                    <select class="form-control pair-branch-select" style="font-size: 12px; padding: 6px;">
-                        <option value="">-- Any Branch --</option>
-                        ${branchesOptions}
-                    </select>
+            <div id="${rowId}" class="target-pair-row" style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #CBD5E1; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">Target Branch</label>
+                        <select class="form-control pair-branch-select" style="font-size: 12.5px; padding: 6px 10px; font-weight: 600;">
+                            <option value="">-- Select Branch --</option>
+                            ${branchesOptions}
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeTargetPairRow('${rowId}')" style="padding: 6px 10px; font-size: 11px; margin-top: 18px;">
+                        <i class="fa-solid fa-trash"></i> Remove Rule
+                    </button>
                 </div>
-                <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: 700; color: #475569;">Target Section</label>
-                    <select class="form-control pair-section-select" style="font-size: 12px; padding: 6px;">
-                        <option value="">-- Any Section --</option>
-                        ${sectionsOptions}
-                    </select>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">Applicable Sections for this Branch</label>
+                    <div style="background: #F8FAFC; padding: 8px 12px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                        <label style="display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 800; color: var(--primary); margin-right: 12px; cursor: pointer; border-right: 1px solid #CBD5E1; padding-right: 10px;">
+                            <input type="checkbox" class="pair-sec-all" ${isAllSec ? 'checked' : ''} onchange="togglePairAllSections('${rowId}', this.checked)"> -- ALL SECTIONS --
+                        </label>
+                        ${sectionsCheckboxes}
+                    </div>
                 </div>
-                <button type="button" class="btn btn-danger" onclick="removeTargetPairRow('${rowId}')" style="padding: 6px 10px; margin-top: 16px; font-size: 12px;">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function togglePairAllSections(rowId, checked) {
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        row.querySelectorAll('.pair-sec-item').forEach(cb => cb.checked = checked);
+    }
+
+    function onPairSectionChange(rowId) {
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        const allCb = row.querySelector('.pair-sec-all');
+        const items = Array.from(row.querySelectorAll('.pair-sec-item'));
+        if (allCb) {
+            allCb.checked = items.length > 0 && items.every(cb => cb.checked);
+        }
     }
 
     function removeTargetPairRow(rowId) {
@@ -352,9 +389,23 @@
         const pairs = [];
         document.querySelectorAll('.target-pair-row').forEach(row => {
             const b = row.querySelector('.pair-branch-select').value;
-            const s = row.querySelector('.pair-section-select').value;
-            if (b || s) {
-                pairs.push({ branch_id: b || 'all', section_id: s || 'all' });
+            const allCb = row.querySelector('.pair-sec-all');
+            let secVals = ['all'];
+
+            if (!allCb || !allCb.checked) {
+                secVals = [];
+                row.querySelectorAll('.pair-sec-item:checked').forEach(cb => {
+                    secVals.push(cb.value);
+                });
+                if (secVals.length === 0) secVals = ['all'];
+            }
+
+            if (b) {
+                pairs.push({
+                    branch_id: b,
+                    section_ids: secVals,
+                    section_id: secVals.includes('all') ? 'all' : (secVals[0] || 'all')
+                });
             }
         });
         return pairs.length === 0 ? null : pairs;
@@ -366,7 +417,8 @@
         container.innerHTML = '';
         if (Array.isArray(groups) && groups.length > 0) {
             groups.forEach(g => {
-                addTargetPairRow(g.branch_id || '', g.section_id || '');
+                const secs = g.section_ids || (g.section_id ? [g.section_id] : ['all']);
+                addTargetPairRow(g.branch_id || '', secs);
             });
         }
     }

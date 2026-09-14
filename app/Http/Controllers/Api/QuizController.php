@@ -37,9 +37,16 @@ class QuizController extends Controller
                             ((string)$user->branch_id === (string)$group['branch_id']) ||
                             ((string)$user->branch === (string)$group['branch_id']);
 
-                        $sectionOk = empty($group['section_id']) || $group['section_id'] === 'all' ||
-                            ((string)$user->section_id === (string)$group['section_id']) ||
-                            ((string)$user->section === (string)$group['section_id']);
+                        $secList = [];
+                        if (!empty($group['section_ids']) && is_array($group['section_ids'])) {
+                            $secList = $group['section_ids'];
+                        } elseif (!empty($group['section_id'])) {
+                            $secList = [$group['section_id']];
+                        }
+
+                        $sectionOk = empty($secList) || in_array('all', $secList) ||
+                            in_array((string)$user->section_id, $secList) ||
+                            in_array((string)$user->section, $secList);
 
                         $deptOk = empty($group['department_id']) || $group['department_id'] === 'all' ||
                             ((string)$user->department_id === (string)$group['department_id']) ||
