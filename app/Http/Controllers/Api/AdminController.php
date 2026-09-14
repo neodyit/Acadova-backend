@@ -80,18 +80,42 @@ class AdminController extends Controller
      */
     public function attempts()
     {
-        $attempts = QuizAttempt::with(['user', 'quiz'])
+        $attempts = QuizAttempt::with(['user.branch', 'user.section', 'quiz'])
             ->orderBy('created_at', 'desc')
-            ->limit(50)
             ->get()
             ->map(function ($att) {
+                $u = $att->user;
+                $q = $att->quiz;
+
+                $branch = 'N/A';
+                if ($u) {
+                    if ($u->branch) {
+                        $branch = $u->branch->code ?? $u->branch->name ?? 'N/A';
+                    } else if (!empty($u->department)) {
+                        $branch = $u->department;
+                    }
+                }
+
+                $sec = 'N/A';
+                if ($u && $u->section) {
+                    $sec = $u->section->name ?? 'N/A';
+                }
+
                 return [
                     'id' => $att->id,
-                    'student_name' => $att->user ? $att->user->name : 'Unknown Student',
-                    'student_email' => $att->user ? $att->user->email : 'N/A',
-                    'quiz_title' => $att->quiz ? $att->quiz->title : 'Quiz #' . $att->quiz_id,
+                    'user_id' => $att->user_id,
+                    'student_name' => $u ? $u->name : 'Unknown Student',
+                    'student_email' => $u ? $u->email : 'N/A',
+                    'roll_number' => $u ? ($u->roll_number ?? 'N/A') : 'N/A',
+                    'branch' => $branch,
+                    'section' => $sec,
+                    'semester' => $u ? ($u->semester ?? 'N/A') : 'N/A',
+                    'quiz_id' => $att->quiz_id,
+                    'quiz_title' => $q ? $q->title : 'Quiz #' . $att->quiz_id,
+                    'subject' => $q ? ($q->subject ?? 'General') : 'General',
                     'score' => $att->score,
                     'total_questions' => $att->total_questions,
+                    'percentage' => $att->total_questions > 0 ? round(($att->score / $att->total_questions) * 100) : 0,
                     'violations_count' => $att->violations_count ?? 0,
                     'ip_address' => $att->ip_address ?? 'N/A',
                     'location' => $att->location ?? 'N/A',

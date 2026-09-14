@@ -16,7 +16,7 @@ class EnsureRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        $user = Auth::user() ?? auth('sanctum')->user();
+        $user = $request->user() ?? Auth::user() ?? auth('sanctum')->user() ?? auth('web')->user();
 
         if (!$user) {
             return response()->json([
