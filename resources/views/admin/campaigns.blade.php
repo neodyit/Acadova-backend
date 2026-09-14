@@ -96,9 +96,16 @@
             </div>
 
             <div class="form-group">
-                <label>Banner Image URL / Poster Header (Optional)</label>
-                <input type="text" id="campaignImageUrl" class="form-control" placeholder="e.g. https://images.unsplash.com/... or relative media path">
-                <small style="color: var(--text-muted); font-size: 11px;">Renders high-res banner image at top of campaign card</small>
+                <label>Banner Image / Poster Header (Optional)</label>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 6px;">
+                    <input type="file" id="campaignImageFile" class="form-control" accept="image/*" onchange="uploadCampaignBannerFile(this)">
+                    <input type="hidden" id="campaignImageUrl">
+                </div>
+                <div id="campaignImagePreview" style="display: none; margin-top: 8px; position: relative; max-width: 200px;">
+                    <img id="campaignPreviewImg" src="" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);" alt="Preview">
+                    <button type="button" onclick="clearCampaignBannerImage()" style="position: absolute; top: -6px; right: -6px; background: #FF7675; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 12px; line-height: 22px; text-align: center;">&times;</button>
+                </div>
+                <small style="color: var(--text-muted); font-size: 11px;">Upload a poster/banner image (JPEG, PNG, WebP) to display on top of the campaign card.</small>
             </div>
 
             <div class="form-group">
@@ -135,10 +142,45 @@
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
+    function clearCampaignBannerImage() {
+        document.getElementById('campaignImageFile').value = '';
+        document.getElementById('campaignImageUrl').value = '';
+        document.getElementById('campaignImagePreview').style.display = 'none';
+        document.getElementById('campaignPreviewImg').src = '';
+    }
+
+    async function uploadCampaignBannerFile(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'campaigns');
+
+        try {
+            showToast('Uploading banner image...');
+            const res = await fetch('/api/media/upload', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': CSRF_TOKEN },
+                body: formData
+            });
+            const json = await res.json();
+            if (res.ok && json.success && json.data && json.data.url) {
+                document.getElementById('campaignImageUrl').value = json.data.url;
+                document.getElementById('campaignPreviewImg').src = json.data.url;
+                document.getElementById('campaignImagePreview').style.display = 'block';
+                showToast('Image uploaded successfully!');
+            } else {
+                showToast(json.message || 'Failed to upload banner image');
+            }
+        } catch (err) {
+            showToast('Error uploading banner image');
+        }
+    }
+
     function openCreateCampaignModal() {
         document.getElementById('editingCampaignId').value = '';
         document.getElementById('createCampaignForm').reset();
-        document.getElementById('campaignImageUrl').value = '';
+        clearCampaignBannerImage();
         document.getElementById('campaignEndsAt').value = '';
         document.getElementById('campaignModalTitleText').innerText = 'Create Campaign / Notice';
         openModal('createCampaignModal');
@@ -150,7 +192,15 @@
         document.getElementById('campaignBadge').value = c.badge || '';
         document.getElementById('campaignColor').value = c.banner_color || 'amber';
         document.getElementById('campaignStatus').value = c.status || 'active';
-        document.getElementById('campaignImageUrl').value = c.image_url || '';
+        
+        if (c.image_url) {
+            document.getElementById('campaignImageUrl').value = c.image_url;
+            document.getElementById('campaignPreviewImg').src = c.image_url.startsWith('http') ? c.image_url : `/api/media/file/${c.image_url}`;
+            document.getElementById('campaignImagePreview').style.display = 'block';
+        } else {
+            clearCampaignBannerImage();
+        }
+
         document.getElementById('campaignLink').value = c.link_url || '';
         document.getElementById('campaignEndsAt').value = formatLocalDatetimeInput(c.ends_at);
         document.getElementById('campaignDescription').value = c.description || '';
