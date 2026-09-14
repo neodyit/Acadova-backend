@@ -46,6 +46,10 @@ class QuizController extends Controller
 
                         $branchOk = empty($group['branch_id']) || $group['branch_id'] === 'all' ||
                             ((string)$user->branch_id === (string)$group['branch_id']) ||
+                            (!empty($group['branch_db_id']) && (string)$user->branch_id === (string)$group['branch_db_id']) ||
+                            ($user->branch && (string)$user->branch->id === (string)$group['branch_id']) ||
+                            ($user->branch && (string)$user->branch->name === (string)$group['branch_id']) ||
+                            ($user->branch && (string)$user->branch->code === (string)$group['branch_id']) ||
                             ((string)$user->branch === (string)$group['branch_id']);
 
                         $secList = [];
@@ -57,14 +61,20 @@ class QuizController extends Controller
 
                         $sectionOk = empty($secList) || in_array('all', $secList) ||
                             in_array((string)$user->section_id, $secList) ||
+                            ($user->section && in_array((string)$user->section->id, $secList)) ||
+                            ($user->section && in_array((string)$user->section->name, $secList)) ||
                             in_array((string)$user->section, $secList);
 
                         $deptOk = empty($group['department_id']) || $group['department_id'] === 'all' ||
                             ((string)$user->department_id === (string)$group['department_id']) ||
+                            ($user->departmentModel && (string)$user->departmentModel->id === (string)$group['department_id']) ||
+                            ($user->departmentModel && (string)$user->departmentModel->name === (string)$group['department_id']) ||
                             ((string)$user->department === (string)$group['department_id']);
 
                         $courseOk = empty($group['course_id']) || $group['course_id'] === 'all' ||
-                            ((string)$user->course_id === (string)$group['course_id']);
+                            ((string)$user->course_id === (string)$group['course_id']) ||
+                            ($user->course && (string)$user->course->id === (string)$group['course_id']) ||
+                            ($user->course && (string)$user->course->name === (string)$group['course_id']);
 
                         $userSemDigits = preg_replace('/[^0-9]/', '', (string)$user->semester);
                         $groupSemDigits = preg_replace('/[^0-9]/', '', (string)($group['semester'] ?? ''));
