@@ -37,7 +37,15 @@ Route::post('/page/delete-account', function (\Illuminate\Http\Request $request)
         'reason' => 'nullable|string|max:1000',
     ]);
 
-    \Illuminate\Support\Facades\Log::info("ACCOUNT DELETION REQUEST: ", $validated);
+    \App\Models\AccountDeletionRequest::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'role' => $validated['role'],
+        'reason' => $validated['reason'] ?? null,
+        'status' => 'pending',
+    ]);
+
+    \Illuminate\Support\Facades\Log::info("ACCOUNT DELETION REQUEST SAVED: ", $validated);
 
     return back()->with('success', 'Your account deletion request has been submitted successfully. Our team will verify and process your request within 48 hours.');
 })->name('account.delete.submit');
