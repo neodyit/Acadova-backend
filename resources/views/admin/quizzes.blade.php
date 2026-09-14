@@ -66,7 +66,11 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Subject / Category</label>
-                    <input type="text" id="quizSubject" class="form-control" placeholder="e.g. Computer Science" required>
+                    <select id="quizSubject" class="form-control" required>
+                        <option value="">-- Select Subject --</option>
+                        <option value="General">General</option>
+                        <option value="Computer Science">Computer Science</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Instructor Name</label>
@@ -264,15 +268,28 @@
     async function loadAcademicTargets() {
         if (window.academicLoaded) return;
         try {
-            const [depts, courses, branches, sections] = await Promise.all([
+            const [depts, courses, branches, sections, subjects] = await Promise.all([
                 fetch('/api/academic/departments').then(r => r.json()),
                 fetch('/api/academic/courses').then(r => r.json()),
                 fetch('/api/academic/branches').then(r => r.json()),
                 fetch('/api/academic/sections').then(r => r.json()),
+                fetch('/api/academic/subjects').then(r => r.json()),
             ]);
 
             window.dbBranchesList = branches.data || [];
             window.dbSectionsList = sections.data || [];
+            window.dbSubjectsList = subjects.data || [];
+
+            const subjectSelect = document.getElementById('quizSubject');
+            if (subjectSelect) {
+                let html = '<option value="">-- Select Subject --</option><option value="General">General</option>';
+                (subjects.data || []).forEach(sub => {
+                    const val = sub.name;
+                    const code = sub.code ? ` (${sub.code})` : '';
+                    html += `<option value="${escapeHtml(val)}">${escapeHtml(val)}${escapeHtml(code)}</option>`;
+                });
+                subjectSelect.innerHTML = html;
+            }
 
             renderCheckboxGroup('targetDeptContainer', depts, 'target-dept', 'name');
             renderCheckboxGroup('targetCourseContainer', courses, 'target-course', 'name');
@@ -522,6 +539,19 @@
         document.getElementById('quizEndsAt').value = formatLocalDatetimeInput(q.ends_at);
 
         await loadAcademicTargets();
+
+        const subjectSelect = document.getElementById('quizSubject');
+        if (subjectSelect && q.subject) {
+            let exists = Array.from(subjectSelect.options).some(opt => opt.value === q.subject);
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = q.subject;
+                opt.textContent = q.subject;
+                subjectSelect.appendChild(opt);
+            }
+            subjectSelect.value = q.subject;
+        }
+
         setCheckboxGroupValues('target-dept', q.department_ids);
         setCheckboxGroupValues('target-course', q.course_ids);
         setCheckboxGroupValues('target-branch', q.branch_ids);
