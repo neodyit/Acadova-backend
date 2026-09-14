@@ -38,7 +38,7 @@ Route::prefix('academic')->group(function () {
 | Authenticated Routes (Require Valid Sanctum Token & Session)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:sanctum', 'validate.session'])->group(function () {
+Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
 
     // User Profile & Authentication Management
     Route::get('/me', [AuthController::class, 'me']);

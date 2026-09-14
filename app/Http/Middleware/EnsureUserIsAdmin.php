@@ -14,7 +14,9 @@ class EnsureUserIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        $user = Auth::user() ?? auth('sanctum')->user() ?? $request->user();
+
+        if (!$user) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -24,7 +26,6 @@ class EnsureUserIsAdmin
             return redirect()->route('admin.login');
         }
 
-        $user = Auth::user();
         if (strtolower($user->role) !== 'admin') {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
