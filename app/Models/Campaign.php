@@ -13,6 +13,7 @@ class Campaign extends Model
         'title',
         'badge',
         'description',
+        'image_url',
         'link_url',
         'banner_color',
         'status',

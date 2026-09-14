@@ -96,6 +96,12 @@
             </div>
 
             <div class="form-group">
+                <label>Banner Image URL / Poster Header (Optional)</label>
+                <input type="text" id="campaignImageUrl" class="form-control" placeholder="e.g. https://images.unsplash.com/... or relative media path">
+                <small style="color: var(--text-muted); font-size: 11px;">Renders high-res banner image at top of campaign card</small>
+            </div>
+
+            <div class="form-group">
                 <label style="color: #E17055; font-weight: 700;"><i class="fa-regular fa-clock"></i> Expiration End Date & Time (Optional)</label>
                 <input type="datetime-local" id="campaignEndsAt" class="form-control">
                 <small style="color: var(--text-muted); font-size: 11px;">Notice will auto-hide from dashboard after this time</small>
@@ -132,6 +138,7 @@
     function openCreateCampaignModal() {
         document.getElementById('editingCampaignId').value = '';
         document.getElementById('createCampaignForm').reset();
+        document.getElementById('campaignImageUrl').value = '';
         document.getElementById('campaignEndsAt').value = '';
         document.getElementById('campaignModalTitleText').innerText = 'Create Campaign / Notice';
         openModal('createCampaignModal');
@@ -143,6 +150,7 @@
         document.getElementById('campaignBadge').value = c.badge || '';
         document.getElementById('campaignColor').value = c.banner_color || 'amber';
         document.getElementById('campaignStatus').value = c.status || 'active';
+        document.getElementById('campaignImageUrl').value = c.image_url || '';
         document.getElementById('campaignLink').value = c.link_url || '';
         document.getElementById('campaignEndsAt').value = formatLocalDatetimeInput(c.ends_at);
         document.getElementById('campaignDescription').value = c.description || '';
@@ -160,6 +168,7 @@
             badge: document.getElementById('campaignBadge').value,
             banner_color: document.getElementById('campaignColor').value,
             status: document.getElementById('campaignStatus').value,
+            image_url: document.getElementById('campaignImageUrl').value || null,
             link_url: document.getElementById('campaignLink').value || null,
             description: document.getElementById('campaignDescription').value,
             ends_at: endsAtVal ? endsAtVal : null,
