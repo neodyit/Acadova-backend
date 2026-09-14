@@ -451,16 +451,25 @@
         document.querySelectorAll(`.${groupClass}-item:checked`).forEach(cb => {
             selected.push(isNaN(cb.value) ? cb.value : parseInt(cb.value));
         });
-        return selected.length === 0 ? ['all'] : selected;
+        return selected;
     }
 
     function setCheckboxGroupValues(groupClass, vals) {
         const allCb = document.querySelector(`.${groupClass}-all`);
         const itemCbs = document.querySelectorAll(`.${groupClass}-item`);
 
-        if (!vals || !Array.isArray(vals) || vals.length === 0 || vals.includes('all')) {
+        if (!vals || !Array.isArray(vals)) {
             if (allCb) allCb.checked = true;
             itemCbs.forEach(cb => cb.checked = true);
+            return;
+        }
+
+        if (vals.includes('all')) {
+            if (allCb) allCb.checked = true;
+            itemCbs.forEach(cb => cb.checked = true);
+        } else if (vals.length === 0) {
+            if (allCb) allCb.checked = false;
+            itemCbs.forEach(cb => cb.checked = false);
         } else {
             if (allCb) allCb.checked = false;
             itemCbs.forEach(cb => {
