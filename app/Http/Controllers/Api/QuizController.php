@@ -27,55 +27,84 @@ class QuizController extends Controller
         $user = auth('sanctum')->user() ?? $request->user();
         if ($user && strtolower($user->role) === 'student') {
             $quizzes = $quizzes->filter(function ($quiz) use ($user) {
-                // 1. Filter Department
-                if (!empty($quiz->department_ids) && is_array($quiz->department_ids) && !in_array('all', $quiz->department_ids)) {
-                    $deptMatch = false;
-                    if ($user->department_id && (in_array($user->department_id, $quiz->department_ids) || in_array((string)$user->department_id, $quiz->department_ids))) {
-                        $deptMatch = true;
-                    }
-                    if ($user->department && in_array($user->department, $quiz->department_ids)) {
-                        $deptMatch = true;
-                    }
-                    if (!$deptMatch) return false;
-                }
+                // Priority 1: Explicit Target Combinations (e.g. CSE - E, AIDS - B)
+                if (!empty($quiz->target_groups) && is_array($quiz->target_groups)) {
+                    $matchedGroup = false;
+                    foreach ($quiz->target_groups as $group) {
+                        if (!is_array($group)) continue;
 
-                // 2. Filter Course
-                if (!empty($quiz->course_ids) && is_array($quiz->course_ids) && !in_array('all', $quiz->course_ids)) {
-                    $courseMatch = false;
-                    if ($user->course_id && (in_array($user->course_id, $quiz->course_ids) || in_array((string)$user->course_id, $quiz->course_ids))) {
-                        $courseMatch = true;
-                    }
-                    if (!$courseMatch) return false;
-                }
+                        $branchOk = empty($group['branch_id']) || $group['branch_id'] === 'all' ||
+                            ((string)$user->branch_id === (string)$group['branch_id']) ||
+                            ((string)$user->branch === (string)$group['branch_id']);
 
-                // 3. Filter Branch
-                if (!empty($quiz->branch_ids) && is_array($quiz->branch_ids) && !in_array('all', $quiz->branch_ids)) {
-                    $branchMatch = false;
-                    if ($user->branch_id && (in_array($user->branch_id, $quiz->branch_ids) || in_array((string)$user->branch_id, $quiz->branch_ids))) {
-                        $branchMatch = true;
-                    }
-                    if (!$branchMatch) return false;
-                }
+                        $sectionOk = empty($group['section_id']) || $group['section_id'] === 'all' ||
+                            ((string)$user->section_id === (string)$group['section_id']) ||
+                            ((string)$user->section === (string)$group['section_id']);
 
-                // 4. Filter Section
-                if (!empty($quiz->section_ids) && is_array($quiz->section_ids) && !in_array('all', $quiz->section_ids)) {
-                    $secMatch = false;
-                    if ($user->section_id && (in_array($user->section_id, $quiz->section_ids) || in_array((string)$user->section_id, $quiz->section_ids))) {
-                        $secMatch = true;
-                    }
-                    if (!$secMatch) return false;
-                }
+                        $deptOk = empty($group['department_id']) || $group['department_id'] === 'all' ||
+                            ((string)$user->department_id === (string)$group['department_id']) ||
+                            ((string)$user->department === (string)$group['department_id']);
 
-                // 5. Filter Subject
-                if (!empty($quiz->subject_ids) && is_array($quiz->subject_ids) && !in_array('all', $quiz->subject_ids)) {
-                    $subMatch = false;
-                    if (in_array($quiz->subject, $quiz->subject_ids) || in_array((string)$quiz->subject, $quiz->subject_ids)) {
-                        $subMatch = true;
-                    } else {
-                        // Allow if no target restrictions violated
-                        $subMatch = true;
+                        $courseOk = empty($group['course_id']) || $group['course_id'] === 'all' ||
+                            ((string)$user->course_id === (string)$group['course_id']);
+
+                        if ($branchOk && $sectionOk && $deptOk && $courseOk) {
+                            $matchedGroup = true;
+                            break;
+                        }
                     }
-                    if (!$subMatch) return false;
+                    if (!$matchedGroup) return false;
+                } else {
+                    // Priority 2: Independent filter lists
+                    // 1. Filter Department
+                    if (!empty($quiz->department_ids) && is_array($quiz->department_ids) && !in_array('all', $quiz->department_ids)) {
+                        $deptMatch = false;
+                        if ($user->department_id && (in_array($user->department_id, $quiz->department_ids) || in_array((string)$user->department_id, $quiz->department_ids))) {
+                            $deptMatch = true;
+                        }
+                        if ($user->department && in_array($user->department, $quiz->department_ids)) {
+                            $deptMatch = true;
+                        }
+                        if (!$deptMatch) return false;
+                    }
+
+                    // 2. Filter Course
+                    if (!empty($quiz->course_ids) && is_array($quiz->course_ids) && !in_array('all', $quiz->course_ids)) {
+                        $courseMatch = false;
+                        if ($user->course_id && (in_array($user->course_id, $quiz->course_ids) || in_array((string)$user->course_id, $quiz->course_ids))) {
+                            $courseMatch = true;
+                        }
+                        if (!$courseMatch) return false;
+                    }
+
+                    // 3. Filter Branch
+                    if (!empty($quiz->branch_ids) && is_array($quiz->branch_ids) && !in_array('all', $quiz->branch_ids)) {
+                        $branchMatch = false;
+                        if ($user->branch_id && (in_array($user->branch_id, $quiz->branch_ids) || in_array((string)$user->branch_id, $quiz->branch_ids))) {
+                            $branchMatch = true;
+                        }
+                        if (!$branchMatch) return false;
+                    }
+
+                    // 4. Filter Section
+                    if (!empty($quiz->section_ids) && is_array($quiz->section_ids) && !in_array('all', $quiz->section_ids)) {
+                        $secMatch = false;
+                        if ($user->section_id && (in_array($user->section_id, $quiz->section_ids) || in_array((string)$user->section_id, $quiz->section_ids))) {
+                            $secMatch = true;
+                        }
+                        if (!$secMatch) return false;
+                    }
+
+                    // 5. Filter Subject
+                    if (!empty($quiz->subject_ids) && is_array($quiz->subject_ids) && !in_array('all', $quiz->subject_ids)) {
+                        $subMatch = false;
+                        if (in_array($quiz->subject, $quiz->subject_ids) || in_array((string)$quiz->subject, $quiz->subject_ids)) {
+                            $subMatch = true;
+                        } else {
+                            $subMatch = true;
+                        }
+                        if (!$subMatch) return false;
+                    }
                 }
 
                 return true;
@@ -128,6 +157,7 @@ class QuizController extends Controller
             'branch_ids' => 'nullable|array',
             'section_ids' => 'nullable|array',
             'subject_ids' => 'nullable|array',
+            'target_groups' => 'nullable|array',
         ]);
 
         $quiz = Quiz::create([
@@ -145,6 +175,7 @@ class QuizController extends Controller
             'branch_ids' => $validated['branch_ids'] ?? null,
             'section_ids' => $validated['section_ids'] ?? null,
             'subject_ids' => $validated['subject_ids'] ?? null,
+            'target_groups' => $validated['target_groups'] ?? null,
         ]);
 
         return response()->json([
@@ -179,6 +210,7 @@ class QuizController extends Controller
             'branch_ids' => 'nullable|array',
             'section_ids' => 'nullable|array',
             'subject_ids' => 'nullable|array',
+            'target_groups' => 'nullable|array',
         ]);
 
         if (isset($validated['starts_at']) && !isset($validated['scheduled_at'])) {

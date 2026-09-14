@@ -136,6 +136,22 @@
                 </div>
             </div>
 
+            <!-- Explicit Target Groups / Branch & Section Pairs -->
+            <div style="background: #F0FDF4; padding: 16px; border-radius: 14px; border: 1px solid #BBF7D0; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="font-weight: 800; font-size: 14px; color: #166534; display: flex; align-items: center; gap: 8px; margin: 0;">
+                        <i class="fa-solid fa-link"></i> Specific Target Pairs (Branch + Section Pairs)
+                    </label>
+                    <button type="button" class="btn btn-secondary" onclick="addTargetPairRow()" style="font-size: 12px; padding: 4px 10px;">
+                        <i class="fa-solid fa-plus"></i> Add Specific Pair
+                    </button>
+                </div>
+                <p style="font-size: 11.5px; color: #15803D; margin-bottom: 10px;">
+                    Use this to strictly match specific pairs (e.g. <b>CSE - Section E</b> AND <b>AIDS - Section B</b>) without cross-matching CSE to B or AIDS to E.
+                </p>
+                <div id="targetPairsContainer"></div>
+            </div>
+
             <div class="form-row" id="scheduleInputsRow" style="display: none; background: #F8FAFC; padding: 14px; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 16px;">
                 <div class="form-group">
                     <label style="color: var(--primary); font-weight: 700;">Quiz Start Date & Time</label>
@@ -262,6 +278,9 @@
     window.currentQuestions = [];
     window.academicLoaded = false;
 
+    window.dbBranchesList = [];
+    window.dbSectionsList = [];
+
     async function loadAcademicTargets() {
         if (window.academicLoaded) return;
         try {
@@ -272,6 +291,9 @@
                 fetch('/api/academic/sections').then(r => r.json()),
             ]);
 
+            window.dbBranchesList = branches.data || [];
+            window.dbSectionsList = sections.data || [];
+
             renderCheckboxGroup('targetDeptContainer', depts, 'target-dept', 'name');
             renderCheckboxGroup('targetCourseContainer', courses, 'target-course', 'name');
             renderCheckboxGroup('targetBranchContainer', branches, 'target-branch', 'name');
@@ -279,6 +301,74 @@
 
             window.academicLoaded = true;
         } catch (e) {}
+    }
+
+    function addTargetPairRow(branchVal = '', sectionVal = '') {
+        const container = document.getElementById('targetPairsContainer');
+        if (!container) return;
+
+        const rowId = 'pair_row_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        const branchesOptions = (window.dbBranchesList || []).map(b => {
+            const val = b.name;
+            const label = b.name + (b.code ? ` (${b.code})` : '');
+            return `<option value="${escapeHtml(val)}" ${val === branchVal ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+        }).join('');
+
+        const sectionsOptions = (window.dbSectionsList || []).map(s => {
+            const val = s.name;
+            return `<option value="${escapeHtml(val)}" ${val === sectionVal ? 'selected' : ''}>Section ${escapeHtml(val)}</option>`;
+        }).join('');
+
+        const html = `
+            <div id="${rowId}" class="target-pair-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; background: white; padding: 8px 12px; border-radius: 10px; border: 1px solid #CBD5E1;">
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: 700; color: #475569;">Target Branch</label>
+                    <select class="form-control pair-branch-select" style="font-size: 12px; padding: 6px;">
+                        <option value="">-- Any Branch --</option>
+                        ${branchesOptions}
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: 700; color: #475569;">Target Section</label>
+                    <select class="form-control pair-section-select" style="font-size: 12px; padding: 6px;">
+                        <option value="">-- Any Section --</option>
+                        ${sectionsOptions}
+                    </select>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="removeTargetPairRow('${rowId}')" style="padding: 6px 10px; margin-top: 16px; font-size: 12px;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function removeTargetPairRow(rowId) {
+        const el = document.getElementById(rowId);
+        if (el) el.remove();
+    }
+
+    function getTargetPairsValues() {
+        const pairs = [];
+        document.querySelectorAll('.target-pair-row').forEach(row => {
+            const b = row.querySelector('.pair-branch-select').value;
+            const s = row.querySelector('.pair-section-select').value;
+            if (b || s) {
+                pairs.push({ branch_id: b || 'all', section_id: s || 'all' });
+            }
+        });
+        return pairs.length === 0 ? null : pairs;
+    }
+
+    function renderTargetPairs(groups) {
+        const container = document.getElementById('targetPairsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        if (Array.isArray(groups) && groups.length > 0) {
+            groups.forEach(g => {
+                addTargetPairRow(g.branch_id || '', g.section_id || '');
+            });
+        }
     }
 
     function renderCheckboxGroup(containerId, items, groupClass, labelKey) {
@@ -318,6 +408,8 @@
         ['target-dept', 'target-course', 'target-branch', 'target-section'].forEach(groupClass => {
             setCheckboxGroupValues(groupClass, ['all']);
         });
+        const container = document.getElementById('targetPairsContainer');
+        if (container) container.innerHTML = '';
     }
 
     function getCheckboxGroupValues(groupClass) {
@@ -395,6 +487,7 @@
         setCheckboxGroupValues('target-course', q.course_ids);
         setCheckboxGroupValues('target-branch', q.branch_ids);
         setCheckboxGroupValues('target-section', q.section_ids);
+        renderTargetPairs(q.target_groups);
 
         toggleScheduleInputs();
         document.getElementById('quizModalTitleText').innerText = 'Edit Quiz Details';
@@ -421,6 +514,7 @@
             course_ids: getCheckboxGroupValues('target-course'),
             branch_ids: getCheckboxGroupValues('target-branch'),
             section_ids: getCheckboxGroupValues('target-section'),
+            target_groups: getTargetPairsValues(),
         };
 
         const url = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';

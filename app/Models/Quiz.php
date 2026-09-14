@@ -23,6 +23,7 @@ class Quiz extends Model
         'branch_ids',
         'section_ids',
         'subject_ids',
+        'target_groups',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class Quiz extends Model
         'branch_ids' => 'array',
         'section_ids' => 'array',
         'subject_ids' => 'array',
+        'target_groups' => 'array',
     ];
 
     public function questions(): HasMany
