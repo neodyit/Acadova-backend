@@ -55,7 +55,14 @@ class QuizController extends Controller
                         $courseOk = empty($group['course_id']) || $group['course_id'] === 'all' ||
                             ((string)$user->course_id === (string)$group['course_id']);
 
-                        if ($branchOk && $sectionOk && $deptOk && $courseOk) {
+                        $userSemDigits = preg_replace('/[^0-9]/', '', (string)$user->semester);
+                        $groupSemDigits = preg_replace('/[^0-9]/', '', (string)($group['semester'] ?? ''));
+
+                        $semOk = empty($group['semester']) || $group['semester'] === 'all' ||
+                            ($userSemDigits !== '' && $groupSemDigits !== '' && $userSemDigits === $groupSemDigits) ||
+                            ((string)$user->semester === (string)$group['semester']);
+
+                        if ($branchOk && $sectionOk && $deptOk && $courseOk && $semOk) {
                             $matchedGroup = true;
                             break;
                         }

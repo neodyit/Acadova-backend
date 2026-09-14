@@ -298,7 +298,7 @@
         } catch (e) {}
     }
 
-    function addTargetPairRow(branchVal = '', sectionsVal = ['all']) {
+    function addTargetPairRow(branchVal = '', sectionsVal = ['all'], semesterVal = 'all') {
         const container = document.getElementById('targetPairsContainer');
         if (!container) return;
 
@@ -321,6 +321,13 @@
             return `<option value="${escapeHtml(val)}" ${val === branchVal ? 'selected' : ''}>${escapeHtml(label)}</option>`;
         }).join('');
 
+        let semOptions = '<option value="all" ' + (semesterVal === 'all' || !semesterVal ? 'selected' : '') + '>All Semesters</option>';
+        for (let i = 1; i <= 8; i++) {
+            const sVal = String(i);
+            const isSel = String(semesterVal) === sVal || String(semesterVal) === ('Sem ' + sVal);
+            semOptions += `<option value="${sVal}" ${isSel ? 'selected' : ''}>Semester ${i}</option>`;
+        }
+
         const sectionsCheckboxes = (window.dbSectionsList || []).map(s => {
             const val = s.name;
             const isChecked = isAllSec || secList.includes(val) || secList.includes(String(val));
@@ -334,11 +341,17 @@
         const html = `
             <div id="${rowId}" class="target-pair-row" style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #CBD5E1; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
-                    <div style="flex: 1;">
+                    <div style="flex: 2;">
                         <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">Target Branch</label>
                         <select class="form-control pair-branch-select" style="font-size: 12.5px; padding: 6px 10px; font-weight: 600;">
                             <option value="">-- Select Branch --</option>
                             ${branchesOptions}
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">Semester</label>
+                        <select class="form-control pair-sem-select" style="font-size: 12.5px; padding: 6px 10px; font-weight: 600;">
+                            ${semOptions}
                         </select>
                     </div>
                     <button type="button" class="btn btn-danger" onclick="removeTargetPairRow('${rowId}')" style="padding: 6px 10px; font-size: 11px; margin-top: 18px;">
@@ -384,6 +397,7 @@
         const pairs = [];
         document.querySelectorAll('.target-pair-row').forEach(row => {
             const b = row.querySelector('.pair-branch-select').value;
+            const sem = row.querySelector('.pair-sem-select')?.value || 'all';
             const allCb = row.querySelector('.pair-sec-all');
             let secVals = ['all'];
 
@@ -398,6 +412,7 @@
             if (b) {
                 pairs.push({
                     branch_id: b,
+                    semester: sem,
                     section_ids: secVals,
                     section_id: secVals.includes('all') ? 'all' : (secVals[0] || 'all')
                 });
@@ -413,7 +428,8 @@
         if (Array.isArray(groups) && groups.length > 0) {
             groups.forEach(g => {
                 const secs = g.section_ids || (g.section_id ? [g.section_id] : ['all']);
-                addTargetPairRow(g.branch_id || '', secs);
+                const sem = g.semester || 'all';
+                addTargetPairRow(g.branch_id || '', secs, sem);
             });
         }
     }
