@@ -114,7 +114,6 @@
                         </div>
                     </div>
                 </div>
-                </div>
             </div>
 
             <!-- Explicit Target Groups / Branch & Section Pairs -->
