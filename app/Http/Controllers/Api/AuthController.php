@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
@@ -369,5 +372,160 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Logged out successfully',
         ], 200);
+    }
+
+    /**
+     * Send Password Reset Link with Rate Limiting (Hostinger 100 emails / 2h max)
+     */
+    public function sendPasswordResetLink(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please provide a valid email address.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $email = strtolower(trim($request->email));
+
+        // 1. Check if user exists and is Admin or Faculty (or Student)
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            // For security, return success message without revealing user existence
+            return response()->json([
+                'success' => true,
+                'message' => 'If an account exists with this email, a password reset link has been sent.',
+            ]);
+        }
+
+        // 2. Strict Rate Limiting Check (Max 3 requests per 10 minutes per email / IP to protect Hostinger SMTP 100 mails/2h limit)
+        $emailThrottleKey = 'pwd_reset_email_' . md5($email);
+        $ipThrottleKey = 'pwd_reset_ip_' . $request->ip();
+
+        if (Cache::has($emailThrottleKey)) {
+            $secondsRemaining = Cache::get($emailThrottleKey) - time();
+            if ($secondsRemaining > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Too many password reset requests. Please wait $secondsRemaining seconds before trying again.",
+                    'retry_after' => $secondsRemaining,
+                ], 429);
+            }
+        }
+
+        // 3. Generate secure random reset token (64 hex characters)
+        $token = Str::random(64);
+
+        // Store in DB password_reset_tokens
+        \DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $email],
+            [
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]
+        );
+
+        // Set Rate Limit cooldown (120 seconds per email)
+        Cache::put($emailThrottleKey, time() + 120, 120);
+
+        // Construct Universal Link & Web Reset Link
+        $baseUrl = config('app.url', 'https://acadova.neodyit.com');
+        $resetUrl = "$baseUrl/reset-password?token=$token&email=" . urlencode($email);
+        $deepLink = "acadova://reset-password?token=$token&email=" . urlencode($email);
+
+        // 4. Send Email via SMTP with Exception handling
+        try {
+            Mail::to($email)->send(new \App\Mail\PasswordResetMail($user->name, $resetUrl, $deepLink));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset link sent to your email address.',
+                'cooldown_seconds' => 120,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('SMTP Password Reset Email Error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to dispatch email due to mail server limits. Please try again later or contact administrator.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
+    }
+
+    /**
+     * Complete Password Reset with Token Validation
+     */
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'token' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $email = strtolower(trim($request->email));
+        $token = $request->token;
+
+        $record = \DB::table('password_reset_tokens')->where('email', $email)->first();
+
+        if (!$record) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired password reset token.',
+            ], 400);
+        }
+
+        // Token lifetime: 60 minutes
+        if (now()->diffInMinutes($record->created_at) > 60) {
+            \DB::table('password_reset_tokens')->where('email', $email)->delete();
+            return response()->json([
+                'success' => false,
+                'message' => 'Password reset token has expired. Please request a new link.',
+            ], 400);
+        }
+
+        if (!Hash::check($token, $record->token)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid password reset token.',
+            ], 400);
+        }
+
+        // Update User Password
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User account not found.',
+            ], 444);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Delete used token
+        \DB::table('password_reset_tokens')->where('email', $email)->delete();
+
+        // Revoke all existing tokens for security after password change
+        $user->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password has been reset successfully! You can now log in with your new password.',
+        ]);
     }
 }

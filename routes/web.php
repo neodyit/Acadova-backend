@@ -9,8 +9,11 @@ Route::get('/login', [AdminWebController::class, 'showLogin'])->name('login');
 Route::post('/neodyit/login', [AdminWebController::class, 'processLogin'])->name('admin.login.process');
 Route::post('/neodyit/logout', [AdminWebController::class, 'logout'])->name('admin.logout');
 
-// Root Landing Page
+// Root Landing Page & Password Reset Page
 Route::get('/', [AdminWebController::class, 'landingPage'])->name('landing');
+Route::get('/reset-password', function () {
+    return view('reset_password');
+})->name('password.reset');
 
 Route::get('/neodyit', function () {
     return redirect()->route('admin.dashboard');
