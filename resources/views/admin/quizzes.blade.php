@@ -471,13 +471,15 @@
         return selected;
     }
 
-    function setCheckboxGroupValues(groupClass, vals) {
+    function setCheckboxGroupValues(groupClass, vals, targetGroups = null) {
         const allCb = document.querySelector(`.${groupClass}-all`);
         const itemCbs = document.querySelectorAll(`.${groupClass}-item`);
 
         if (!vals || !Array.isArray(vals)) {
-            if (allCb) allCb.checked = true;
-            itemCbs.forEach(cb => cb.checked = true);
+            // If specific target groups exist, don't auto-check ALL general scope checkboxes
+            const hasTargetGroups = Array.isArray(targetGroups) && targetGroups.length > 0;
+            if (allCb) allCb.checked = !hasTargetGroups;
+            itemCbs.forEach(cb => cb.checked = !hasTargetGroups);
             return;
         }
 
@@ -552,10 +554,10 @@
             subjectSelect.value = q.subject;
         }
 
-        setCheckboxGroupValues('target-dept', q.department_ids);
-        setCheckboxGroupValues('target-course', q.course_ids);
-        setCheckboxGroupValues('target-branch', q.branch_ids);
-        setCheckboxGroupValues('target-section', q.section_ids);
+        setCheckboxGroupValues('target-dept', q.department_ids, q.target_groups);
+        setCheckboxGroupValues('target-course', q.course_ids, q.target_groups);
+        setCheckboxGroupValues('target-branch', q.branch_ids, q.target_groups);
+        setCheckboxGroupValues('target-section', q.section_ids, q.target_groups);
         renderTargetPairs(q.target_groups);
 
         toggleScheduleInputs();
