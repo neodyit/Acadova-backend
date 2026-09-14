@@ -89,41 +89,49 @@
                 </div>
             </div>
 
-            <!-- Target Student Scope Selection (All / Multiple) -->
+            <!-- Target Student Scope Selection (All / Multiple Checkboxes) -->
             <div style="background: #F8FAFC; padding: 16px; border-radius: 14px; border: 1px solid #E2E8F0; margin-bottom: 16px;">
-                <label style="font-weight: 800; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-                    <i class="fa-solid fa-users-viewfinder"></i> Target Student Scope (Select Database Academic Criteria)
+                <label style="font-weight: 800; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <i class="fa-solid fa-users-viewfinder"></i> Target Student Scope (Checkboxes)
                 </label>
                 <div class="form-row">
                     <div class="form-group">
                         <label style="font-size: 12px; font-weight: 700;">Target Departments</label>
-                        <select id="quizTargetDepts" class="form-control" multiple style="height: 80px;">
-                            <option value="all" selected>-- ALL DEPARTMENTS --</option>
-                        </select>
-                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 120px; overflow-y: auto;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; margin-bottom: 6px; color: var(--primary); border-bottom: 1px solid #EDF2F7; padding-bottom: 4px;">
+                                <input type="checkbox" class="target-dept-all" checked onchange="toggleAllCheckboxes('target-dept', this.checked)"> -- ALL DEPARTMENTS --
+                            </label>
+                            <div id="targetDeptContainer"></div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label style="font-size: 12px; font-weight: 700;">Target Courses</label>
-                        <select id="quizTargetCourses" class="form-control" multiple style="height: 80px;">
-                            <option value="all" selected>-- ALL COURSES --</option>
-                        </select>
-                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 120px; overflow-y: auto;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; margin-bottom: 6px; color: var(--primary); border-bottom: 1px solid #EDF2F7; padding-bottom: 4px;">
+                                <input type="checkbox" class="target-course-all" checked onchange="toggleAllCheckboxes('target-course', this.checked)"> -- ALL COURSES --
+                            </label>
+                            <div id="targetCourseContainer"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label style="font-size: 12px; font-weight: 700;">Target Branches</label>
-                        <select id="quizTargetBranches" class="form-control" multiple style="height: 80px;">
-                            <option value="all" selected>-- ALL BRANCHES --</option>
-                        </select>
-                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 120px; overflow-y: auto;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; margin-bottom: 6px; color: var(--primary); border-bottom: 1px solid #EDF2F7; padding-bottom: 4px;">
+                                <input type="checkbox" class="target-branch-all" checked onchange="toggleAllCheckboxes('target-branch', this.checked)"> -- ALL BRANCHES --
+                            </label>
+                            <div id="targetBranchContainer"></div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label style="font-size: 12px; font-weight: 700;">Target Sections</label>
-                        <select id="quizTargetSections" class="form-control" multiple style="height: 80px;">
-                            <option value="all" selected>-- ALL SECTIONS --</option>
-                        </select>
-                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 120px; overflow-y: auto;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; margin-bottom: 6px; color: var(--primary); border-bottom: 1px solid #EDF2F7; padding-bottom: 4px;">
+                                <input type="checkbox" class="target-section-all" checked onchange="toggleAllCheckboxes('target-section', this.checked)"> -- ALL SECTIONS --
+                            </label>
+                            <div id="targetSectionContainer"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -264,54 +272,81 @@
                 fetch('/api/academic/sections').then(r => r.json()),
             ]);
 
-            const fillSelect = (elemId, items, labelKey) => {
-                const select = document.getElementById(elemId);
-                select.innerHTML = '';
-                const allOpt = document.createElement('option');
-                allOpt.value = 'all';
-                allOpt.innerText = '-- ALL --';
-                allOpt.selected = true;
-                select.appendChild(allOpt);
-
-                (items.data || []).forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.id;
-                    opt.innerText = item[labelKey] + (item.code ? ` (${item.code})` : '');
-                    select.appendChild(opt);
-                });
-
-                select.selectedIndex = 0;
-            };
-
-            fillSelect('quizTargetDepts', depts, 'name');
-            fillSelect('quizTargetCourses', courses, 'name');
-            fillSelect('quizTargetBranches', branches, 'name');
-            fillSelect('quizTargetSections', sections, 'name');
+            renderCheckboxGroup('targetDeptContainer', depts, 'target-dept', 'name');
+            renderCheckboxGroup('targetCourseContainer', courses, 'target-course', 'name');
+            renderCheckboxGroup('targetBranchContainer', branches, 'target-branch', 'name');
+            renderCheckboxGroup('targetSectionContainer', sections, 'target-section', 'name');
 
             window.academicLoaded = true;
         } catch (e) {}
     }
 
-    function resetTargetSelects() {
-        ['quizTargetDepts', 'quizTargetCourses', 'quizTargetBranches', 'quizTargetSections'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                Array.from(el.options).forEach(opt => opt.selected = (opt.value === 'all'));
-                el.selectedIndex = 0;
-            }
+    function renderCheckboxGroup(containerId, items, groupClass, labelKey) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const list = items.data || [];
+        if (list.length === 0) {
+            container.innerHTML = '<div style="font-size: 11px; color: var(--text-muted);">No entries in database</div>';
+            return;
+        }
+        container.innerHTML = list.map(item => {
+            const val = item.id;
+            const text = item[labelKey] + (item.code ? ` (${item.code})` : '');
+            return `
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 4px; font-weight: 500; cursor: pointer;">
+                    <input type="checkbox" class="${groupClass}-item" value="${val}" checked onchange="onItemCheckboxChange('${groupClass}')"> ${escapeHtml(text)}
+                </label>
+            `;
+        }).join('');
+    }
+
+    function toggleAllCheckboxes(groupClass, checked) {
+        document.querySelectorAll(`.${groupClass}-item`).forEach(cb => {
+            cb.checked = checked;
         });
     }
 
-    function setSelectValues(elemId, vals) {
-        const select = document.getElementById(elemId);
-        if (!select) return;
+    function onItemCheckboxChange(groupClass) {
+        const allCb = document.querySelector(`.${groupClass}-all`);
+        const itemCbs = Array.from(document.querySelectorAll(`.${groupClass}-item`));
+        if (allCb) {
+            allCb.checked = itemCbs.length > 0 && itemCbs.every(cb => cb.checked);
+        }
+    }
+
+    function resetTargetSelects() {
+        ['target-dept', 'target-course', 'target-branch', 'target-section'].forEach(groupClass => {
+            setCheckboxGroupValues(groupClass, ['all']);
+        });
+    }
+
+    function getCheckboxGroupValues(groupClass) {
+        const allCb = document.querySelector(`.${groupClass}-all`);
+        if (allCb && allCb.checked) {
+            return ['all'];
+        }
+        const selected = [];
+        document.querySelectorAll(`.${groupClass}-item:checked`).forEach(cb => {
+            selected.push(isNaN(cb.value) ? cb.value : parseInt(cb.value));
+        });
+        return selected.length === 0 ? ['all'] : selected;
+    }
+
+    function setCheckboxGroupValues(groupClass, vals) {
+        const allCb = document.querySelector(`.${groupClass}-all`);
+        const itemCbs = document.querySelectorAll(`.${groupClass}-item`);
+
         if (!vals || !Array.isArray(vals) || vals.length === 0 || vals.includes('all')) {
-            Array.from(select.options).forEach(opt => opt.selected = (opt.value === 'all'));
-            select.selectedIndex = 0;
+            if (allCb) allCb.checked = true;
+            itemCbs.forEach(cb => cb.checked = true);
         } else {
-            Array.from(select.options).forEach(opt => {
-                opt.selected = vals.includes(opt.value) || vals.includes(parseInt(opt.value)) || vals.includes(String(opt.value));
+            if (allCb) allCb.checked = false;
+            itemCbs.forEach(cb => {
+                cb.checked = vals.includes(cb.value) || vals.includes(parseInt(cb.value)) || vals.includes(String(cb.value));
             });
+            if (itemCbs.length > 0 && Array.from(itemCbs).every(cb => cb.checked)) {
+                if (allCb) allCb.checked = true;
+            }
         }
     }
 
@@ -356,20 +391,14 @@
         document.getElementById('quizEndsAt').value = formatLocalDatetimeInput(q.ends_at);
 
         await loadAcademicTargets();
-        setSelectValues('quizTargetDepts', q.department_ids);
-        setSelectValues('quizTargetCourses', q.course_ids);
-        setSelectValues('quizTargetBranches', q.branch_ids);
-        setSelectValues('quizTargetSections', q.section_ids);
+        setCheckboxGroupValues('target-dept', q.department_ids);
+        setCheckboxGroupValues('target-course', q.course_ids);
+        setCheckboxGroupValues('target-branch', q.branch_ids);
+        setCheckboxGroupValues('target-section', q.section_ids);
 
         toggleScheduleInputs();
         document.getElementById('quizModalTitleText').innerText = 'Edit Quiz Details';
         openModal('createQuizModal');
-    }
-
-    function getMultiSelectValues(elemId) {
-        const select = document.getElementById(elemId);
-        const vals = Array.from(select.selectedOptions).map(opt => opt.value);
-        return (vals.length === 0 || vals.includes('all')) ? ['all'] : vals.map(v => isNaN(v) ? v : parseInt(v));
     }
 
     async function handleSaveQuiz(e) {
@@ -388,10 +417,10 @@
             starts_at: startsAtVal ? startsAtVal : null,
             scheduled_at: startsAtVal ? startsAtVal : null,
             ends_at: endsAtVal ? endsAtVal : null,
-            department_ids: getMultiSelectValues('quizTargetDepts'),
-            course_ids: getMultiSelectValues('quizTargetCourses'),
-            branch_ids: getMultiSelectValues('quizTargetBranches'),
-            section_ids: getMultiSelectValues('quizTargetSections'),
+            department_ids: getCheckboxGroupValues('target-dept'),
+            course_ids: getCheckboxGroupValues('target-course'),
+            branch_ids: getCheckboxGroupValues('target-branch'),
+            section_ids: getCheckboxGroupValues('target-section'),
         };
 
         const url = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';
