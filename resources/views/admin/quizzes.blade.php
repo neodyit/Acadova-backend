@@ -266,13 +266,21 @@
 
             const fillSelect = (elemId, items, labelKey) => {
                 const select = document.getElementById(elemId);
-                select.innerHTML = '<option value="all" selected>-- ALL --</option>';
+                select.innerHTML = '';
+                const allOpt = document.createElement('option');
+                allOpt.value = 'all';
+                allOpt.innerText = '-- ALL --';
+                allOpt.selected = true;
+                select.appendChild(allOpt);
+
                 (items.data || []).forEach(item => {
                     const opt = document.createElement('option');
                     opt.value = item.id;
                     opt.innerText = item[labelKey] + (item.code ? ` (${item.code})` : '');
                     select.appendChild(opt);
                 });
+
+                select.selectedIndex = 0;
             };
 
             fillSelect('quizTargetDepts', depts, 'name');
@@ -284,17 +292,41 @@
         } catch (e) {}
     }
 
+    function resetTargetSelects() {
+        ['quizTargetDepts', 'quizTargetCourses', 'quizTargetBranches', 'quizTargetSections'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                Array.from(el.options).forEach(opt => opt.selected = (opt.value === 'all'));
+                el.selectedIndex = 0;
+            }
+        });
+    }
+
+    function setSelectValues(elemId, vals) {
+        const select = document.getElementById(elemId);
+        if (!select) return;
+        if (!vals || !Array.isArray(vals) || vals.length === 0 || vals.includes('all')) {
+            Array.from(select.options).forEach(opt => opt.selected = (opt.value === 'all'));
+            select.selectedIndex = 0;
+        } else {
+            Array.from(select.options).forEach(opt => {
+                opt.selected = vals.includes(opt.value) || vals.includes(parseInt(opt.value)) || vals.includes(String(opt.value));
+            });
+        }
+    }
+
     function toggleScheduleInputs() {
         const status = document.getElementById('quizStatus').value;
         const row = document.getElementById('scheduleInputsRow');
         row.style.display = (status === 'upcoming' || status === 'active') ? 'flex' : 'none';
     }
 
-    function openCreateQuizModal() {
+    async function openCreateQuizModal() {
         document.getElementById('editingQuizId').value = '';
         document.getElementById('createQuizForm').reset();
         document.getElementById('quizModalTitleText').innerText = 'Create New Quiz';
-        loadAcademicTargets();
+        await loadAcademicTargets();
+        resetTargetSelects();
         toggleScheduleInputs();
         openModal('createQuizModal');
     }
@@ -311,7 +343,7 @@
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
-    function editQuiz(q) {
+    async function editQuiz(q) {
         document.getElementById('editingQuizId').value = q.id;
         document.getElementById('quizTitle').value = q.title || '';
         document.getElementById('quizSubject').value = q.subject || '';
@@ -323,7 +355,12 @@
         document.getElementById('quizStartsAt').value = formatLocalDatetimeInput(q.starts_at || q.scheduled_at);
         document.getElementById('quizEndsAt').value = formatLocalDatetimeInput(q.ends_at);
 
-        loadAcademicTargets();
+        await loadAcademicTargets();
+        setSelectValues('quizTargetDepts', q.department_ids);
+        setSelectValues('quizTargetCourses', q.course_ids);
+        setSelectValues('quizTargetBranches', q.branch_ids);
+        setSelectValues('quizTargetSections', q.section_ids);
+
         toggleScheduleInputs();
         document.getElementById('quizModalTitleText').innerText = 'Edit Quiz Details';
         openModal('createQuizModal');
