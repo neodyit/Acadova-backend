@@ -402,20 +402,7 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // 2. Strict Rate Limiting Check (Max 3 requests per 10 minutes per email / IP to protect Hostinger SMTP 100 mails/2h limit)
-        $emailThrottleKey = 'pwd_reset_email_' . md5($email);
-        $ipThrottleKey = 'pwd_reset_ip_' . $request->ip();
-
-        if (Cache::has($emailThrottleKey)) {
-            $secondsRemaining = Cache::get($emailThrottleKey) - time();
-            if ($secondsRemaining > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Too many password reset requests. Please wait $secondsRemaining seconds before trying again.",
-                    'retry_after' => $secondsRemaining,
-                ], 429);
-            }
-        }
+        // 2. Cooldown check disabled temporarily for testing
 
         // 3. Generate secure random reset token (64 hex characters)
         $token = Str::random(64);
@@ -429,15 +416,12 @@ class AuthController extends Controller
             ]
         );
 
-        // Set Rate Limit cooldown (120 seconds per email)
-        Cache::put($emailThrottleKey, time() + 120, 120);
-
         // Construct Universal Link & Web Reset Link
         $baseUrl = config('app.url', 'https://acadova.neodyit.com');
         $resetUrl = "$baseUrl/reset-password?token=$token&email=" . urlencode($email);
         $deepLink = "acadova://reset-password?token=$token&email=" . urlencode($email);
 
-        // Force Hostinger / dynamic .env SMTP configuration explicitly to prevent cached env issues
+        // Force Hostinger / dynamic .env SMTP configuration explicitly
         config([
             'mail.default' => env('MAIL_MAILER', 'smtp'),
             'mail.mailers.smtp.host' => env('MAIL_HOST', 'smtp.hostinger.com'),
@@ -457,15 +441,15 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Password reset link sent to your email address.',
-                'cooldown_seconds' => 120,
+                'cooldown_seconds' => 0,
             ]);
         } catch (\Throwable $e) {
             \Log::error('SMTP Password Reset Email Error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to dispatch email due to mail server limits. Please try again later or contact administrator.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'message' => 'Email dispatch failed: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
