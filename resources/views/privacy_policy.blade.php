@@ -66,6 +66,17 @@
             color: var(--text-main);
         }
 
+        .brand-logo-img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: white;
+            padding: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+        }
+
         .brand-icon {
             width: 42px;
             height: 42px;
@@ -352,7 +363,8 @@
     <header>
         <div class="nav-container">
             <a href="/" class="brand-logo">
-                <div class="brand-icon">A</div>
+                <img src="/logo.png" alt="Acadova Logo" class="brand-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="brand-icon" style="display: none;">A</div>
                 <div>
                     <div class="brand-name">Acadova</div>
                     <div class="brand-subtitle">By Neody IT</div>
@@ -368,8 +380,13 @@
     <!-- Hero Header -->
     <div class="hero-section">
         <div class="hero-card">
-            <span class="hero-badge">Official Policy</span>
-            <h1 class="hero-title">Privacy Policy</h1>
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+                <img src="/logo.png" alt="Acadova Logo" style="width: 56px; height: 56px; object-fit: contain; background: white; padding: 6px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div>
+                    <span class="hero-badge">Official Policy</span>
+                    <h1 class="hero-title" style="margin-bottom: 0;">Privacy Policy</h1>
+                </div>
+            </div>
             <div class="hero-meta">
                 Effective Date: <strong>September 15, 2026</strong> &bull; Last Updated: <strong>September 15, 2026</strong>
             </div>
