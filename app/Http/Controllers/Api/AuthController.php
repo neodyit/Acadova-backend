@@ -212,13 +212,25 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'old_password' => 'nullable|string',
-            'new_password' => 'required|string|min:6|confirmed',
+            'new_password' => [
+                'required',
+                'string',
+                'min:6',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[!@#$%^&*(),.?":{}|<>]/',
+                'confirmed',
+            ],
+        ], [
+            'new_password.min' => 'Password must be at least 6 characters long.',
+            'new_password.regex' => 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation errors occurred',
+                'message' => $validator->errors()->first() ?? 'Validation errors occurred',
                 'errors' => $validator->errors()
             ], 422);
         }
