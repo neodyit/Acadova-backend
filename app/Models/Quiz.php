@@ -18,12 +18,22 @@ class Quiz extends Model
         'ends_at',
         'instructor',
         'passing_marks',
+        'department_ids',
+        'course_ids',
+        'branch_ids',
+        'section_ids',
+        'subject_ids',
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'department_ids' => 'array',
+        'course_ids' => 'array',
+        'branch_ids' => 'array',
+        'section_ids' => 'array',
+        'subject_ids' => 'array',
     ];
 
     public function questions(): HasMany

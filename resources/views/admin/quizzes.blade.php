@@ -89,6 +89,45 @@
                 </div>
             </div>
 
+            <!-- Target Student Scope Selection (All / Multiple) -->
+            <div style="background: #F8FAFC; padding: 16px; border-radius: 14px; border: 1px solid #E2E8F0; margin-bottom: 16px;">
+                <label style="font-weight: 800; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                    <i class="fa-solid fa-users-viewfinder"></i> Target Student Scope (Select Database Academic Criteria)
+                </label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="font-size: 12px; font-weight: 700;">Target Departments</label>
+                        <select id="quizTargetDepts" class="form-control" multiple style="height: 80px;">
+                            <option value="all" selected>-- ALL DEPARTMENTS --</option>
+                        </select>
+                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px; font-weight: 700;">Target Courses</label>
+                        <select id="quizTargetCourses" class="form-control" multiple style="height: 80px;">
+                            <option value="all" selected>-- ALL COURSES --</option>
+                        </select>
+                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="font-size: 12px; font-weight: 700;">Target Branches</label>
+                        <select id="quizTargetBranches" class="form-control" multiple style="height: 80px;">
+                            <option value="all" selected>-- ALL BRANCHES --</option>
+                        </select>
+                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px; font-weight: 700;">Target Sections</label>
+                        <select id="quizTargetSections" class="form-control" multiple style="height: 80px;">
+                            <option value="all" selected>-- ALL SECTIONS --</option>
+                        </select>
+                        <small style="font-size: 11px; color: var(--text-muted);">Hold Ctrl/Cmd to select multiple or select ALL</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-row" id="scheduleInputsRow" style="display: none; background: #F8FAFC; padding: 14px; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 16px;">
                 <div class="form-group">
                     <label style="color: var(--primary); font-weight: 700;">Quiz Start Date & Time</label>
@@ -213,6 +252,37 @@
 @section('scripts')
 <script>
     window.currentQuestions = [];
+    window.academicLoaded = false;
+
+    async function loadAcademicTargets() {
+        if (window.academicLoaded) return;
+        try {
+            const [depts, courses, branches, sections] = await Promise.all([
+                fetch('/api/academic/departments').then(r => r.json()),
+                fetch('/api/academic/courses').then(r => r.json()),
+                fetch('/api/academic/branches').then(r => r.json()),
+                fetch('/api/academic/sections').then(r => r.json()),
+            ]);
+
+            const fillSelect = (elemId, items, labelKey) => {
+                const select = document.getElementById(elemId);
+                select.innerHTML = '<option value="all" selected>-- ALL --</option>';
+                (items.data || []).forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.id;
+                    opt.innerText = item[labelKey] + (item.code ? ` (${item.code})` : '');
+                    select.appendChild(opt);
+                });
+            };
+
+            fillSelect('quizTargetDepts', depts, 'name');
+            fillSelect('quizTargetCourses', courses, 'name');
+            fillSelect('quizTargetBranches', branches, 'name');
+            fillSelect('quizTargetSections', sections, 'name');
+
+            window.academicLoaded = true;
+        } catch (e) {}
+    }
 
     function toggleScheduleInputs() {
         const status = document.getElementById('quizStatus').value;
@@ -224,6 +294,7 @@
         document.getElementById('editingQuizId').value = '';
         document.getElementById('createQuizForm').reset();
         document.getElementById('quizModalTitleText').innerText = 'Create New Quiz';
+        loadAcademicTargets();
         toggleScheduleInputs();
         openModal('createQuizModal');
     }
@@ -252,9 +323,16 @@
         document.getElementById('quizStartsAt').value = formatLocalDatetimeInput(q.starts_at || q.scheduled_at);
         document.getElementById('quizEndsAt').value = formatLocalDatetimeInput(q.ends_at);
 
+        loadAcademicTargets();
         toggleScheduleInputs();
         document.getElementById('quizModalTitleText').innerText = 'Edit Quiz Details';
         openModal('createQuizModal');
+    }
+
+    function getMultiSelectValues(elemId) {
+        const select = document.getElementById(elemId);
+        const vals = Array.from(select.selectedOptions).map(opt => opt.value);
+        return (vals.length === 0 || vals.includes('all')) ? ['all'] : vals.map(v => isNaN(v) ? v : parseInt(v));
     }
 
     async function handleSaveQuiz(e) {
@@ -273,6 +351,10 @@
             starts_at: startsAtVal ? startsAtVal : null,
             scheduled_at: startsAtVal ? startsAtVal : null,
             ends_at: endsAtVal ? endsAtVal : null,
+            department_ids: getMultiSelectValues('quizTargetDepts'),
+            course_ids: getMultiSelectValues('quizTargetCourses'),
+            branch_ids: getMultiSelectValues('quizTargetBranches'),
+            section_ids: getMultiSelectValues('quizTargetSections'),
         };
 
         const url = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';

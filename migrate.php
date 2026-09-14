@@ -83,11 +83,23 @@ try {
         }
     }
 
-    if (\Illuminate\Support\Facades\Schema::hasTable('quizzes') && !\Illuminate\Support\Facades\Schema::hasColumn('quizzes', 'section')) {
-        \Illuminate\Support\Facades\Schema::table('quizzes', function (\Illuminate\Database\Schema\Blueprint $table) {
-            $table->string('section')->nullable()->after('subject');
-        });
-        echo " -> Added 'section' to quizzes table.\n";
+    if (\Illuminate\Support\Facades\Schema::hasTable('quizzes')) {
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('quizzes', 'section')) {
+            \Illuminate\Support\Facades\Schema::table('quizzes', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->string('section')->nullable()->after('subject');
+            });
+            echo " -> Added 'section' to quizzes table.\n";
+        }
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('quizzes', 'department_ids')) {
+            \Illuminate\Support\Facades\Schema::table('quizzes', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->json('department_ids')->nullable()->after('subject');
+                $table->json('course_ids')->nullable()->after('department_ids');
+                $table->json('branch_ids')->nullable()->after('course_ids');
+                $table->json('section_ids')->nullable()->after('branch_ids');
+                $table->json('subject_ids')->nullable()->after('section_ids');
+            });
+            echo " -> Added department_ids, course_ids, branch_ids, section_ids, subject_ids to quizzes table.\n";
+        }
     }
 
     if (\Illuminate\Support\Facades\Schema::hasTable('users') && !\Illuminate\Support\Facades\Schema::hasColumn('users', 'semester')) {
