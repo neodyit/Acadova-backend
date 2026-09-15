@@ -441,7 +441,20 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // 2. Cooldown check disabled temporarily for testing
+        // 2. Cooldown Rate Limiting (120 seconds / 2 minutes per email)
+        $cacheKey = 'password_reset_cooldown_' . md5($email);
+        if (Cache::has($cacheKey)) {
+            $secondsRemaining = Cache::get($cacheKey) - time();
+            if ($secondsRemaining > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Please wait $secondsRemaining seconds before requesting another password reset link.",
+                    'statusCode' => 429,
+                    'retry_after' => $secondsRemaining,
+                    'cooldown_seconds' => $secondsRemaining,
+                ], 429);
+            }
+        }
 
         // 3. Generate secure random reset token (64 hex characters)
         $token = Str::random(64);
@@ -499,10 +512,13 @@ class AuthController extends Controller
 
             $mailer->send($emailMessage);
 
+            // Store 120 seconds (2 minutes) cooldown in Cache
+            Cache::put($cacheKey, time() + 120, 120);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Password reset link sent to your email address.',
-                'cooldown_seconds' => 0,
+                'cooldown_seconds' => 120,
             ]);
         } catch (\Throwable $e) {
             \Log::error('SMTP Password Reset Email Error: ' . $e->getMessage());
