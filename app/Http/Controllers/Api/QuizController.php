@@ -104,6 +104,37 @@ class QuizController extends Controller
         $user = auth('sanctum')->user() ?? $request->user();
         $userId = $user ? $user->id : null;
 
+        if ($user && strtolower($user->role) === 'faculty') {
+            $hasTargetGroups = !empty($validated['target_groups']) && is_array($validated['target_groups']) && count($validated['target_groups']) > 0;
+            $hasExplicitDepts = !empty($validated['department_ids']) && is_array($validated['department_ids']) && !in_array('all', $validated['department_ids']) && count($validated['department_ids']) > 0;
+
+            if (!$hasTargetGroups && !$hasExplicitDepts) {
+                $allocations = \App\Models\FacultySubjectAllocation::where('faculty_id', $user->id)->get();
+                if ($allocations->isEmpty()) {
+                    $validated['department_ids'] = [];
+                    $validated['course_ids'] = [];
+                    $validated['branch_ids'] = [];
+                    $validated['section_ids'] = [];
+                    $validated['subject_ids'] = [];
+                    $validated['target_groups'] = null;
+                } else {
+                    $builtGroups = [];
+                    foreach ($allocations as $alloc) {
+                        $group = [
+                            'branch_id' => $alloc->branch_name ?? $alloc->branch_code ?? $alloc->branch_id ?? 'all',
+                            'section_id' => (string)($alloc->section_name ?? $alloc->section_id ?? 'all'),
+                        ];
+                        if ($alloc->branch_id) $group['branch_db_id'] = $alloc->branch_id;
+                        if ($alloc->department_id) $group['department_id'] = $alloc->department_id;
+                        if ($alloc->course_id) $group['course_id'] = $alloc->course_id;
+                        if ($alloc->semester) $group['semester'] = (string)$alloc->semester;
+                        $builtGroups[] = $group;
+                    }
+                    $validated['target_groups'] = $builtGroups;
+                }
+            }
+        }
+
         $quiz = Quiz::create([
             'user_id' => $userId,
             'created_by' => $userId,
@@ -158,6 +189,39 @@ class QuizController extends Controller
             'subject_ids' => 'nullable|array',
             'target_groups' => 'nullable|array',
         ]);
+
+        $user = auth('sanctum')->user() ?? $request->user();
+
+        if ($user && strtolower($user->role) === 'faculty') {
+            $hasTargetGroups = !empty($validated['target_groups']) && is_array($validated['target_groups']) && count($validated['target_groups']) > 0;
+            $hasExplicitDepts = !empty($validated['department_ids']) && is_array($validated['department_ids']) && !in_array('all', $validated['department_ids']) && count($validated['department_ids']) > 0;
+
+            if (!$hasTargetGroups && !$hasExplicitDepts) {
+                $allocations = \App\Models\FacultySubjectAllocation::where('faculty_id', $user->id)->get();
+                if ($allocations->isEmpty()) {
+                    $validated['department_ids'] = [];
+                    $validated['course_ids'] = [];
+                    $validated['branch_ids'] = [];
+                    $validated['section_ids'] = [];
+                    $validated['subject_ids'] = [];
+                    $validated['target_groups'] = null;
+                } else {
+                    $builtGroups = [];
+                    foreach ($allocations as $alloc) {
+                        $group = [
+                            'branch_id' => $alloc->branch_name ?? $alloc->branch_code ?? $alloc->branch_id ?? 'all',
+                            'section_id' => (string)($alloc->section_name ?? $alloc->section_id ?? 'all'),
+                        ];
+                        if ($alloc->branch_id) $group['branch_db_id'] = $alloc->branch_id;
+                        if ($alloc->department_id) $group['department_id'] = $alloc->department_id;
+                        if ($alloc->course_id) $group['course_id'] = $alloc->course_id;
+                        if ($alloc->semester) $group['semester'] = (string)$alloc->semester;
+                        $builtGroups[] = $group;
+                    }
+                    $validated['target_groups'] = $builtGroups;
+                }
+            }
+        }
 
         if (isset($validated['starts_at']) && !isset($validated['scheduled_at'])) {
             $validated['scheduled_at'] = $validated['starts_at'];
