@@ -114,11 +114,13 @@ class NotificationController extends Controller
             'fcm_token' => 'required|string',
         ]);
 
-        $user->update(['fcm_token' => $validated['fcm_token']]);
+        $user->fcm_token = $validated['fcm_token'];
+        $user->save();
 
         return response()->json([
             'success' => true,
             'message' => 'FCM token saved successfully.',
+            'fcm_token' => $user->fcm_token,
         ]);
     }
 

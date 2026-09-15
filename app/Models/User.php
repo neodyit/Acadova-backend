@@ -39,6 +39,7 @@ class User extends Authenticatable
         'section_id',
         'subsection_id',
         'semester',
+        'fcm_token',
     ];
 
     /**
