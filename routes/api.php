@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AcademicController;
 use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\CronController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +25,9 @@ Route::get('/app-settings', [AuthController::class, 'getAppSettings']);
 
 // Public Media & File Serving (Avatars, Uploads, Media)
 Route::get('/media/file/{path}', [MediaController::class, 'showFile'])->where('path', '.*');
+
+// Public Automated Reminder Cron Endpoint
+Route::get('/cron/send-notifications', [CronController::class, 'sendNotifications']);
 
 // Public Academic hierarchy getters (Used during registration & initial profile setup)
 Route::prefix('academic')->group(function () {
@@ -49,6 +54,14 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Notifications & FCM Token Management
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+    Route::post('/fcm-token', [NotificationController::class, 'saveFcmToken']);
+    Route::post('/fcm-token/remove', [NotificationController::class, 'removeFcmToken']);
 
     // Media & File Upload
     Route::post('/upload', [MediaController::class, 'store']);

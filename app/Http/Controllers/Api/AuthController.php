@@ -399,7 +399,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        $token = $user->currentAccessToken();
+        if ($user) {
+            $user->update(['fcm_token' => null]);
+        }
+        $token = $user ? $user->currentAccessToken() : null;
 
         if ($token) {
             // Update session log for this token to logged_out status
