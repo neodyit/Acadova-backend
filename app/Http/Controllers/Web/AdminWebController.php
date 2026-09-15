@@ -174,8 +174,11 @@ class AdminWebController extends Controller
     /**
      * Ads Management Page
      */
-    public function ads()
+    /**
+     * Notifications Page
+     */
+    public function notifications()
     {
-        return view('admin.ads');
+        return view('admin.notifications');
     }
 }
