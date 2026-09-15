@@ -179,6 +179,6 @@ class AdminWebController extends Controller
      */
     public function notifications()
     {
-        return view('admin.notifications');
+        return view('admin');
     }
 }
