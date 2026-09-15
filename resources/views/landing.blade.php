@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <!-- Strict Anti-Cache Meta Tags for Mobile Browsers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0, post-check=0, pre-check=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Acadova — Smart Quiz & Assessment Platform | Powered by Neody IT</title>
     <meta name="description" content="Acadova is the premier academic quiz and online examination platform. Download the Android App from Google Play Store, get the Windows Desktop (.exe) app, or access the Web Portal.">
     

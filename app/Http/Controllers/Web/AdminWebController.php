@@ -27,7 +27,11 @@ class AdminWebController extends Controller
             'total_quizzes' => Quiz::count(),
             'total_attempts' => QuizAttempt::count(),
         ];
-        return view('landing', compact('activeQuizzes', 'campaigns', 'stats'));
+        return response()
+            ->view('landing', compact('activeQuizzes', 'campaigns', 'stats'))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, post-check=0, pre-check=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1900 00:00:00 GMT');
     }
 
     /**
