@@ -843,23 +843,60 @@
             .hero-container {
                 grid-template-columns: 1fr;
                 text-align: center;
-                padding-top: 130px;
+                padding-top: 110px;
+                padding-bottom: 50px;
+                gap: 40px;
             }
-            .hero-title { font-size: 42px; }
-            .hero-subtitle { margin: 0 auto 32px; }
-            .download-buttons-wrap { justify-content: center; }
-            .stats-row { justify-content: center; }
+            .hero-title { font-size: 38px; }
+            .hero-subtitle { margin: 0 auto 28px; font-size: 16px; }
+            .download-buttons-wrap { justify-content: center; flex-direction: column; width: 100%; }
+            .download-buttons-wrap .btn { width: 100%; justify-content: center; }
             .nav-menu, .nav-cta-group { display: none; }
             .mobile-toggle { display: block; }
-            .downloads-grid, .workflow-grid { grid-template-columns: 1fr; }
-            .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+            .downloads-grid, .workflow-grid, .features-cards-grid, .quiz-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
         }
 
         @media (max-width: 600px) {
-            .hero-title { font-size: 32px; }
-            .section-title { font-size: 30px; }
+            .navbar { padding: 0 4%; height: 70px; }
+            .mobile-drawer { top: 70px; }
+            .hero-container { padding-top: 95px; padding-left: 4%; padding-right: 4%; }
+            .hero-badge { font-size: 11.5px; padding: 5px 12px; }
+            .hero-title { font-size: 28px; letter-spacing: -0.5px; }
+            .hero-subtitle { font-size: 14.5px; }
+            .section-title { font-size: 26px; }
+            .section-desc { font-size: 14.5px; }
+
+            /* Stats row mobile layout */
+            .stats-row {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                padding-top: 20px;
+            }
+            .stat-card h3 { font-size: 22px; }
+            .stat-card p { font-size: 11px; line-height: 1.2; }
+
+            /* Preview Widget mobile layout fix */
+            .preview-widget {
+                padding: 20px 16px;
+                border-radius: 20px;
+                text-align: left;
+            }
+            .preview-widget-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            .live-status-pill {
+                align-self: flex-start;
+                font-size: 10.5px;
+                padding: 4px 10px;
+            }
+
             .btn { width: 100%; justify-content: center; }
             .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; text-align: center; gap: 8px; }
         }
     </style>
 </head>
