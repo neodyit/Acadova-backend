@@ -432,6 +432,11 @@
                     <i class="fa-solid fa-users"></i> Users Directory
                 </a>
             </li>
+            <li class="nav-item {{ Request::is('neodyit/ads*') ? 'active' : '' }}">
+                <a href="{{ route('admin.ads') }}">
+                    <i class="fa-solid fa-rectangle-ad"></i> Ads Management
+                </a>
+            </li>
             <li class="nav-item {{ Request::is('neodyit/media*') ? 'active' : '' }}">
                 <a href="{{ route('admin.media') }}">
                     <i class="fa-solid fa-folder-open"></i> Media Library

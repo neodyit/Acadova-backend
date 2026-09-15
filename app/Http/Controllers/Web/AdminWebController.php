@@ -167,4 +167,12 @@ class AdminWebController extends Controller
     {
         return view('admin.settings');
     }
+
+    /**
+     * Ads Management Page
+     */
+    public function ads()
+    {
+        return view('admin.ads');
+    }
 }

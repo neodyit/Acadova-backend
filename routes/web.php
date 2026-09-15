@@ -88,6 +88,7 @@ Route::middleware(['auth:web', 'admin'])->prefix('neodyit')->name('admin.')->gro
     Route::get('/users', [AdminWebController::class, 'users'])->name('users');
     Route::get('/media', [AdminWebController::class, 'media'])->name('media');
     Route::get('/settings', [AdminWebController::class, 'settings'])->name('settings');
+    Route::get('/ads', [AdminWebController::class, 'ads'])->name('ads');
 });
 
 Route::get('/sample-csv', function () {
