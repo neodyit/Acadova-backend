@@ -91,6 +91,19 @@ Route::middleware(['auth:web', 'admin'])->prefix('neodyit')->name('admin.')->gro
     Route::get('/ads', [AdminWebController::class, 'ads'])->name('ads');
 });
 
+// Public Student Web Auth Routes
+Route::get('/student/login', [\App\Http\Controllers\Web\StudentWebController::class, 'showLogin'])->name('student.login');
+Route::post('/student/login', [\App\Http\Controllers\Web\StudentWebController::class, 'processLogin'])->name('student.login.process');
+Route::post('/student/logout', [\App\Http\Controllers\Web\StudentWebController::class, 'logout'])->name('student.logout');
+
+// Protected Student Web Portal Routes
+Route::middleware(['auth:web'])->prefix('student')->name('student.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Web\StudentWebController::class, 'dashboard'])->name('dashboard');
+    Route::get('/quizzes/{id}', [\App\Http\Controllers\Web\StudentWebController::class, 'quizPreScreen'])->name('quiz.prescreen');
+    Route::get('/quizzes/{id}/take', [\App\Http\Controllers\Web\StudentWebController::class, 'takeQuiz'])->name('quiz.take');
+    Route::get('/attempts/{id}/result', [\App\Http\Controllers\Web\StudentWebController::class, 'attemptResult'])->name('attempt.result');
+});
+
 Route::get('/sample-csv', function () {
     $csvContent = "Question,Type,Difficulty,Option1,Option2,Option3,Option4,Correct_Option\n"
         . '"What is the capital of France?",single,easy,Paris,London,Berlin,Rome,Paris' . "\n"

@@ -447,8 +447,11 @@
         </ul>
 
         <div style="display: flex; gap: 12px; align-items: center;">
+            <a href="/student/login" class="btn btn-primary" style="font-size: 13px; padding: 10px 18px;">
+                <i class="fa-solid fa-graduation-cap"></i> Student Portal
+            </a>
             <a href="/neodyit/login" class="btn btn-secondary" style="font-size: 13px; padding: 10px 18px;">
-                <i class="fa-solid fa-lock"></i> Portal Access
+                <i class="fa-solid fa-lock"></i> Admin Access
             </a>
         </div>
     </nav>
@@ -462,11 +465,11 @@
             <h1>Empowering Students & Educators with <span>Smart Assessments</span></h1>
             <p>Acadova offers a seamless mobile and web assessment experience. Experience timed quizzes, instant performance analytics, and dynamic campaign notifications.</p>
             <div class="hero-buttons">
-                <a href="#quizzes" class="btn btn-primary">
-                    <i class="fa-solid fa-play"></i> Explore Active Quizzes
+                <a href="/student/login" class="btn btn-primary">
+                    <i class="fa-solid fa-graduation-cap"></i> Take Web Quiz Now
                 </a>
                 <a href="/neodyit/login" class="btn btn-secondary">
-                    <i class="fa-solid fa-shield-halved"></i> Faculty Login
+                    <i class="fa-solid fa-shield-halved"></i> Admin & Faculty Login
                 </a>
             </div>
         </div>
