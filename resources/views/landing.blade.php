@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Acadova — Smart Quiz & Assessment Platform | Powered by Neody IT</title>
     <meta name="description" content="Acadova is the premier academic quiz and online examination platform. Download the Android App from Google Play Store, get the Windows Desktop (.exe) app, or access the Web Portal.">
     
@@ -43,6 +43,7 @@
             color: var(--main-text);
             overflow-x: hidden;
             line-height: 1.6;
+            width: 100%;
         }
 
         /* Ambient Header Glow */
@@ -61,7 +62,7 @@
         /* Sticky Navigation Bar */
         .navbar {
             height: 80px;
-            background: rgba(245, 236, 221, 0.92);
+            background: rgba(245, 236, 221, 0.95);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
@@ -93,6 +94,7 @@
             justify-content: center;
             box-shadow: 0 4px 16px rgba(180, 83, 9, 0.15);
             border: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .brand-logo-box img {
@@ -147,29 +149,43 @@
             gap: 12px;
         }
 
-        /* Mobile Hamburger Toggle */
+        /* Mobile Hamburger Toggle Button */
         .mobile-toggle {
             display: none;
-            background: none;
-            border: none;
-            color: var(--main-text);
-            font-size: 22px;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #FFFFFF;
+            border: 1px solid var(--border);
+            color: var(--primary);
+            font-size: 18px;
             cursor: pointer;
-            padding: 6px;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
-        /* Mobile Drawer */
+        .mobile-toggle:active {
+            transform: scale(0.92);
+        }
+
+        /* Mobile Navigation Drawer */
         .mobile-drawer {
             display: none;
             position: fixed;
-            top: 80px; left: 0; right: 0;
-            background: #F5ECDD;
-            border-bottom: 2px solid var(--border);
-            padding: 24px;
+            top: 70px; left: 0; right: 0; bottom: 0;
+            background: rgba(245, 236, 221, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            padding: 24px 20px;
             z-index: 999;
             flex-direction: column;
-            gap: 16px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            gap: 12px;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
         .mobile-drawer.active {
@@ -177,15 +193,33 @@
         }
 
         .mobile-drawer a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: #FFFFFF;
+            border: 1px solid var(--border);
+            border-radius: 14px;
             color: var(--main-text);
-            text-decoration: none;
             font-weight: 700;
-            font-size: 16px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
 
-        /* Buttons Styling (AppTheme Matching) */
+        .mobile-drawer a i {
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        .mobile-drawer a:active {
+            background: var(--surface-light);
+            transform: scale(0.98);
+        }
+
+        /* Buttons Styling */
         .btn {
             padding: 12px 24px;
             border-radius: 16px;
@@ -198,6 +232,7 @@
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
             border: none;
+            box-sizing: border-box;
         }
 
         .btn-primary {
@@ -359,6 +394,8 @@
             padding: 34px;
             box-shadow: 0 20px 50px rgba(180, 83, 9, 0.12);
             position: relative;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .preview-widget-header {
@@ -381,6 +418,7 @@
             border-radius: 14px;
             padding: 5px;
             border: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .app-badge-icon img {
@@ -401,6 +439,7 @@
             font-size: 11.5px;
             font-weight: 800;
             text-transform: uppercase;
+            flex-shrink: 0;
         }
 
         .pulse-light {
@@ -423,6 +462,8 @@
             border-radius: 20px;
             padding: 20px;
             margin-top: 20px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .feature-mini-row {
@@ -430,6 +471,8 @@
             align-items: center;
             gap: 14px;
             margin-bottom: 14px;
+            width: 100%;
+            min-width: 0;
         }
 
         .feature-mini-row:last-child {
@@ -448,6 +491,27 @@
             justify-content: center;
             font-size: 16px;
             flex-shrink: 0;
+        }
+
+        .feature-mini-text {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .feature-mini-text h4 {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--main-text);
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .feature-mini-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: normal;
+            word-break: break-word;
         }
 
         /* Platform Downloads Banner */
@@ -503,6 +567,8 @@
             text-align: center;
             transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .download-platform-card:hover {
@@ -560,6 +626,8 @@
             padding: 34px 28px;
             box-shadow: 0 4px 18px rgba(0,0,0,0.02);
             transition: all 0.35s ease;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .feature-card:hover {
@@ -618,6 +686,8 @@
             border: 1px solid var(--border);
             border-radius: 24px;
             padding: 36px 28px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .step-number {
@@ -671,6 +741,8 @@
             flex-direction: column;
             justify-content: space-between;
             transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .quiz-card:hover {
@@ -838,7 +910,7 @@
             gap: 16px;
         }
 
-        /* Mobile Responsiveness Media Queries */
+        /* Pixel-Perfect Mobile Responsiveness */
         @media (max-width: 992px) {
             .hero-container {
                 grid-template-columns: 1fr;
@@ -852,50 +924,102 @@
             .download-buttons-wrap { justify-content: center; flex-direction: column; width: 100%; }
             .download-buttons-wrap .btn { width: 100%; justify-content: center; }
             .nav-menu, .nav-cta-group { display: none; }
-            .mobile-toggle { display: block; }
+            .mobile-toggle { display: flex; }
             .downloads-grid, .workflow-grid, .features-cards-grid, .quiz-grid { grid-template-columns: 1fr; }
             .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
         }
 
-        @media (max-width: 600px) {
-            .navbar { padding: 0 4%; height: 70px; }
-            .mobile-drawer { top: 70px; }
-            .hero-container { padding-top: 95px; padding-left: 4%; padding-right: 4%; }
-            .hero-badge { font-size: 11.5px; padding: 5px 12px; }
-            .hero-title { font-size: 28px; letter-spacing: -0.5px; }
-            .hero-subtitle { font-size: 14.5px; }
-            .section-title { font-size: 26px; }
-            .section-desc { font-size: 14.5px; }
+        @media (max-width: 650px) {
+            .navbar { padding: 0 16px; height: 70px; }
+            .brand-logo-box { width: 36px; height: 36px; border-radius: 10px; }
+            .brand-name { font-size: 18px; }
+            .brand-subtitle { font-size: 8px; }
+            
+            .mobile-toggle { width: 40px; height: 40px; font-size: 17px; }
+            .mobile-drawer { top: 70px; padding: 18px 14px; }
+            .mobile-drawer a { padding: 12px 14px; font-size: 14.5px; }
 
-            /* Stats row mobile layout */
+            .hero-container { padding: 90px 16px 40px; gap: 32px; }
+            .hero-badge { font-size: 11px; padding: 5px 12px; margin-bottom: 16px; }
+            .hero-title { font-size: 26px; line-height: 1.25; letter-spacing: -0.5px; margin-bottom: 14px; }
+            .hero-subtitle { font-size: 14px; line-height: 1.5; margin-bottom: 24px; }
+            
+            .download-buttons-wrap { flex-direction: column; gap: 10px; width: 100%; margin-bottom: 28px; }
+            .download-buttons-wrap .btn { width: 100%; justify-content: center; padding: 14px 18px; }
+
             .stats-row {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-                padding-top: 20px;
+                display: flex;
+                justify-content: space-between;
+                gap: 4px;
+                padding-top: 18px;
             }
-            .stat-card h3 { font-size: 22px; }
-            .stat-card p { font-size: 11px; line-height: 1.2; }
+            .stat-card { flex: 1; text-align: center; }
+            .stat-card h3 { font-size: 20px; }
+            .stat-card p { font-size: 10.5px; line-height: 1.2; word-break: break-word; }
 
-            /* Preview Widget mobile layout fix */
+            /* Preview Widget Mobile Overhaul */
             .preview-widget {
-                padding: 20px 16px;
+                padding: 18px 14px;
                 border-radius: 20px;
                 text-align: left;
+                width: 100%;
+                box-sizing: border-box;
             }
             .preview-widget-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 12px;
-                margin-bottom: 16px;
+                gap: 10px;
+                margin-bottom: 14px;
             }
+            .app-badge-info { gap: 10px; }
+            .app-badge-icon { width: 40px; height: 40px; border-radius: 10px; }
             .live-status-pill {
                 align-self: flex-start;
-                font-size: 10.5px;
+                font-size: 10px;
                 padding: 4px 10px;
             }
+            .preview-feature-box {
+                padding: 14px 12px;
+                border-radius: 16px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .feature-mini-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                min-width: 0;
+            }
+            .mini-icon { width: 34px; height: 34px; font-size: 14px; }
+            .feature-mini-text { flex: 1; min-width: 0; overflow: hidden; }
+            .feature-mini-text h4 { font-size: 13.5px; word-break: break-word; }
+            .feature-mini-text p { font-size: 11.5px; word-break: break-word; }
 
-            .btn { width: 100%; justify-content: center; }
-            .footer-grid { grid-template-columns: 1fr; }
+            .downloads-banner-section,
+            .features-section,
+            .workflow-section,
+            .quizzes-section,
+            .faq-section,
+            .footer {
+                padding: 50px 16px;
+            }
+            .section-title-wrap { margin-bottom: 32px; }
+            .section-title { font-size: 24px; letter-spacing: -0.5px; }
+            .section-desc { font-size: 14px; }
+            
+            .feature-card,
+            .download-platform-card,
+            .workflow-step-card,
+            .quiz-card {
+                padding: 22px 18px;
+                border-radius: 18px;
+            }
+
+            .faq-question { padding: 18px 18px; font-size: 15px; }
+            .faq-answer { padding: 0 18px 18px; font-size: 13.5px; }
+
+            .footer-grid { grid-template-columns: 1fr; gap: 28px; }
             .footer-bottom { flex-direction: column; text-align: center; gap: 8px; }
         }
     </style>
@@ -941,15 +1065,15 @@
         </button>
     </nav>
 
-    <!-- Mobile Drawer Navigation -->
+    <!-- Mobile Navigation Drawer -->
     <div class="mobile-drawer" id="mobileDrawer">
-        <a href="#downloads"><i class="fa-solid fa-download"></i> Downloads</a>
-        <a href="#features"><i class="fa-solid fa-star"></i> Features</a>
+        <a href="#downloads"><i class="fa-solid fa-download"></i> Apps & Downloads</a>
+        <a href="#features"><i class="fa-solid fa-star"></i> Platform Features</a>
         <a href="#workflow"><i class="fa-solid fa-diagram-project"></i> How It Works</a>
         <a href="#quizzes"><i class="fa-solid fa-list-check"></i> Live Assessments</a>
         <a href="/help-center"><i class="fa-solid fa-circle-question"></i> Help Center</a>
-        <a href="/student/login" style="color: var(--primary);"><i class="fa-solid fa-graduation-cap"></i> Student Web Portal</a>
-        <a href="/neodyit/login" style="color: var(--main-text);"><i class="fa-solid fa-user-shield"></i> Admin & Faculty Login</a>
+        <a href="/student/login" style="color: var(--primary); background: rgba(180, 83, 9, 0.08);"><i class="fa-solid fa-graduation-cap"></i> Student Web Portal</a>
+        <a href="/neodyit/login" style="color: var(--main-text); background: var(--surface-light);"><i class="fa-solid fa-user-shield"></i> Admin & Faculty Login</a>
     </div>
 
     <!-- Hero Section -->
@@ -1013,8 +1137,8 @@
                             <img src="{{ asset('logo.png') }}" alt="Acadova Icon">
                         </div>
                         <div>
-                            <h3 style="font-size: 19px; font-weight: 800; color: var(--main-text);">Acadova Ecosystem</h3>
-                            <p style="font-size: 12.5px; color: var(--text-muted);">Android • Windows • Web</p>
+                            <h3 style="font-size: 18px; font-weight: 800; color: var(--main-text);">Acadova Ecosystem</h3>
+                            <p style="font-size: 12px; color: var(--text-muted);">Android • Windows • Web</p>
                         </div>
                     </div>
                     <div class="live-status-pill">
@@ -1022,7 +1146,7 @@
                     </div>
                 </div>
 
-                <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6;">
+                <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">
                     Powered by Neody IT backend infrastructure for real-time exam validation, instant submission processing, and zero latency.
                 </p>
 
@@ -1031,9 +1155,9 @@
                         <div class="mini-icon">
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
-                        <div>
-                            <h4 style="font-size: 14px; font-weight: 800; color: var(--main-text);">Timed Quiz Engine</h4>
-                            <p style="font-size: 12px; color: var(--text-muted);">Auto-submit on timer completion</p>
+                        <div class="feature-mini-text">
+                            <h4>Timed Quiz Engine</h4>
+                            <p>Auto-submit on timer completion</p>
                         </div>
                     </div>
 
@@ -1041,9 +1165,9 @@
                         <div class="mini-icon">
                             <i class="fa-solid fa-chart-pie"></i>
                         </div>
-                        <div>
-                            <h4 style="font-size: 14px; font-weight: 800; color: var(--main-text);">Instant Score Breakdown</h4>
-                            <p style="font-size: 12px; color: var(--text-muted);">Detailed answer feedback & accuracy</p>
+                        <div class="feature-mini-text">
+                            <h4>Instant Score Breakdown</h4>
+                            <p>Detailed answer feedback & accuracy</p>
                         </div>
                     </div>
 
@@ -1051,9 +1175,9 @@
                         <div class="mini-icon">
                             <i class="fa-solid fa-bullhorn"></i>
                         </div>
-                        <div>
-                            <h4 style="font-size: 14px; font-weight: 800; color: var(--main-text);">Campaign Notice Board</h4>
-                            <p style="font-size: 12px; color: var(--text-muted);">Campus contests and announcements</p>
+                        <div class="feature-mini-text">
+                            <h4>Campaign Notice Board</h4>
+                            <p>Campus contests and announcements</p>
                         </div>
                     </div>
                 </div>
@@ -1335,13 +1459,30 @@
         const mobileToggle = document.getElementById('mobileToggle');
         const mobileDrawer = document.getElementById('mobileDrawer');
 
-        mobileToggle.addEventListener('click', () => {
+        mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             mobileDrawer.classList.toggle('active');
             const icon = mobileToggle.querySelector('i');
             if (mobileDrawer.classList.contains('active')) {
                 icon.className = 'fa-solid fa-xmark';
             } else {
                 icon.className = 'fa-solid fa-bars';
+            }
+        });
+
+        // Close Mobile Drawer on Link Click
+        document.querySelectorAll('.mobile-drawer a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileDrawer.classList.remove('active');
+                mobileToggle.querySelector('i').className = 'fa-solid fa-bars';
+            });
+        });
+
+        // Close Mobile Drawer on Outer Click
+        document.addEventListener('click', (e) => {
+            if (!mobileDrawer.contains(e.target) && !mobileToggle.contains(e.target)) {
+                mobileDrawer.classList.remove('active');
+                mobileToggle.querySelector('i').className = 'fa-solid fa-bars';
             }
         });
 
