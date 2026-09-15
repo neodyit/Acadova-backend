@@ -24,6 +24,32 @@ Route::get('/privacy-policy', function () {
     return redirect()->route('privacy.policy');
 });
 
+// Public Terms of Service Page
+Route::get('/page/terms-of-service', function () {
+    return view('terms_of_service');
+})->name('terms.service');
+
+Route::get('/terms-of-service', function () {
+    return redirect()->route('terms.service');
+});
+
+Route::get('/terms', function () {
+    return redirect()->route('terms.service');
+});
+
+// Public Help Center Page
+Route::get('/page/help-center', function () {
+    return view('help_center');
+})->name('help.center');
+
+Route::get('/help-center', function () {
+    return redirect()->route('help.center');
+});
+
+Route::get('/help', function () {
+    return redirect()->route('help.center');
+});
+
 // Public Account Deletion Request Page
 Route::get('/page/delete-account', function () {
     return view('delete_account');

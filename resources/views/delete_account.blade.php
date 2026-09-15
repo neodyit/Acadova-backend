@@ -326,10 +326,12 @@
                     <div class="brand-subtitle">By Neody IT</div>
                 </div>
             </a>
-            <a href="/" class="nav-back-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                Home
-            </a>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="{{ route('privacy.policy') }}" class="nav-back-btn">Privacy Policy</a>
+                <a href="{{ route('terms.service') }}" class="nav-back-btn">Terms of Service</a>
+                <a href="{{ route('help.center') }}" class="nav-back-btn">Help Center</a>
+                <a href="{{ route('account.delete') }}" class="nav-back-btn" style="background-color: var(--primary); color: white; border-color: var(--primary);">Account Deletion</a>
+            </div>
         </div>
     </header>
 
@@ -423,6 +425,15 @@
 
     <!-- Footer -->
     <footer>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 16px; flex-wrap: wrap;">
+            <a href="{{ route('privacy.policy') }}" style="color: var(--primary); font-weight:600; text-decoration: none;">Privacy Policy</a>
+            <span>&bull;</span>
+            <a href="{{ route('terms.service') }}" style="color: var(--primary); font-weight:600; text-decoration: none;">Terms of Service</a>
+            <span>&bull;</span>
+            <a href="{{ route('help.center') }}" style="color: var(--primary); font-weight:600; text-decoration: none;">Help Center</a>
+            <span>&bull;</span>
+            <a href="{{ route('account.delete') }}" style="color: var(--primary); font-weight:600; text-decoration: none;">Account Deletion</a>
+        </div>
         <p>&copy; 2026 Neody IT. All rights reserved. &bull; Acadova Quiz Platform</p>
     </footer>
 
