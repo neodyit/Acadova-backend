@@ -782,6 +782,11 @@
                     <i class="fa-solid fa-users"></i> Users Directory
                 </a>
             </li>
+            <li class="nav-item" id="nav-ads">
+                <a href="/admin/ads" onclick="navigateToSection('ads', event)">
+                    <i class="fa-solid fa-rectangle-ad"></i> Ads Management
+                </a>
+            </li>
             <li class="nav-item" id="nav-media">
                 <a href="/admin/media" onclick="navigateToSection('media', event)">
                     <i class="fa-solid fa-folder-open"></i> Media Library
@@ -1037,6 +1042,81 @@
                 </div>
             </div>
 
+            <!-- ADS MANAGEMENT SECTION -->
+            <div class="page-section" id="section-ads">
+                <div class="action-bar">
+                    <div>
+                        <h1 style="font-size: 24px; font-weight: 800;">Google Mobile Ads Management</h1>
+                        <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Dynamically turn ads on/off, set target audiences, and toggle ads per user account in real time.</p>
+                    </div>
+                    <button type="button" onclick="saveAdSettings()" class="btn btn-primary" style="padding: 10px 20px; font-size: 14px;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Ad Configuration
+                    </button>
+                </div>
+
+                <div class="quiz-card" style="margin-bottom: 24px; border: 2px solid #FCD34D;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; background: #FEF3C7; color: #D97706; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                <i class="fa-solid fa-rectangle-ad"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 17px; font-weight: 800;">Global Ad Feature Flag & Audience Controls</h3>
+                                <span id="adStatusBadge" style="font-size: 12px; color: #10B981; font-weight: 700;">● Active</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px;">Dynamically control advertisement visibility across student and faculty devices in real-time from this admin panel.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; background: var(--bg); padding: 20px; border-radius: 12px;">
+                        <div>
+                            <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px; color: var(--text);">Master Ads Switch</label>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
+                                <input type="checkbox" id="adsEnabledToggle" style="width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary);">
+                                <span style="font-size: 14px; font-weight: 700;">Enable Advertisements in App</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px; color: var(--text);">Target Audience Filter</label>
+                            <select id="adsTargetAudience" class="form-control" style="font-size: 13.5px; font-weight: 600; padding: 10px 12px;">
+                                <option value="all">🌐 All Users (Show ads to everyone)</option>
+                                <option value="selected_users">🎯 Selected Users Only (Users with Show Ads = Enabled)</option>
+                                <option value="none">🚫 No Users (Turn off ads for everyone)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Level Ads Targeting Directory -->
+                <div class="action-bar" style="margin-top: 32px;">
+                    <div>
+                        <h2 style="font-size: 18px; font-weight: 800;">User-Level Ads Targeting Directory</h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">When "Selected Users Only" mode is active, only users marked 🟢 Ads Enabled will receive ads.</p>
+                    </div>
+                </div>
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User Details</th>
+                                    <th>Role</th>
+                                    <th>Roll / Faculty ID</th>
+                                    <th>Department</th>
+                                    <th>Quizzes Taken</th>
+                                    <th>Joined Date</th>
+                                    <th>Ads Status</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adsUsersTableBody">
+                                <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading users directory...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- 6. SYSTEM SETTINGS SECTION -->
             <div class="page-section" id="section-settings">
                 <div class="action-bar">
@@ -1078,42 +1158,6 @@
                         <a href="/sample-csv" download="sample_questions.csv" class="btn btn-secondary" style="justify-content: center;">
                             <i class="fa-solid fa-download"></i> Download Sample CSV
                         </a>
-                    </div>
-
-                    <div class="quiz-card" style="grid-column: 1 / -1; margin-top: 12px; border: 2px solid #FCD34D;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 44px; height: 44px; background: #FEF3C7; color: #D97706; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                                    <i class="fa-solid fa-rectangle-ad"></i>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800;">Google Mobile Ads Feature Flag</h3>
-                                    <span id="adStatusBadge" style="font-size: 12px; color: #10B981; font-weight: 700;">● Active</span>
-                                </div>
-                            </div>
-                            <button type="button" onclick="saveAdSettings()" class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Ad Settings
-                            </button>
-                        </div>
-                        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px;">Dynamically control advertisement visibility across student and faculty devices in real-time from this admin panel.</p>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; background: var(--bg); padding: 20px; border-radius: 12px;">
-                            <div>
-                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px; color: var(--text);">Master Ads Switch</label>
-                                <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
-                                    <input type="checkbox" id="adsEnabledToggle" style="width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary);">
-                                    <span style="font-size: 14px; font-weight: 700;">Enable Advertisements in App</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px; color: var(--text);">Target Audience Filter</label>
-                                <select id="adsTargetAudience" class="form-control" style="font-size: 13.5px; font-weight: 600; padding: 10px 12px;">
-                                    <option value="all">🌐 All Users (Show ads to everyone)</option>
-                                    <option value="selected_users">🎯 Selected Users Only (Users with Show Ads = Enabled)</option>
-                                    <option value="none">🚫 No Users (Turn off ads for everyone)</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1485,7 +1529,7 @@
         function navigateToSection(section, event, updateHistory = true) {
             if (event) event.preventDefault();
 
-            const validSections = ['dashboard', 'quizzes', 'campaigns', 'users', 'media', 'settings'];
+            const validSections = ['dashboard', 'quizzes', 'campaigns', 'users', 'ads', 'media', 'settings'];
             if (!validSections.includes(section)) section = 'dashboard';
 
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -1502,6 +1546,7 @@
                 quizzes: 'Quizzes Management',
                 campaigns: 'Campaigns & Announcements',
                 users: 'Users Directory',
+                ads: 'Google Mobile Ads Management',
                 media: 'Media Library & Files',
                 settings: 'System & Database Settings'
             };
@@ -1527,6 +1572,9 @@
             } else if (section === 'campaigns') {
                 loadCampaigns();
             } else if (section === 'users') {
+                loadUsers();
+            } else if (section === 'ads') {
+                loadAdSettings();
                 loadUsers();
             } else if (section === 'media') {
                 loadMediaFiles();
@@ -1679,13 +1727,17 @@
         }
 
         function renderUsersTable(list) {
-            const tbody = document.getElementById('usersTableBody');
+            const tbody1 = document.getElementById('usersTableBody');
+            const tbody2 = document.getElementById('adsUsersTableBody');
+
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No users found.</td></tr>`;
+                const emptyHtml = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No users found.</td></tr>`;
+                if (tbody1) tbody1.innerHTML = emptyHtml;
+                if (tbody2) tbody2.innerHTML = emptyHtml;
                 return;
             }
 
-            tbody.innerHTML = list.map(u => `
+            const html = list.map(u => `
                 <tr>
                     <td>
                         <strong>${u.name}</strong><br>
@@ -1707,6 +1759,9 @@
                     </td>
                 </tr>
             `).join('');
+
+            if (tbody1) tbody1.innerHTML = html;
+            if (tbody2) tbody2.innerHTML = html;
         }
 
         async function toggleUserAds(userId, newShowAds) {
