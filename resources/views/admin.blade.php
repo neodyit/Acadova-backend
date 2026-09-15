@@ -1075,34 +1075,39 @@
                             </div>
                         </div>
                         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Download pre-formatted CSV template for single & multiple answer questions.</p>
-                    <div class="quiz-card" style="grid-column: span 2;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <a href="/sample-csv" download="sample_questions.csv" class="btn btn-secondary" style="justify-content: center;">
+                            <i class="fa-solid fa-download"></i> Download Sample CSV
+                        </a>
+                    </div>
+
+                    <div class="quiz-card" style="grid-column: 1 / -1; margin-top: 12px; border: 2px solid #FCD34D;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 40px; height: 40px; background: #FEF3C7; color: #D97706; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                                <div style="width: 44px; height: 44px; background: #FEF3C7; color: #D97706; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
                                     <i class="fa-solid fa-rectangle-ad"></i>
                                 </div>
                                 <div>
-                                    <h3 style="font-size: 16px; font-weight: 800;">Google Mobile Ads Feature Flag</h3>
+                                    <h3 style="font-size: 17px; font-weight: 800;">Google Mobile Ads Feature Flag</h3>
                                     <span id="adStatusBadge" style="font-size: 12px; color: #10B981; font-weight: 700;">● Active</span>
                                 </div>
                             </div>
-                            <button type="button" onclick="saveAdSettings()" class="btn btn-primary">
+                            <button type="button" onclick="saveAdSettings()" class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;">
                                 <i class="fa-solid fa-floppy-disk"></i> Save Ad Settings
                             </button>
                         </div>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Dynamically control advertisement visibility across student and faculty devices in real-time from this admin panel.</p>
+                        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px;">Dynamically control advertisement visibility across student and faculty devices in real-time from this admin panel.</p>
                         
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; background: var(--bg); padding: 18px; border-radius: 12px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; background: var(--bg); padding: 20px; border-radius: 12px;">
                             <div>
-                                <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 8px;">Master Ads Switch</label>
+                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px; color: var(--text);">Master Ads Switch</label>
                                 <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
-                                    <input type="checkbox" id="adsEnabledToggle" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary);">
-                                    <span style="font-size: 13.5px; font-weight: 700;">Enable Advertisements in App</span>
+                                    <input type="checkbox" id="adsEnabledToggle" style="width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary);">
+                                    <span style="font-size: 14px; font-weight: 700;">Enable Advertisements in App</span>
                                 </div>
                             </div>
                             <div>
-                                <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 8px;">Target Audience Filter</label>
-                                <select id="adsTargetAudience" class="form-control" style="font-size: 13.5px; font-weight: 600;">
+                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px; color: var(--text);">Target Audience Filter</label>
+                                <select id="adsTargetAudience" class="form-control" style="font-size: 13.5px; font-weight: 600; padding: 10px 12px;">
                                     <option value="all">🌐 All Users (Show ads to everyone)</option>
                                     <option value="selected_users">🎯 Selected Users Only (Users with Show Ads = Enabled)</option>
                                     <option value="none">🚫 No Users (Turn off ads for everyone)</option>
