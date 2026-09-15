@@ -1459,6 +1459,44 @@
         let authToken = localStorage.getItem('acadova_admin_token') || '';
         let currentUser = null;
 
+        // Global Fetch Interceptor to ensure Authorization headers & persistent session
+        const _originalFetch = window.fetch;
+        window.fetch = async function(resource, init = {}) {
+            init = init || {};
+            init.headers = init.headers || {};
+            
+            const currentToken = authToken || localStorage.getItem('acadova_admin_token');
+            if (currentToken) {
+                if (init.headers instanceof Headers) {
+                    if (!init.headers.has('Authorization')) {
+                        init.headers.append('Authorization', `Bearer ${currentToken}`);
+                    }
+                } else if (Array.isArray(init.headers)) {
+                    if (!init.headers.some(([k]) => k.toLowerCase() === 'authorization')) {
+                        init.headers.push(['Authorization', `Bearer ${currentToken}`]);
+                    }
+                } else if (typeof init.headers === 'object') {
+                    if (!init.headers['Authorization'] && !init.headers['authorization']) {
+                        init.headers['Authorization'] = `Bearer ${currentToken}`;
+                    }
+                }
+            }
+
+            const response = await _originalFetch(resource, init);
+            if (response.status === 401) {
+                // If explicit unauthenticated response from API, prompt login modal
+                const urlStr = typeof resource === 'string' ? resource : (resource ? resource.url : '');
+                if (!urlStr.includes('/api/login')) {
+                    localStorage.removeItem('acadova_admin_token');
+                    localStorage.removeItem('acadova_admin_user');
+                    authToken = '';
+                    currentUser = null;
+                    openModal('adminLoginModal');
+                }
+            }
+            return response;
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             checkAuthSession();
             navigateToSection(INITIAL_SECTION, null, false);
