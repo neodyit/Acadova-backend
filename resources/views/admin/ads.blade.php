@@ -142,6 +142,10 @@
     async function loadUsersForAds() {
         try {
             const res = await fetch('/api/admin/users');
+            if (res.status === 401) {
+                window.location.href = '/neodyit/login';
+                return;
+            }
             const json = await res.json();
             const list = json.data || [];
             const tbody = document.getElementById('adsUsersTableBody');

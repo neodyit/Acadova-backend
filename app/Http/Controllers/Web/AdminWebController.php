@@ -51,9 +51,8 @@ class AdminWebController extends Controller
             'password' => 'required|string',
         ]);
 
-        $remember = $request->has('remember');
-
-        if (Auth::attempt(['email' => strtolower(trim($credentials['email'])), 'password' => $credentials['password']], $remember)) {
+        // Always keep admin session persistent for web admin portal
+        if (Auth::attempt(['email' => strtolower(trim($credentials['email'])), 'password' => $credentials['password']], true)) {
             $user = Auth::user();
             if (strtolower($user->role) === 'admin') {
                 $request->session()->regenerate();

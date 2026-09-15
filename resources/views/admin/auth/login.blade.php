@@ -184,12 +184,19 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-bottom: 28px;">
+            <div class="form-group" style="margin-bottom: 20px;">
                 <label for="password">Password</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-lock"></i>
                     <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                 </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94A3B8; margin-bottom: 0;">
+                    <input type="checkbox" name="remember" checked style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
+                    Keep me logged in (Persistent Session)
+                </label>
             </div>
 
             <button type="submit" class="btn-submit">
