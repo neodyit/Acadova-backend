@@ -105,7 +105,7 @@ class NotificationController extends Controller
      */
     public function saveFcmToken(Request $request)
     {
-        $user = auth('sanctum')->user() ?? $request->user();
+        $user = $request->user() ?? \Illuminate\Support\Facades\Auth::user() ?? auth('sanctum')->user() ?? auth('web')->user();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
         }
@@ -127,7 +127,7 @@ class NotificationController extends Controller
      */
     public function removeFcmToken(Request $request)
     {
-        $user = auth('sanctum')->user() ?? $request->user();
+        $user = $request->user() ?? \Illuminate\Support\Facades\Auth::user() ?? auth('sanctum')->user() ?? auth('web')->user();
         if ($user) {
             $user->update(['fcm_token' => null]);
         }
