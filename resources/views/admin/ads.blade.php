@@ -218,7 +218,7 @@
                 if (audience) audience.value = json.data.ads_target_audience;
                 if (googleAndroid) googleAndroid.checked = json.data.google_auth_android !== false;
                 if (googleWindows) googleWindows.checked = json.data.google_auth_windows !== false;
-                if (latestVer) latestVer.value = json.data.latest_app_version || '1.0.0';
+                if (latestVer) latestVer.value = json.data.latest_app_version || '0.0.6';
                 if (updateUrl) updateUrl.value = json.data.update_url || 'https://play.google.com/store/apps/details?id=com.neodyit.acadova';
                 if (forceUpdate) forceUpdate.checked = json.data.force_update === true;
 
@@ -247,7 +247,7 @@
             ads_target_audience: audience ? audience.value : 'all',
             google_auth_android: googleAndroid ? googleAndroid.checked : true,
             google_auth_windows: googleWindows ? googleWindows.checked : true,
-            latest_app_version: latestVer ? latestVer.value.trim() : '1.0.0',
+            latest_app_version: latestVer ? latestVer.value.trim() : '0.0.6',
             update_url: updateUrl ? updateUrl.value.trim() : 'https://play.google.com/store/apps/details?id=com.neodyit.acadova',
             force_update: forceUpdate ? forceUpdate.checked : false
         };

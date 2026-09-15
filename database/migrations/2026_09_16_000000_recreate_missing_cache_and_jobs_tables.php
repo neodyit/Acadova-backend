@@ -65,6 +65,11 @@ return new class extends Migration
                 $table->timestamp('failed_at')->useCurrent();
             });
         }
+
+        if (Schema::hasTable('app_settings')) {
+            \App\Models\AppSetting::set('latest_app_version', '0.0.6');
+            \App\Models\AppSetting::set('min_required_version', '0.0.6');
+        }
     }
 
     /**
