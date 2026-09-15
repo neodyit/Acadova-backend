@@ -136,6 +136,8 @@ class AuthController extends Controller
             'data' => [
                 'ads_enabled' => \App\Models\AppSetting::get('ads_enabled', 'true') === 'true',
                 'ads_target_audience' => \App\Models\AppSetting::get('ads_target_audience', 'all'),
+                'google_auth_android' => \App\Models\AppSetting::get('google_auth_android', 'true') === 'true',
+                'google_auth_windows' => \App\Models\AppSetting::get('google_auth_windows', 'true') === 'true',
             ]
         ])->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
           ->header('Pragma', 'no-cache')

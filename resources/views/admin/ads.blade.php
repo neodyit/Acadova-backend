@@ -49,6 +49,40 @@
     </div>
 </div>
 
+<!-- Google Authentication Feature Flags Card -->
+<div style="background: white; border-radius: 18px; border: 2px solid #6C5CE7; padding: 28px; margin-bottom: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 48px; height: 48px; background: #EEF2FF; color: #6C5CE7; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                <i class="fa-brands fa-google"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800;">Google Sign-In Feature Flags</h2>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Control visibility of "Continue with Google" button on Android and Windows platforms separately.</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; background: var(--bg); padding: 24px; border-radius: 14px; border: 1px solid var(--border);">
+        <div>
+            <label style="font-weight: 800; font-size: 14px; display: block; margin-bottom: 8px;">🤖 Android App Google Login</label>
+            <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
+                <input type="checkbox" id="googleAuthAndroidToggle" style="width: 24px; height: 24px; cursor: pointer; accent-color: #6C5CE7;">
+                <span style="font-size: 14.5px; font-weight: 700;">Show Google Sign-In on Android</span>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">When enabled, Android users will see the "Continue with Google" button on login & signup screens.</p>
+        </div>
+        <div>
+            <label style="font-weight: 800; font-size: 14px; display: block; margin-bottom: 8px;">💻 Windows App Google Login</label>
+            <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
+                <input type="checkbox" id="googleAuthWindowsToggle" style="width: 24px; height: 24px; cursor: pointer; accent-color: #6C5CE7;">
+                <span style="font-size: 14.5px; font-weight: 700;">Show Google Sign-In on Windows</span>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">When enabled, Windows desktop users will see the "Continue with Google" button on login & signup screens.</p>
+        </div>
+    </div>
+</div>
+
 <!-- User Level Ads Targeting Directory Header & Controls -->
 <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
     <div>
@@ -137,15 +171,21 @@
                 const toggle = document.getElementById('adsEnabledToggle');
                 const audience = document.getElementById('adsTargetAudience');
                 const badge = document.getElementById('adStatusBadge');
+                const googleAndroid = document.getElementById('googleAuthAndroidToggle');
+                const googleWindows = document.getElementById('googleAuthWindowsToggle');
+
                 if (toggle) toggle.checked = json.data.ads_enabled;
                 if (audience) audience.value = json.data.ads_target_audience;
+                if (googleAndroid) googleAndroid.checked = json.data.google_auth_android !== false;
+                if (googleWindows) googleWindows.checked = json.data.google_auth_windows !== false;
+
                 if (badge) {
                     badge.innerText = json.data.ads_enabled ? '● Active' : '○ Disabled';
                     badge.style.color = json.data.ads_enabled ? '#10B981' : '#EF4444';
                 }
             }
         } catch (e) {
-            console.error('Failed to load ad settings', e);
+            console.error('Failed to load settings', e);
         }
     }
 
@@ -153,10 +193,14 @@
         const toggle = document.getElementById('adsEnabledToggle');
         const audience = document.getElementById('adsTargetAudience');
         const badge = document.getElementById('adStatusBadge');
+        const googleAndroid = document.getElementById('googleAuthAndroidToggle');
+        const googleWindows = document.getElementById('googleAuthWindowsToggle');
 
         const payload = {
             ads_enabled: toggle ? toggle.checked : true,
-            ads_target_audience: audience ? audience.value : 'all'
+            ads_target_audience: audience ? audience.value : 'all',
+            google_auth_android: googleAndroid ? googleAndroid.checked : true,
+            google_auth_windows: googleWindows ? googleWindows.checked : true
         };
 
         try {
@@ -171,16 +215,16 @@
             });
             const json = await res.json();
             if (json.success) {
-                showToast('AdMob configuration saved successfully!');
+                showToast('Feature flag configuration saved successfully!');
                 if (badge) {
                     badge.innerText = payload.ads_enabled ? '● Active' : '○ Disabled';
                     badge.style.color = payload.ads_enabled ? '#10B981' : '#EF4444';
                 }
             } else {
-                showToast(json.message || 'Failed to save ad settings');
+                showToast(json.message || 'Failed to save settings');
             }
         } catch (e) {
-            showToast('Network error while saving ad settings');
+            showToast('Network error while saving settings');
         }
     }
 

@@ -24,29 +24,45 @@ class AdminController extends Controller
             'data' => [
                 'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
                 'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+                'google_auth_android' => AppSetting::get('google_auth_android', 'true') === 'true',
+                'google_auth_windows' => AppSetting::get('google_auth_windows', 'true') === 'true',
             ]
         ]);
     }
 
     /**
-     * Update AdMob Feature Flag Settings from Admin Panel.
+     * Update Feature Flag Settings from Admin Panel.
      */
     public function updateAdSettings(Request $request)
     {
         $request->validate([
-            'ads_enabled' => 'required|boolean',
-            'ads_target_audience' => 'required|string|in:all,selected_users,none',
+            'ads_enabled' => 'nullable|boolean',
+            'ads_target_audience' => 'nullable|string|in:all,selected_users,none',
+            'google_auth_android' => 'nullable|boolean',
+            'google_auth_windows' => 'nullable|boolean',
         ]);
 
-        AppSetting::set('ads_enabled', $request->ads_enabled ? 'true' : 'false');
-        AppSetting::set('ads_target_audience', $request->ads_target_audience);
+        if ($request->has('ads_enabled')) {
+            AppSetting::set('ads_enabled', $request->ads_enabled ? 'true' : 'false');
+        }
+        if ($request->has('ads_target_audience')) {
+            AppSetting::set('ads_target_audience', $request->ads_target_audience);
+        }
+        if ($request->has('google_auth_android')) {
+            AppSetting::set('google_auth_android', $request->google_auth_android ? 'true' : 'false');
+        }
+        if ($request->has('google_auth_windows')) {
+            AppSetting::set('google_auth_windows', $request->google_auth_windows ? 'true' : 'false');
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'AdMob feature flag settings updated successfully!',
+            'message' => 'Feature flag settings updated successfully!',
             'data' => [
-                'ads_enabled' => $request->ads_enabled,
-                'ads_target_audience' => $request->ads_target_audience,
+                'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
+                'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+                'google_auth_android' => AppSetting::get('google_auth_android', 'true') === 'true',
+                'google_auth_windows' => AppSetting::get('google_auth_windows', 'true') === 'true',
             ]
         ]);
     }
