@@ -108,6 +108,28 @@ try {
         });
         echo " -> Added 'semester' to users table.\n";
     }
+
+    if (\Illuminate\Support\Facades\Schema::hasTable('users') && !\Illuminate\Support\Facades\Schema::hasColumn('users', 'show_ads')) {
+        \Illuminate\Support\Facades\Schema::table('users', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->boolean('show_ads')->default(true)->after('role');
+        });
+        echo " -> Added 'show_ads' to users table.\n";
+    }
+
+    if (!\Illuminate\Support\Facades\Schema::hasTable('app_settings')) {
+        \Illuminate\Database\Schema\Blueprint::macro('dummy', function() {});
+        \Illuminate\Support\Facades\Schema::create('app_settings', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->id();
+            $table->string('key')->unique();
+            $table->text('value')->nullable();
+            $table->timestamps();
+        });
+        \Illuminate\Support\Facades\DB::table('app_settings')->insert([
+            ['key' => 'ads_enabled', 'value' => 'true', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'ads_target_audience', 'value' => 'all', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        echo " -> Created 'app_settings' table.\n";
+    }
     echo "Dynamic column checks complete.\n\n";
 
     $runSeed = isset($_GET['seed']) ? filter_var($_GET['seed'], FILTER_VALIDATE_BOOLEAN) : false;

@@ -126,18 +126,36 @@ class AuthController extends Controller
     }
 
     /**
-     * Get authenticated user profile.
+     * Get public application settings (ad configurations, feature flags)
      */
+    public function getAppSettings()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
+                'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+            ]
+        ]);
+    }
+
     /**
      * Get authenticated user profile with loaded academic structure relationships.
      */
     public function me(Request $request)
     {
         $user = $request->user()->load(['university', 'college', 'departmentModel', 'course', 'branch', 'section', 'subsection']);
+        $adConfig = [
+            'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
+            'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+            'user_show_ads' => (bool)($user->show_ads ?? true),
+        ];
+
         return response()->json([
             'success' => true,
             'data' => [
                 'user' => $user,
+                'ad_config' => $adConfig,
             ]
         ], 200);
     }

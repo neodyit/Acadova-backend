@@ -996,11 +996,12 @@
                                     <th>Department</th>
                                     <th>Quizzes Taken</th>
                                     <th>Joined Date</th>
+                                    <th>Ads Status</th>
                                     <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
-                                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading users directory...</td></tr>
+                                <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading users directory...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1074,9 +1075,40 @@
                             </div>
                         </div>
                         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Download pre-formatted CSV template for single & multiple answer questions.</p>
-                        <a href="/sample-csv" download="sample_questions.csv" class="btn btn-secondary" style="justify-content: center;">
-                            <i class="fa-solid fa-download"></i> Download Sample CSV
-                        </a>
+                    <div class="quiz-card" style="grid-column: span 2;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 40px; height: 40px; background: #FEF3C7; color: #D97706; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                                    <i class="fa-solid fa-rectangle-ad"></i>
+                                </div>
+                                <div>
+                                    <h3 style="font-size: 16px; font-weight: 800;">Google Mobile Ads Feature Flag</h3>
+                                    <span id="adStatusBadge" style="font-size: 12px; color: #10B981; font-weight: 700;">● Active</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="saveAdSettings()" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Ad Settings
+                            </button>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Dynamically control advertisement visibility across student and faculty devices in real-time from this admin panel.</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; background: var(--bg); padding: 18px; border-radius: 12px;">
+                            <div>
+                                <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 8px;">Master Ads Switch</label>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
+                                    <input type="checkbox" id="adsEnabledToggle" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary);">
+                                    <span style="font-size: 13.5px; font-weight: 700;">Enable Advertisements in App</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 8px;">Target Audience Filter</label>
+                                <select id="adsTargetAudience" class="form-control" style="font-size: 13.5px; font-weight: 600;">
+                                    <option value="all">🌐 All Users (Show ads to everyone)</option>
+                                    <option value="selected_users">🎯 Selected Users Only (Users with Show Ads = Enabled)</option>
+                                    <option value="none">🚫 No Users (Turn off ads for everyone)</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1493,6 +1525,8 @@
                 loadUsers();
             } else if (section === 'media') {
                 loadMediaFiles();
+            } else if (section === 'settings') {
+                loadAdSettings();
             }
         }
 
@@ -1642,7 +1676,7 @@
         function renderUsersTable(list) {
             const tbody = document.getElementById('usersTableBody');
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No users found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No users found.</td></tr>`;
                 return;
             }
 
@@ -1657,12 +1691,87 @@
                     <td>${u.department || 'Not Specified'}</td>
                     <td><strong>${u.attempts_count}</strong> Quizzes</td>
                     <td>${u.created_at}</td>
+                    <td>
+                        <button type="button" class="btn ${u.show_ads ? 'btn-secondary' : 'btn-danger'}" style="padding: 4px 10px; font-size: 11.5px;" onclick="toggleUserAds(${u.id}, ${!u.show_ads})">
+                            ${u.show_ads ? '🟢 Ads Enabled' : '🔴 Ads Disabled'}
+                        </button>
+                    </td>
                     <td style="text-align: right;">
                         <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 12px;" onclick="editUser(${u.id})"><i class="fa-solid fa-pen"></i> Edit</button>
                         <button class="btn btn-danger" style="padding: 6px 10px; font-size: 12px;" onclick="deleteUser(${u.id})"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        async function toggleUserAds(userId, newShowAds) {
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ show_ads: newShowAds })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    showToast(newShowAds ? 'Ads enabled for user' : 'Ads disabled for user');
+                    loadUsers();
+                } else {
+                    showToast(json.message || 'Failed to update user ads setting');
+                }
+            } catch (e) {
+                showToast('Network error while updating user ads setting');
+            }
+        }
+
+        async function loadAdSettings() {
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/ad-settings`);
+                const json = await res.json();
+                if (json.success && json.data) {
+                    const toggle = document.getElementById('adsEnabledToggle');
+                    const audience = document.getElementById('adsTargetAudience');
+                    const badge = document.getElementById('adStatusBadge');
+                    if (toggle) toggle.checked = json.data.ads_enabled;
+                    if (audience) audience.value = json.data.ads_target_audience;
+                    if (badge) {
+                        badge.innerText = json.data.ads_enabled ? '● Active' : '○ Disabled';
+                        badge.style.color = json.data.ads_enabled ? '#10B981' : '#EF4444';
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load ad settings', e);
+            }
+        }
+
+        async function saveAdSettings() {
+            const toggle = document.getElementById('adsEnabledToggle');
+            const audience = document.getElementById('adsTargetAudience');
+            const badge = document.getElementById('adStatusBadge');
+
+            const payload = {
+                ads_enabled: toggle ? toggle.checked : true,
+                ads_target_audience: audience ? audience.value : 'all'
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/ad-settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.success) {
+                    showToast('AdMob feature flag settings saved!');
+                    if (badge) {
+                        badge.innerText = payload.ads_enabled ? '● Active' : '○ Disabled';
+                        badge.style.color = payload.ads_enabled ? '#10B981' : '#EF4444';
+                    }
+                } else {
+                    showToast(json.message || 'Failed to save ad settings');
+                }
+            } catch (e) {
+                showToast('Network error while saving ad settings');
+            }
         }
 
         function searchUsers() {

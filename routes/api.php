@@ -19,6 +19,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/google-login', [AuthController::class, 'googleLogin']);
 Route::post('/forgot-password', [AuthController::class, 'sendPasswordResetLink']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::get('/app-settings', [AuthController::class, 'getAppSettings']);
 
 // Public Academic hierarchy getters (Used during registration & initial profile setup)
 Route::prefix('academic')->group(function () {
@@ -98,6 +99,8 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
         Route::get('/admin/attempts', [AdminController::class, 'attempts']);
         Route::delete('/admin/attempts/{id}', [AdminController::class, 'deleteAttempt']);
         Route::get('/admin/sessions', [AdminController::class, 'sessions']);
+        Route::get('/admin/ad-settings', [AdminController::class, 'getAdSettings']);
+        Route::post('/admin/ad-settings', [AdminController::class, 'updateAdSettings']);
 
         // Faculty Allocations Management
         Route::get('/admin/faculty/allocations', [AdminController::class, 'getFacultyAllocations']);

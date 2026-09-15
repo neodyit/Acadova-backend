@@ -10,8 +10,47 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\Models\AppSetting;
+
 class AdminController extends Controller
 {
+    /**
+     * Get current AdMob Feature Flag Settings for Admin Panel.
+     */
+    public function getAdSettings()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
+                'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+            ]
+        ]);
+    }
+
+    /**
+     * Update AdMob Feature Flag Settings from Admin Panel.
+     */
+    public function updateAdSettings(Request $request)
+    {
+        $request->validate([
+            'ads_enabled' => 'required|boolean',
+            'ads_target_audience' => 'required|string|in:all,selected_users,none',
+        ]);
+
+        AppSetting::set('ads_enabled', $request->ads_enabled ? 'true' : 'false');
+        AppSetting::set('ads_target_audience', $request->ads_target_audience);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'AdMob feature flag settings updated successfully!',
+            'data' => [
+                'ads_enabled' => $request->ads_enabled,
+                'ads_target_audience' => $request->ads_target_audience,
+            ]
+        ]);
+    }
+
     /**
      * Get aggregate statistics for web admin dashboard.
      */
@@ -64,6 +103,7 @@ class AdminController extends Controller
                 'department' => $user->department,
                 'phone' => $user->phone,
                 'avatar' => $user->avatar,
+                'show_ads' => (bool)($user->show_ads ?? true),
                 'attempts_count' => $attemptsCount,
                 'created_at' => $user->created_at ? $user->created_at->format('M d, Y H:i') : 'N/A',
             ];
@@ -244,6 +284,7 @@ class AdminController extends Controller
             'faculty_id' => 'nullable|string',
             'department' => 'nullable|string',
             'phone' => 'nullable|string',
+            'show_ads' => 'sometimes|boolean',
             'bio' => 'nullable|string',
             'password' => 'nullable|string|min:6',
         ]);
@@ -259,6 +300,7 @@ class AdminController extends Controller
         if ($request->has('name')) $user->name = $request->name;
         if ($request->has('email')) $user->email = strtolower(trim($request->email));
         if ($request->has('role')) $user->role = strtolower($request->role);
+        if ($request->has('show_ads')) $user->show_ads = (bool)$request->show_ads;
         if ($request->has('roll_number')) $user->roll_number = $request->roll_number;
         if ($request->has('faculty_id')) $user->faculty_id = $request->faculty_id;
         if ($request->has('department')) $user->department = $request->department;
