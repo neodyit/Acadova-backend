@@ -139,4 +139,73 @@ class NotificationController extends Controller
             'message' => 'FCM token removed successfully.',
         ]);
     }
+
+    /**
+     * Admin Endpoint: Send notification to a specific user, role, or broadcast to all users
+     */
+    public function sendNotification(Request $request)
+    {
+        $admin = $request->user() ?? \Illuminate\Support\Facades\Auth::user() ?? auth('sanctum')->user() ?? auth('web')->user();
+        if (!$admin || strtolower($admin->role) !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Forbidden. Admin authorization required.'], 403);
+        }
+
+        $validated = $request->validate([
+            'target' => 'required|string|in:all,student,faculty,specific',
+            'user_id' => 'required_if:target,specific|nullable|integer|exists:users,id',
+            'title' => 'required|string|max:255',
+            'body' => 'required|string|max:2000',
+            'type' => 'nullable|string|max:50',
+        ]);
+
+        $query = \App\Models\User::query();
+
+        if ($validated['target'] === 'student') {
+            $query->where('role', 'student');
+        } elseif ($validated['target'] === 'faculty') {
+            $query->where('role', 'faculty');
+        } elseif ($validated['target'] === 'specific') {
+            $query->where('id', $validated['user_id']);
+        }
+
+        $recipients = $query->get();
+        if ($recipients->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No target users found for this notification.'], 404);
+        }
+
+        $sentCount = 0;
+        $fcmTokens = [];
+
+        foreach ($recipients as $recipient) {
+            // 1. Create in-app database notification
+            Notification::create([
+                'user_id' => $recipient->id,
+                'title' => $validated['title'],
+                'message' => $validated['body'],
+                'type' => $validated['type'] ?? 'announcement',
+                'is_read' => false,
+            ]);
+            $sentCount++;
+
+            if (!empty($recipient->fcm_token)) {
+                $fcmTokens[] = $recipient->fcm_token;
+            }
+        }
+
+        // 2. Dispatch FCM Push Notifications if FCM tokens are present
+        if (!empty($fcmTokens)) {
+            \App\Services\FcmService::sendPushMulticast(
+                $fcmTokens,
+                $validated['title'],
+                $validated['body'],
+                ['type' => $validated['type'] ?? 'announcement']
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Notification successfully dispatched to {$sentCount} user(s).",
+            'recipients_count' => $sentCount,
+        ]);
+    }
 }

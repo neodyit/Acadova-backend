@@ -782,6 +782,11 @@
                     <i class="fa-solid fa-users"></i> Users Directory
                 </a>
             </li>
+            <li class="nav-item" id="nav-notifications">
+                <a href="/admin/notifications" onclick="navigateToSection('notifications', event)">
+                    <i class="fa-solid fa-paper-plane"></i> Send Notifications
+                </a>
+            </li>
             <li class="nav-item" id="nav-ads">
                 <a href="/admin/ads" onclick="navigateToSection('ads', event)">
                     <i class="fa-solid fa-rectangle-ad"></i> Ads Management
@@ -1113,6 +1118,98 @@
                                 <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading users directory...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. SEND NOTIFICATIONS SECTION -->
+            <div class="page-section" id="section-notifications">
+                <div class="action-bar">
+                    <div>
+                        <h1 style="font-size: 24px; font-weight: 800;">Send Push & In-App Notifications</h1>
+                        <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Dispatch real-time FCM push notifications and in-app alerts to students, faculty, or specific users.</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;" class="form-row">
+                    <!-- Notification Dispatch Card -->
+                    <div class="table-card" style="padding: 28px;">
+                        <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Dispatch New Notification
+                        </h2>
+
+                        <form id="sendNotificationForm" onsubmit="handleSendAdminNotification(event)">
+                            <div class="form-group">
+                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px;">Target Audience</label>
+                                <select id="notifTarget" class="form-control" style="font-size: 14px; font-weight: 600; padding: 12px;" onchange="toggleNotificationTargetUserSelect()">
+                                    <option value="all">📢 Broadcast to All Users (Students & Faculty)</option>
+                                    <option value="student">🎓 All Students Only</option>
+                                    <option value="faculty">👨‍🏫 All Faculty Members Only</option>
+                                    <option value="specific">👤 Specific User</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="notifSpecificUserGroup" style="display: none;">
+                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px;">Select User</label>
+                                <select id="notifUserId" class="form-control" style="font-size: 14px;">
+                                    <option value="">Loading users directory...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px;">Notification Title</label>
+                                <input type="text" id="notifTitle" class="form-control" placeholder="e.g. Exam Schedule Update" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px;">Notification Category / Type</label>
+                                <select id="notifType" class="form-control" style="font-size: 14px;">
+                                    <option value="announcement">📢 Announcement / Alert</option>
+                                    <option value="quiz_reminder">⏰ Quiz / Exam Reminder</option>
+                                    <option value="system">⚙️ System Update</option>
+                                    <option value="general">💬 General Notice</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="font-weight: 700; font-size: 13.5px; display: block; margin-bottom: 8px;">Notification Message</label>
+                                <textarea id="notifBody" class="form-control" rows="4" placeholder="Enter detailed message content here..." required></textarea>
+                            </div>
+
+                            <button type="submit" id="btnSendNotif" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 15px;">
+                                <i class="fa-solid fa-paper-plane"></i> Dispatch Notification Now
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Guidelines & Device FCM Status Summary Card -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="table-card" style="padding: 24px;">
+                            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 14px; color: var(--dark);">
+                                <i class="fa-solid fa-circle-info" style="color: #3B82F6;"></i> How Notification Dispatch Works
+                            </h3>
+                            <ul style="font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 10px; padding-left: 18px; list-style-type: disc;">
+                                <li><strong>In-App Inbox:</strong> Notifications are immediately stored in the user's database notification history.</li>
+                                <li><strong>FCM Push:</strong> Real-time Firebase Cloud Messaging push alerts are delivered to registered devices.</li>
+                                <li><strong>Audience Scoping:</strong> Target all students, faculty members, or pick a specific user by email/name.</li>
+                            </ul>
+                        </div>
+
+                        <div class="table-card" style="padding: 24px; background: #F8FAFC;">
+                            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--dark);">
+                                <i class="fa-solid fa-mobile-screen-button" style="color: #10B981;"></i> Active Device FCM Tokens
+                            </h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Summary of user accounts with registered FCM tokens ready to receive push alerts.</p>
+
+                            <div style="display: flex; justify-content: space-between; font-size: 13.5px; padding: 10px 14px; background: white; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px;">
+                                <span style="font-weight: 600;">Total Active Users:</span>
+                                <strong id="notifStatTotalUsers">0</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13.5px; padding: 10px 14px; background: white; border-radius: 10px; border: 1px solid var(--border);">
+                                <span style="font-weight: 600;">Users with FCM Tokens:</span>
+                                <strong id="notifStatFcmUsers" style="color: #10B981;">0</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1567,7 +1664,7 @@
         function navigateToSection(section, event, updateHistory = true) {
             if (event) event.preventDefault();
 
-            const validSections = ['dashboard', 'quizzes', 'campaigns', 'users', 'ads', 'media', 'settings'];
+            const validSections = ['dashboard', 'quizzes', 'campaigns', 'users', 'notifications', 'ads', 'media', 'settings'];
             if (!validSections.includes(section)) section = 'dashboard';
 
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -1584,6 +1681,7 @@
                 quizzes: 'Quizzes Management',
                 campaigns: 'Campaigns & Announcements',
                 users: 'Users Directory',
+                notifications: 'Send Push & In-App Notifications',
                 ads: 'Google Mobile Ads Management',
                 media: 'Media Library & Files',
                 settings: 'System & Database Settings'
@@ -1611,6 +1709,8 @@
                 loadCampaigns();
             } else if (section === 'users') {
                 loadUsers();
+            } else if (section === 'notifications') {
+                loadNotificationSectionData();
             } else if (section === 'ads') {
                 loadAdSettings();
                 loadUsers();
@@ -1838,6 +1938,101 @@
                 }
             } catch (e) {
                 console.error('Failed to load ad settings', e);
+            }
+        }
+
+        // Notification System Admin Handlers
+        async function loadNotificationSectionData() {
+            try {
+                if (usersData.length === 0) {
+                    await loadUsers();
+                }
+                populateNotificationUserDropdown();
+                updateNotificationStats();
+            } catch (e) {
+                console.error('Failed to load notification section data', e);
+            }
+        }
+
+        function populateNotificationUserDropdown() {
+            const select = document.getElementById('notifUserId');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Select Specific User --</option>' + usersData.map(u => `
+                <option value="${u.id}">${u.name} (${u.email}) - ${u.role ? u.role.toUpperCase() : 'USER'}</option>
+            `).join('');
+        }
+
+        function updateNotificationStats() {
+            const totalElem = document.getElementById('notifStatTotalUsers');
+            const fcmElem = document.getElementById('notifStatFcmUsers');
+            if (totalElem) totalElem.innerText = usersData.length;
+            if (fcmElem) {
+                const fcmCount = usersData.filter(u => u.fcm_token && u.fcm_token.trim().length > 0).length;
+                fcmElem.innerText = fcmCount;
+            }
+        }
+
+        function toggleNotificationTargetUserSelect() {
+            const target = document.getElementById('notifTarget').value;
+            const group = document.getElementById('notifSpecificUserGroup');
+            const userSelect = document.getElementById('notifUserId');
+            if (group) {
+                group.style.display = target === 'specific' ? 'block' : 'none';
+            }
+            if (userSelect) {
+                userSelect.required = target === 'specific';
+            }
+        }
+
+        async function handleSendAdminNotification(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSendNotif');
+            const target = document.getElementById('notifTarget').value;
+            const userId = document.getElementById('notifUserId').value;
+            const title = document.getElementById('notifTitle').value.trim();
+            const body = document.getElementById('notifBody').value.trim();
+            const type = document.getElementById('notifType').value;
+
+            if (target === 'specific' && !userId) {
+                showToast('Please select a specific user from the directory.');
+                return;
+            }
+
+            const payload = {
+                target: target,
+                user_id: target === 'specific' ? parseInt(userId) : null,
+                title: title,
+                body: body,
+                type: type
+            };
+
+            try {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dispatching Notification...';
+                }
+
+                const res = await fetch(`${API_BASE}/api/admin/notifications/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast(json.message || 'Notification dispatched successfully!');
+                    document.getElementById('sendNotificationForm').reset();
+                    toggleNotificationTargetUserSelect();
+                } else {
+                    showToast(json.message || 'Failed to dispatch notification');
+                }
+            } catch (err) {
+                showToast('Request failed. Please check network connection.');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Dispatch Notification Now';
+                }
             }
         }
 

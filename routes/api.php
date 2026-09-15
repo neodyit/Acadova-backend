@@ -117,6 +117,7 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
         Route::get('/admin/ad-settings', [AdminController::class, 'getAdSettings']);
         Route::post('/admin/ad-settings', [AdminController::class, 'updateAdSettings']);
         Route::post('/admin/users/bulk-ads', [AdminController::class, 'bulkUserAds']);
+        Route::post('/admin/notifications/send', [NotificationController::class, 'sendNotification']);
 
         // Faculty Allocations Management
         Route::get('/admin/faculty/allocations', [AdminController::class, 'getFacultyAllocations']);
