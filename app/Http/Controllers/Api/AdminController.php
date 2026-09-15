@@ -320,6 +320,39 @@ class AdminController extends Controller
     }
 
     /**
+     * Bulk update show_ads flag for users (e.g. Select All / Deselect All).
+     */
+    public function bulkUserAds(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'show_ads' => 'required|boolean',
+            'role' => 'nullable|string|in:all,student,faculty,admin',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $query = User::query();
+
+        if ($request->filled('role') && $request->role !== 'all') {
+            $query->where('role', strtolower($request->role));
+        }
+
+        $updatedCount = $query->update(['show_ads' => (bool)$request->show_ads]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Updated ads status for {$updatedCount} users.",
+            'updated_count' => $updatedCount,
+        ]);
+    }
+
+    /**
      * Delete user account & attempts.
      */
     public function destroyUser($id)

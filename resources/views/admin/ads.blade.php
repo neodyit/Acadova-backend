@@ -49,12 +49,54 @@
     </div>
 </div>
 
-<!-- User Level Ads Targeting Directory -->
-<div style="margin-bottom: 20px;">
-    <h2 style="font-size: 18px; font-weight: 800;">User-Level Ads Targeting Directory</h2>
-    <p style="font-size: 13.5px; color: var(--text-muted); margin-top: 2px;">Toggle ad visibility per user. When "Selected Users Only" mode is active, only users marked 🟢 Ads Enabled will receive ads.</p>
+<!-- User Level Ads Targeting Directory Header & Controls -->
+<div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h2 style="font-size: 20px; font-weight: 800;">User-Level Ads Targeting Directory</h2>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-top: 2px;">Toggle ad visibility per user. In "Selected Users Only" mode, only users marked 🟢 Ads Enabled will receive ads.</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary" style="padding: 10px 18px; font-size: 13px; font-weight: 700; border-radius: 10px;" onclick="bulkToggleAds(true)">
+            <i class="fa-solid fa-square-check" style="color: #10B981; margin-right: 6px;"></i> Select All (Enable Ads)
+        </button>
+        <button type="button" class="btn btn-danger" style="padding: 10px 18px; font-size: 13px; font-weight: 700; border-radius: 10px;" onclick="bulkToggleAds(false)">
+            <i class="fa-solid fa-square-xmark" style="margin-right: 6px;"></i> Deselect All (Disable Ads)
+        </button>
+    </div>
 </div>
 
+<!-- Filters & Search Toolbar -->
+<div style="background: white; border-radius: 16px; border: 1px solid var(--border); padding: 18px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1;">
+        <!-- Role Filter Tabs -->
+        <div style="display: flex; background: var(--bg); padding: 4px; border-radius: 10px; border: 1px solid var(--border);">
+            <button type="button" class="role-filter-tab active" id="filterTabAll" onclick="setRoleFilter('all')" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                All Users (<span id="countAll">0</span>)
+            </button>
+            <button type="button" class="role-filter-tab" id="filterTabFaculty" onclick="setRoleFilter('faculty')" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: transparent; color: var(--text-muted);">
+                👨‍🏫 Faculty (<span id="countFaculty">0</span>)
+            </button>
+            <button type="button" class="role-filter-tab" id="filterTabStudent" onclick="setRoleFilter('student')" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: transparent; color: var(--text-muted);">
+                🎓 Students (<span id="countStudent">0</span>)
+            </button>
+        </div>
+
+        <!-- Ads Status Filter -->
+        <select id="statusFilter" class="form-control" onchange="renderUsersTable()" style="width: auto; min-width: 170px; font-size: 13px; font-weight: 600; padding: 9px 14px; border-radius: 10px;">
+            <option value="all">All Ad Statuses</option>
+            <option value="enabled">🟢 Ads Enabled Only</option>
+            <option value="disabled">🔴 Ads Disabled Only</option>
+        </select>
+    </div>
+
+    <!-- Search Input -->
+    <div style="position: relative; width: 280px;">
+        <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, email, ID..." oninput="renderUsersTable()" style="padding: 9px 14px 9px 38px; font-size: 13px; border-radius: 10px;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px;"></i>
+    </div>
+</div>
+
+<!-- Table Card -->
 <div class="table-card">
     <div class="table-responsive">
         <table>
@@ -66,7 +108,7 @@
                     <th>Department</th>
                     <th>Quizzes Taken</th>
                     <th>Joined Date</th>
-                    <th>Ads Status</th>
+                    <th style="text-align: right;">Ads Status</th>
                 </tr>
             </thead>
             <tbody id="adsUsersTableBody">
@@ -79,6 +121,9 @@
 
 @section('scripts')
 <script>
+    let rawUsersList = [];
+    let currentRoleFilter = 'all';
+
     document.addEventListener('DOMContentLoaded', function() {
         loadAdSettings();
         loadUsersForAds();
@@ -147,35 +192,136 @@
                 return;
             }
             const json = await res.json();
-            const list = json.data || [];
-            const tbody = document.getElementById('adsUsersTableBody');
+            rawUsersList = json.data || [];
             
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No users found.</td></tr>`;
-                return;
-            }
+            // Update Role Counters
+            const facultyCount = rawUsersList.filter(u => u.role === 'FACULTY').length;
+            const studentCount = rawUsersList.filter(u => u.role === 'STUDENT').length;
+            document.getElementById('countAll').innerText = rawUsersList.length;
+            document.getElementById('countFaculty').innerText = facultyCount;
+            document.getElementById('countStudent').innerText = studentCount;
 
-            tbody.innerHTML = list.map(u => `
-                <tr>
-                    <td>
-                        <strong>${u.name}</strong><br>
-                        <span style="font-size: 11.5px; color: var(--text-muted);">${u.email}</span>
-                    </td>
-                    <td><span class="badge ${u.role === 'STUDENT' ? 'badge-active' : 'badge-upcoming'}">${u.role}</span></td>
-                    <td><strong>${u.roll_number || u.faculty_id || 'N/A'}</strong></td>
-                    <td>${u.department || 'Not Specified'}</td>
-                    <td><strong>${u.attempts_count}</strong> Quizzes</td>
-                    <td>${u.created_at}</td>
-                    <td>
-                        <button type="button" class="btn ${u.show_ads ? 'btn-secondary' : 'btn-danger'}" style="padding: 6px 14px; font-size: 12px; border-radius: 20px;" onclick="toggleUserAds(${u.id}, ${!u.show_ads})">
-                            ${u.show_ads ? '🟢 Ads Enabled' : '🔴 Ads Disabled'}
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            renderUsersTable();
         } catch (e) {
             console.error('Failed to load users for ads directory', e);
         }
+    }
+
+    function setRoleFilter(role) {
+        currentRoleFilter = role;
+        ['All', 'Faculty', 'Student'].forEach(tab => {
+            const btn = document.getElementById('filterTab' + tab);
+            if (btn) {
+                const isActive = tab.toLowerCase() === role || (tab === 'All' && role === 'all');
+                btn.style.background = isActive ? 'white' : 'transparent';
+                btn.style.color = isActive ? 'var(--primary)' : 'var(--text-muted)';
+                btn.style.boxShadow = isActive ? '0 2px 4px rgba(0,0,0,0.05)' : 'none';
+            }
+        });
+        renderUsersTable();
+    }
+
+    function renderUsersTable() {
+        const tbody = document.getElementById('adsUsersTableBody');
+        const searchQuery = (document.getElementById('userSearchInput').value || '').toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+
+        let filtered = rawUsersList.filter(u => {
+            // Role Filter
+            if (currentRoleFilter !== 'all') {
+                if (u.role.toLowerCase() !== currentRoleFilter) return false;
+            }
+            // Status Filter
+            if (statusFilter === 'enabled' && !u.show_ads) return false;
+            if (statusFilter === 'disabled' && u.show_ads) return false;
+
+            // Search Query
+            if (searchQuery) {
+                const name = (u.name || '').toLowerCase();
+                const email = (u.email || '').toLowerCase();
+                const idNum = (u.roll_number || u.faculty_id || '').toLowerCase();
+                const dept = (u.department || '').toLowerCase();
+                return name.includes(searchQuery) || email.includes(searchQuery) || idNum.includes(searchQuery) || dept.includes(searchQuery);
+            }
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No matching users found in directory.</td></tr>`;
+            return;
+        }
+
+        // Separate Faculty & Students for visual separator headings when showing "All Users"
+        const facultyList = filtered.filter(u => u.role === 'FACULTY');
+        const studentList = filtered.filter(u => u.role === 'STUDENT');
+        const otherList = filtered.filter(u => u.role !== 'FACULTY' && u.role !== 'STUDENT');
+
+        let html = '';
+
+        if (currentRoleFilter === 'all') {
+            if (facultyList.length > 0) {
+                html += `
+                    <tr style="background: #FFFBEB; border-top: 2px solid #FCD34D; border-bottom: 1px solid #FDE68A;">
+                        <td colspan="7" style="padding: 12px 20px; font-weight: 800; color: #B45309; font-size: 13.5px;">
+                            <i class="fa-solid fa-chalkboard-user" style="margin-right: 8px;"></i> FACULTY DIRECTORY (${facultyList.length} Members)
+                        </td>
+                    </tr>
+                `;
+                html += facultyList.map(u => renderUserRow(u)).join('');
+            }
+
+            if (studentList.length > 0) {
+                html += `
+                    <tr style="background: #EFF6FF; border-top: 2px solid #93C5FD; border-bottom: 1px solid #BFDBFE;">
+                        <td colspan="7" style="padding: 12px 20px; font-weight: 800; color: #1D4ED8; font-size: 13.5px;">
+                            <i class="fa-solid fa-user-graduate" style="margin-right: 8px;"></i> STUDENT DIRECTORY (${studentList.length} Students)
+                        </td>
+                    </tr>
+                `;
+                html += studentList.map(u => renderUserRow(u)).join('');
+            }
+
+            if (otherList.length > 0) {
+                html += `
+                    <tr style="background: #F3F4F6; border-top: 2px solid #D1D5DB;">
+                        <td colspan="7" style="padding: 12px 20px; font-weight: 800; color: #374151; font-size: 13.5px;">
+                            <i class="fa-solid fa-users-gear" style="margin-right: 8px;"></i> ADMINISTRATORS & OTHERS (${otherList.length})
+                        </td>
+                    </tr>
+                `;
+                html += otherList.map(u => renderUserRow(u)).join('');
+            }
+        } else {
+            html = filtered.map(u => renderUserRow(u)).join('');
+        }
+
+        tbody.innerHTML = html;
+    }
+
+    function renderUserRow(u) {
+        const isFaculty = u.role === 'FACULTY';
+        const roleBadge = isFaculty
+            ? `<span class="badge" style="background: #FEF3C7; color: #B45309; font-weight: 800; padding: 4px 10px; border-radius: 12px;"><i class="fa-solid fa-chalkboard-user"></i> FACULTY</span>`
+            : `<span class="badge" style="background: #DBEAFE; color: #1E40AF; font-weight: 800; padding: 4px 10px; border-radius: 12px;"><i class="fa-solid fa-user-graduate"></i> STUDENT</span>`;
+
+        return `
+            <tr>
+                <td>
+                    <strong style="font-size: 14px;">${u.name}</strong><br>
+                    <span style="font-size: 12px; color: var(--text-muted);">${u.email}</span>
+                </td>
+                <td>${roleBadge}</td>
+                <td><strong>${u.roll_number || u.faculty_id || 'N/A'}</strong></td>
+                <td>${u.department || 'Not Specified'}</td>
+                <td><strong>${u.attempts_count}</strong> Quizzes</td>
+                <td>${u.created_at}</td>
+                <td style="text-align: right;">
+                    <button type="button" class="btn ${u.show_ads ? 'btn-secondary' : 'btn-danger'}" style="padding: 7px 16px; font-size: 12.5px; font-weight: 700; border-radius: 20px;" onclick="toggleUserAds(${u.id}, ${!u.show_ads})">
+                        ${u.show_ads ? '🟢 Ads Enabled' : '🔴 Ads Disabled'}
+                    </button>
+                </td>
+            </tr>
+        `;
     }
 
     async function toggleUserAds(userId, newShowAds) {
@@ -192,7 +338,9 @@
             const json = await res.json();
             if (json.success) {
                 showToast(newShowAds ? 'Ads enabled for user' : 'Ads disabled for user');
-                loadUsersForAds();
+                const target = rawUsersList.find(u => u.id === userId);
+                if (target) target.show_ads = newShowAds;
+                renderUsersTable();
             } else {
                 showToast(json.message || 'Failed to update user ads setting');
             }
@@ -200,5 +348,39 @@
             showToast('Network error while updating user ads setting');
         }
     }
+
+    async function bulkToggleAds(enableAds) {
+        const actionText = enableAds ? 'Enable Ads' : 'Disable Ads';
+        const roleScope = currentRoleFilter === 'all' ? 'All Users' : `${currentRoleFilter.toUpperCase()} Users`;
+
+        if (!confirm(`Are you sure you want to ${actionText} for ${roleScope}?`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/admin/users/bulk-ads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    show_ads: enableAds,
+                    role: currentRoleFilter
+                })
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast(json.message || `Bulk ${actionText} completed successfully!`);
+                loadUsersForAds();
+            } else {
+                showToast(json.message || 'Failed to perform bulk update');
+            }
+        } catch (e) {
+            showToast('Network error while performing bulk update');
+        }
+    }
 </script>
 @endsection
+
