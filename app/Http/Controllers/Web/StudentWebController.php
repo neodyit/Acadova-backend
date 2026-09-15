@@ -72,16 +72,7 @@ class StudentWebController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->filter(function ($quiz) use ($user) {
-                if (!empty($quiz->target_academic_type) && !empty($quiz->target_academic_id)) {
-                    $type = strtolower($quiz->target_academic_type);
-                    $id = (int)$quiz->target_academic_id;
-
-                    if ($type === 'branch' && $user->branch_id !== $id) return false;
-                    if ($type === 'department' && $user->department_id !== $id) return false;
-                    if ($type === 'course' && $user->course_id !== $id) return false;
-                    if ($type === 'section' && $user->section_id !== $id) return false;
-                }
-                return true;
+                return $quiz->isTargetedToStudent($user);
             });
 
         // Student's recent attempt history

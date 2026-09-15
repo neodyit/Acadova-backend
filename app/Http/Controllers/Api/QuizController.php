@@ -38,111 +38,7 @@ class QuizController extends Controller
         $quizzes = $query->latest()->get();
         if ($user && strtolower($user->role) === 'student') {
             $quizzes = $quizzes->filter(function ($quiz) use ($user) {
-                // Priority 1: Explicit Target Combinations (e.g. CSE - E, AIDS - B)
-                if (!empty($quiz->target_groups) && is_array($quiz->target_groups)) {
-                    $matchedGroup = false;
-                    foreach ($quiz->target_groups as $group) {
-                        if (!is_array($group)) continue;
-
-                        $branchOk = empty($group['branch_id']) || $group['branch_id'] === 'all' ||
-                            ((string)$user->branch_id === (string)$group['branch_id']) ||
-                            (!empty($group['branch_db_id']) && (string)$user->branch_id === (string)$group['branch_db_id']) ||
-                            ($user->branch && (string)$user->branch->id === (string)$group['branch_id']) ||
-                            ($user->branch && (string)$user->branch->name === (string)$group['branch_id']) ||
-                            ($user->branch && (string)$user->branch->code === (string)$group['branch_id']) ||
-                            ((string)$user->branch === (string)$group['branch_id']);
-
-                        $secList = [];
-                        if (!empty($group['section_ids']) && is_array($group['section_ids'])) {
-                            $secList = $group['section_ids'];
-                        } elseif (!empty($group['section_id'])) {
-                            $secList = [$group['section_id']];
-                        }
-
-                        $sectionOk = empty($secList) || in_array('all', $secList) ||
-                            in_array((string)$user->section_id, $secList) ||
-                            ($user->section && in_array((string)$user->section->id, $secList)) ||
-                            ($user->section && in_array((string)$user->section->name, $secList)) ||
-                            in_array((string)$user->section, $secList);
-
-                        $deptOk = empty($group['department_id']) || $group['department_id'] === 'all' ||
-                            ((string)$user->department_id === (string)$group['department_id']) ||
-                            ($user->departmentModel && (string)$user->departmentModel->id === (string)$group['department_id']) ||
-                            ($user->departmentModel && (string)$user->departmentModel->name === (string)$group['department_id']) ||
-                            ((string)$user->department === (string)$group['department_id']);
-
-                        $courseOk = empty($group['course_id']) || $group['course_id'] === 'all' ||
-                            ((string)$user->course_id === (string)$group['course_id']) ||
-                            ($user->course && (string)$user->course->id === (string)$group['course_id']) ||
-                            ($user->course && (string)$user->course->name === (string)$group['course_id']);
-
-                        $userSemDigits = preg_replace('/[^0-9]/', '', (string)$user->semester);
-                        $groupSemDigits = preg_replace('/[^0-9]/', '', (string)($group['semester'] ?? ''));
-
-                        $semOk = empty($group['semester']) || $group['semester'] === 'all' ||
-                            ($userSemDigits !== '' && $groupSemDigits !== '' && $userSemDigits === $groupSemDigits) ||
-                            ((string)$user->semester === (string)$group['semester']);
-
-                        if ($branchOk && $sectionOk && $deptOk && $courseOk && $semOk) {
-                            $matchedGroup = true;
-                            break;
-                        }
-                    }
-                    if (!$matchedGroup) return false;
-                } else {
-                    // Priority 2: Independent filter lists
-                    // 1. Filter Department
-                    if (!empty($quiz->department_ids) && is_array($quiz->department_ids) && !in_array('all', $quiz->department_ids)) {
-                        $deptMatch = false;
-                        if ($user->department_id && (in_array($user->department_id, $quiz->department_ids) || in_array((string)$user->department_id, $quiz->department_ids))) {
-                            $deptMatch = true;
-                        }
-                        if ($user->department && in_array($user->department, $quiz->department_ids)) {
-                            $deptMatch = true;
-                        }
-                        if (!$deptMatch) return false;
-                    }
-
-                    // 2. Filter Course
-                    if (!empty($quiz->course_ids) && is_array($quiz->course_ids) && !in_array('all', $quiz->course_ids)) {
-                        $courseMatch = false;
-                        if ($user->course_id && (in_array($user->course_id, $quiz->course_ids) || in_array((string)$user->course_id, $quiz->course_ids))) {
-                            $courseMatch = true;
-                        }
-                        if (!$courseMatch) return false;
-                    }
-
-                    // 3. Filter Branch
-                    if (!empty($quiz->branch_ids) && is_array($quiz->branch_ids) && !in_array('all', $quiz->branch_ids)) {
-                        $branchMatch = false;
-                        if ($user->branch_id && (in_array($user->branch_id, $quiz->branch_ids) || in_array((string)$user->branch_id, $quiz->branch_ids))) {
-                            $branchMatch = true;
-                        }
-                        if (!$branchMatch) return false;
-                    }
-
-                    // 4. Filter Section
-                    if (!empty($quiz->section_ids) && is_array($quiz->section_ids) && !in_array('all', $quiz->section_ids)) {
-                        $secMatch = false;
-                        if ($user->section_id && (in_array($user->section_id, $quiz->section_ids) || in_array((string)$user->section_id, $quiz->section_ids))) {
-                            $secMatch = true;
-                        }
-                        if (!$secMatch) return false;
-                    }
-
-                    // 5. Filter Subject
-                    if (!empty($quiz->subject_ids) && is_array($quiz->subject_ids) && !in_array('all', $quiz->subject_ids)) {
-                        $subMatch = false;
-                        if (in_array($quiz->subject, $quiz->subject_ids) || in_array((string)$quiz->subject, $quiz->subject_ids)) {
-                            $subMatch = true;
-                        } else {
-                            $subMatch = true;
-                        }
-                        if (!$subMatch) return false;
-                    }
-                }
-
-                return true;
+                return $quiz->isTargetedToStudent($user);
             })->values();
         }
 
@@ -164,6 +60,16 @@ class QuizController extends Controller
                 'success' => false,
                 'message' => 'Quiz not found.',
             ], 404);
+        }
+
+        $user = auth('sanctum')->user() ?? request()->user();
+        if ($user && strtolower($user->role) === 'student') {
+            if (!$quiz->isTargetedToStudent($user)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Quiz not available for your department/batch scope.',
+                ], 403);
+            }
         }
 
         return response()->json([
