@@ -15,6 +15,27 @@ use App\Models\AppSetting;
 class AdminController extends Controller
 {
     /**
+     * Get current App Settings for public API.
+     */
+    public function getAppSettings()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
+                'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+                'google_auth_android' => AppSetting::get('google_auth_android', 'true') === 'true',
+                'google_auth_windows' => AppSetting::get('google_auth_windows', 'true') === 'true',
+                'latest_app_version' => AppSetting::get('latest_app_version', '1.0.0'),
+                'min_required_version' => AppSetting::get('min_required_version', '1.0.0'),
+                'update_url' => AppSetting::get('update_url', 'https://play.google.com/store/apps/details?id=com.neodyit.acadova'),
+                'force_update' => AppSetting::get('force_update', 'false') === 'true',
+                'release_notes' => AppSetting::get('release_notes', 'Performance improvements & bug fixes.'),
+            ]
+        ]);
+    }
+
+    /**
      * Get current AdMob Feature Flag Settings for Admin Panel.
      */
     public function getAdSettings()
@@ -26,12 +47,17 @@ class AdminController extends Controller
                 'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
                 'google_auth_android' => AppSetting::get('google_auth_android', 'true') === 'true',
                 'google_auth_windows' => AppSetting::get('google_auth_windows', 'true') === 'true',
+                'latest_app_version' => AppSetting::get('latest_app_version', '1.0.0'),
+                'min_required_version' => AppSetting::get('min_required_version', '1.0.0'),
+                'update_url' => AppSetting::get('update_url', 'https://acadova.neodyit.com/download'),
+                'force_update' => AppSetting::get('force_update', 'false') === 'true',
+                'release_notes' => AppSetting::get('release_notes', 'Performance improvements & bug fixes.'),
             ]
         ]);
     }
 
     /**
-     * Update Feature Flag Settings from Admin Panel.
+     * Update Feature Flag & App Version Settings from Admin Panel.
      */
     public function updateAdSettings(Request $request)
     {
@@ -40,6 +66,11 @@ class AdminController extends Controller
             'ads_target_audience' => 'nullable|string|in:all,selected_users,none',
             'google_auth_android' => 'nullable|boolean',
             'google_auth_windows' => 'nullable|boolean',
+            'latest_app_version' => 'nullable|string|max:20',
+            'min_required_version' => 'nullable|string|max:20',
+            'update_url' => 'nullable|string|max:500',
+            'force_update' => 'nullable|boolean',
+            'release_notes' => 'nullable|string|max:1000',
         ]);
 
         if ($request->has('ads_enabled')) {
@@ -54,15 +85,35 @@ class AdminController extends Controller
         if ($request->has('google_auth_windows')) {
             AppSetting::set('google_auth_windows', $request->google_auth_windows ? 'true' : 'false');
         }
+        if ($request->has('latest_app_version')) {
+            AppSetting::set('latest_app_version', $request->latest_app_version);
+        }
+        if ($request->has('min_required_version')) {
+            AppSetting::set('min_required_version', $request->min_required_version);
+        }
+        if ($request->has('update_url')) {
+            AppSetting::set('update_url', $request->update_url);
+        }
+        if ($request->has('force_update')) {
+            AppSetting::set('force_update', $request->force_update ? 'true' : 'false');
+        }
+        if ($request->has('release_notes')) {
+            AppSetting::set('release_notes', $request->release_notes);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Feature flag settings updated successfully!',
+            'message' => 'Settings updated successfully!',
             'data' => [
                 'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
                 'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
                 'google_auth_android' => AppSetting::get('google_auth_android', 'true') === 'true',
                 'google_auth_windows' => AppSetting::get('google_auth_windows', 'true') === 'true',
+                'latest_app_version' => AppSetting::get('latest_app_version', '1.0.0'),
+                'min_required_version' => AppSetting::get('min_required_version', '1.0.0'),
+                'update_url' => AppSetting::get('update_url', 'https://acadova.neodyit.com/download'),
+                'force_update' => AppSetting::get('force_update', 'false') === 'true',
+                'release_notes' => AppSetting::get('release_notes', 'Performance improvements & bug fixes.'),
             ]
         ]);
     }

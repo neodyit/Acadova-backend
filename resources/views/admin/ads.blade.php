@@ -83,6 +83,42 @@
     </div>
 </div>
 
+<!-- App Version & Update Control Card -->
+<div style="background: white; border-radius: 18px; border: 2px solid #10B981; padding: 28px; margin-bottom: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 48px; height: 48px; background: #D1FAE5; color: #10B981; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800;">App Update & Play Store Version Control</h2>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">When local app version is lower than the latest Play Store version, users will be prompted to update.</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; background: var(--bg); padding: 24px; border-radius: 14px; border: 1px solid var(--border);">
+        <div>
+            <label style="font-weight: 800; font-size: 13.5px; display: block; margin-bottom: 6px;">🚀 Latest Play Store Version</label>
+            <input type="text" id="latestAppVersionInput" class="form-control" placeholder="1.0.0" style="font-weight: 700; font-size: 14px; padding: 10px 14px;">
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">e.g., 1.0.1 or 2.0.0. Current local app version is 1.0.0.</p>
+        </div>
+        <div>
+            <label style="font-weight: 800; font-size: 13.5px; display: block; margin-bottom: 6px;">🔗 Play Store / Update URL</label>
+            <input type="text" id="updateUrlInput" class="form-control" placeholder="https://play.google.com/store/apps/details?id=com.neodyit.acadova" style="font-weight: 600; font-size: 13.5px; padding: 10px 14px;">
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">URL user is directed to when tapping "Update Now".</p>
+        </div>
+        <div>
+            <label style="font-weight: 800; font-size: 13.5px; display: block; margin-bottom: 6px;">⚠️ Mandatory / Force Update</label>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                <input type="checkbox" id="forceUpdateToggle" style="width: 22px; height: 22px; cursor: pointer; accent-color: #10B981;">
+                <span style="font-size: 14px; font-weight: 700;">Force Immediate Update</span>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">If enabled, user cannot dismiss the update popup without updating.</p>
+        </div>
+    </div>
+</div>
+
 <!-- User Level Ads Targeting Directory Header & Controls -->
 <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
     <div>
@@ -174,10 +210,17 @@
                 const googleAndroid = document.getElementById('googleAuthAndroidToggle');
                 const googleWindows = document.getElementById('googleAuthWindowsToggle');
 
+                const latestVer = document.getElementById('latestAppVersionInput');
+                const updateUrl = document.getElementById('updateUrlInput');
+                const forceUpdate = document.getElementById('forceUpdateToggle');
+
                 if (toggle) toggle.checked = json.data.ads_enabled;
                 if (audience) audience.value = json.data.ads_target_audience;
                 if (googleAndroid) googleAndroid.checked = json.data.google_auth_android !== false;
                 if (googleWindows) googleWindows.checked = json.data.google_auth_windows !== false;
+                if (latestVer) latestVer.value = json.data.latest_app_version || '1.0.0';
+                if (updateUrl) updateUrl.value = json.data.update_url || 'https://play.google.com/store/apps/details?id=com.neodyit.acadova';
+                if (forceUpdate) forceUpdate.checked = json.data.force_update === true;
 
                 if (badge) {
                     badge.innerText = json.data.ads_enabled ? '● Active' : '○ Disabled';
@@ -195,12 +238,18 @@
         const badge = document.getElementById('adStatusBadge');
         const googleAndroid = document.getElementById('googleAuthAndroidToggle');
         const googleWindows = document.getElementById('googleAuthWindowsToggle');
+        const latestVer = document.getElementById('latestAppVersionInput');
+        const updateUrl = document.getElementById('updateUrlInput');
+        const forceUpdate = document.getElementById('forceUpdateToggle');
 
         const payload = {
             ads_enabled: toggle ? toggle.checked : true,
             ads_target_audience: audience ? audience.value : 'all',
             google_auth_android: googleAndroid ? googleAndroid.checked : true,
-            google_auth_windows: googleWindows ? googleWindows.checked : true
+            google_auth_windows: googleWindows ? googleWindows.checked : true,
+            latest_app_version: latestVer ? latestVer.value.trim() : '1.0.0',
+            update_url: updateUrl ? updateUrl.value.trim() : 'https://play.google.com/store/apps/details?id=com.neodyit.acadova',
+            force_update: forceUpdate ? forceUpdate.checked : false
         };
 
         try {

@@ -138,6 +138,11 @@ class AuthController extends Controller
                 'ads_target_audience' => \App\Models\AppSetting::get('ads_target_audience', 'all'),
                 'google_auth_android' => \App\Models\AppSetting::get('google_auth_android', 'true') === 'true',
                 'google_auth_windows' => \App\Models\AppSetting::get('google_auth_windows', 'true') === 'true',
+                'latest_app_version' => \App\Models\AppSetting::get('latest_app_version', '1.0.0'),
+                'min_required_version' => \App\Models\AppSetting::get('min_required_version', '1.0.0'),
+                'update_url' => \App\Models\AppSetting::get('update_url', 'https://acadova.neodyit.com/download'),
+                'force_update' => \App\Models\AppSetting::get('force_update', 'false') === 'true',
+                'release_notes' => \App\Models\AppSetting::get('release_notes', 'Performance improvements & bug fixes.'),
             ]
         ])->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
           ->header('Pragma', 'no-cache')
