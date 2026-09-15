@@ -64,6 +64,7 @@ return new class extends Migration
                 $table->longText('exception');
                 $table->timestamp('failed_at')->useCurrent();
             });
+        }
         if (!Schema::hasTable('sessions')) {
             Schema::create('sessions', function (Blueprint $table) {
                 $table->string('id')->primary();
@@ -91,5 +92,6 @@ return new class extends Migration
         Schema::dropIfExists('jobs');
         Schema::dropIfExists('job_batches');
         Schema::dropIfExists('failed_jobs');
+        Schema::dropIfExists('sessions');
     }
 };
