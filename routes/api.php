@@ -21,6 +21,9 @@ Route::post('/forgot-password', [AuthController::class, 'sendPasswordResetLink']
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/app-settings', [AuthController::class, 'getAppSettings']);
 
+// Public Media & File Serving (Avatars, Uploads, Media)
+Route::get('/media/file/{path}', [MediaController::class, 'showFile'])->where('path', '.*');
+
 // Public Academic hierarchy getters (Used during registration & initial profile setup)
 Route::prefix('academic')->group(function () {
     Route::get('/universities', [AcademicController::class, 'getUniversities']);
@@ -50,7 +53,6 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
     // Media & File Upload
     Route::post('/upload', [MediaController::class, 'store']);
     Route::get('/media', [MediaController::class, 'index']);
-    Route::get('/media/file/{path}', [MediaController::class, 'showFile'])->where('path', '.*');
 
     // General Quiz Browsing & Student Quiz Attempts
     Route::get('/quizzes', [QuizController::class, 'index']);
