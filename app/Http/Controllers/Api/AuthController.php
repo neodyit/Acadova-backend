@@ -134,10 +134,12 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
-                'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+                'ads_enabled' => \App\Models\AppSetting::get('ads_enabled', 'true') === 'true',
+                'ads_target_audience' => \App\Models\AppSetting::get('ads_target_audience', 'all'),
             ]
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+          ->header('Pragma', 'no-cache')
+          ->header('Expires', '0');
     }
 
     /**
@@ -147,8 +149,8 @@ class AuthController extends Controller
     {
         $user = $request->user()->load(['university', 'college', 'departmentModel', 'course', 'branch', 'section', 'subsection']);
         $adConfig = [
-            'ads_enabled' => AppSetting::get('ads_enabled', 'true') === 'true',
-            'ads_target_audience' => AppSetting::get('ads_target_audience', 'all'),
+            'ads_enabled' => \App\Models\AppSetting::get('ads_enabled', 'true') === 'true',
+            'ads_target_audience' => \App\Models\AppSetting::get('ads_target_audience', 'all'),
             'user_show_ads' => (bool)($user->show_ads ?? true),
         ];
 
@@ -158,7 +160,10 @@ class AuthController extends Controller
                 'user' => $user,
                 'ad_config' => $adConfig,
             ]
-        ], 200);
+        ], 200)
+        ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
     }
 
     /**
