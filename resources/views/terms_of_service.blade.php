@@ -321,14 +321,42 @@
         }
 
         @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+                padding: 14px 16px;
+            }
+            .brand-logo {
+                justify-content: center;
+            }
+            .nav-links {
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 6px;
+                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+            }
+            .hero-section {
+                margin: 20px auto 20px auto;
+                padding: 0 16px;
+            }
+            .hero-card {
+                padding: 28px 20px;
+            }
+            .hero-title {
+                font-size: 26px;
+            }
             .content-container {
                 grid-template-columns: 1fr;
+                padding: 0 16px;
             }
             .sidebar {
                 display: none;
             }
             .legal-card {
-                padding: 28px 20px;
+                padding: 24px 18px;
             }
         }
     </style>

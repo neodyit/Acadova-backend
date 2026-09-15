@@ -286,6 +286,69 @@
         .footer-nav a:hover {
             text-decoration: underline;
         }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 12px 16px;
+            }
+
+            .nav-links {
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-link-btn {
+                font-size: 12px;
+                padding: 6px 14px;
+            }
+
+            .hero-section {
+                margin: 20px auto 20px auto;
+                padding: 0 16px;
+            }
+
+            .hero-card {
+                padding: 24px 20px;
+            }
+
+            .hero-card > div {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+
+            .hero-title {
+                font-size: 24px !important;
+            }
+
+            .main-container {
+                padding: 0 16px;
+            }
+
+            .faq-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .faq-card {
+                padding: 20px;
+            }
+
+            .support-card {
+                padding: 24px 18px;
+            }
+
+            .support-title {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>

@@ -339,20 +339,60 @@
 
         /* Responsive Breakpoints */
         @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 12px 16px;
+            }
+
+            .nav-links {
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-back-btn {
+                font-size: 12px;
+                padding: 6px 14px;
+            }
+
+            .hero-section {
+                margin: 20px auto 20px auto;
+                padding: 0 16px;
+            }
+
+            .hero-card {
+                padding: 24px 20px;
+            }
+
+            .hero-card > div {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+
+            .hero-title {
+                font-size: 24px !important;
+            }
+
             .content-container {
                 grid-template-columns: 1fr;
+                padding: 0 16px;
             }
+
             .sidebar {
                 display: none;
             }
+
             .legal-card {
-                padding: 28px 20px;
+                padding: 24px 18px;
             }
-            .hero-card {
-                padding: 32px 24px;
-            }
-            .hero-title {
-                font-size: 28px;
+
+            .section-heading {
+                font-size: 18px;
             }
         }
     </style>
@@ -370,7 +410,7 @@
                     <div class="brand-subtitle">By Neody IT</div>
                 </div>
             </a>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="nav-links" style="display: flex; align-items: center; gap: 10px;">
                 <a href="{{ route('privacy.policy') }}" class="nav-back-btn" style="background-color: var(--primary); color: white; border-color: var(--primary);">Privacy Policy</a>
                 <a href="{{ route('terms.service') }}" class="nav-back-btn">Terms of Service</a>
                 <a href="{{ route('help.center') }}" class="nav-back-btn">Help Center</a>

@@ -304,12 +304,40 @@
             font-size: 14px;
         }
 
-        @media (max-width: 600px) {
+        /* Nav Links bar */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+                padding: 14px 16px;
+            }
+            .brand-logo {
+                justify-content: center;
+            }
+            .nav-links {
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 6px;
+                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+            }
+            .main-container {
+                margin-top: 20px;
+                padding: 0 16px;
+            }
             .content-card, .hero-card {
-                padding: 24px 20px;
+                padding: 24px 18px;
             }
             .hero-title {
-                font-size: 26px;
+                font-size: 24px;
             }
         }
     </style>
@@ -326,7 +354,7 @@
                     <div class="brand-subtitle">By Neody IT</div>
                 </div>
             </a>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="nav-links">
                 <a href="{{ route('privacy.policy') }}" class="nav-back-btn">Privacy Policy</a>
                 <a href="{{ route('terms.service') }}" class="nav-back-btn">Terms of Service</a>
                 <a href="{{ route('help.center') }}" class="nav-back-btn">Help Center</a>
