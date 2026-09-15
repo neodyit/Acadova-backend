@@ -432,6 +432,11 @@
                     <i class="fa-solid fa-users"></i> Users Directory
                 </a>
             </li>
+            <li class="nav-item {{ Request::is('neodyit/notifications*') ? 'active' : '' }}">
+                <a href="{{ route('admin.notifications') }}">
+                    <i class="fa-solid fa-paper-plane"></i> Send Notifications
+                </a>
+            </li>
             <li class="nav-item {{ Request::is('neodyit/ads*') ? 'active' : '' }}">
                 <a href="{{ route('admin.ads') }}">
                     <i class="fa-solid fa-rectangle-ad"></i> Ads Management
