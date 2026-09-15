@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acadova — Smart Quiz & Assessment Platform | Powered by Neody IT</title>
-    <meta name="description" content="Acadova is the ultimate academic quiz and online examination platform. Download the Android App from Google Play Store, get the Windows Desktop (.exe) app, or access the Web Portal.">
+    <meta name="description" content="Acadova is the premier academic quiz and online examination platform. Download the Android App from Google Play Store, get the Windows Desktop (.exe) app, or access the Web Portal.">
     
     <!-- Google Fonts & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,21 +14,20 @@
     
     <style>
         :root {
-            --primary: #6C5CE7;
-            --primary-light: #A29BFE;
-            --primary-dark: #5B4BC4;
-            --secondary: #00B894;
-            --secondary-light: #55E6C1;
-            --accent-pink: #FD79A8;
-            --accent-yellow: #FDCB6E;
-            --bg-dark: #0B0F19;
-            --bg-card: rgba(22, 27, 46, 0.75);
-            --bg-card-hover: rgba(30, 37, 62, 0.85);
-            --border-glass: rgba(255, 255, 255, 0.1);
-            --border-highlight: rgba(108, 92, 231, 0.35);
-            --text-heading: #FFFFFF;
-            --text-body: #94A3B8;
-            --text-muted: #64748B;
+            /* AppTheme Palette */
+            --background: #F5ECDD;
+            --main-text: #111111;
+            --primary: #B45309;
+            --primary-light: #D97706;
+            --primary-dark: #78350F;
+            --card-bg: #FFFFFF;
+            --surface-light: #EFE6D5;
+            --text-muted: #666666;
+            --border: #E5D5C0;
+
+            --success: #15803D;
+            --warning: #D97706;
+            --info: #0369A1;
         }
 
         * {
@@ -40,52 +39,32 @@
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-body);
+            background-color: var(--background);
+            color: var(--main-text);
             overflow-x: hidden;
             line-height: 1.6;
         }
 
-        /* Ambient Lighting Background */
-        .glow-sphere {
+        /* Ambient Header Glow */
+        .header-bg-glow {
             position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(180, 83, 9, 0.15) 0%, rgba(245, 236, 221, 0) 70%);
             pointer-events: none;
             z-index: 0;
         }
 
-        .glow-1 {
-            top: -100px;
-            left: 15%;
-            width: 550px;
-            height: 550px;
-            background: radial-gradient(circle, rgba(108, 92, 231, 0.28) 0%, rgba(108, 92, 231, 0) 70%);
-        }
-
-        .glow-2 {
-            top: 600px;
-            right: 5%;
-            width: 650px;
-            height: 650px;
-            background: radial-gradient(circle, rgba(0, 184, 148, 0.2) 0%, rgba(0, 184, 148, 0) 70%);
-        }
-
-        .glow-3 {
-            top: 1600px;
-            left: 10%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(253, 121, 168, 0.18) 0%, rgba(253, 121, 168, 0) 70%);
-        }
-
-        /* Sticky Glass Header Navigation */
+        /* Sticky Navigation Bar */
         .navbar {
             height: 80px;
-            background: rgba(11, 15, 25, 0.88);
+            background: rgba(245, 236, 221, 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border);
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 1000;
@@ -107,13 +86,13 @@
             width: 44px;
             height: 44px;
             background: #FFFFFF;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 18px rgba(108, 92, 231, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(180, 83, 9, 0.15);
+            border: 1px solid var(--border);
         }
 
         .brand-logo-box img {
@@ -130,7 +109,7 @@
         .brand-name {
             font-size: 22px;
             font-weight: 900;
-            color: var(--text-heading);
+            color: var(--main-text);
             letter-spacing: -0.5px;
             line-height: 1.1;
         }
@@ -138,7 +117,7 @@
         .brand-subtitle {
             font-size: 9.5px;
             font-weight: 800;
-            color: var(--secondary-light);
+            color: var(--primary);
             letter-spacing: 1.2px;
             text-transform: uppercase;
         }
@@ -152,15 +131,14 @@
 
         .nav-menu a {
             text-decoration: none;
-            color: #CBD5E1;
-            font-weight: 600;
+            color: var(--main-text);
+            font-weight: 700;
             font-size: 14.5px;
             transition: all 0.25s ease;
         }
 
         .nav-menu a:hover {
-            color: var(--primary-light);
-            text-shadow: 0 0 10px rgba(162, 155, 254, 0.4);
+            color: var(--primary);
         }
 
         .nav-cta-group {
@@ -174,24 +152,24 @@
             display: none;
             background: none;
             border: none;
-            color: white;
+            color: var(--main-text);
             font-size: 22px;
             cursor: pointer;
             padding: 6px;
         }
 
-        /* Mobile Menu Drawer */
+        /* Mobile Drawer */
         .mobile-drawer {
             display: none;
             position: fixed;
             top: 80px; left: 0; right: 0;
-            background: rgba(11, 15, 25, 0.96);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-glass);
+            background: #F5ECDD;
+            border-bottom: 2px solid var(--border);
             padding: 24px;
             z-index: 999;
             flex-direction: column;
             gap: 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
         }
 
         .mobile-drawer.active {
@@ -199,19 +177,19 @@
         }
 
         .mobile-drawer a {
-            color: white;
+            color: var(--main-text);
             text-decoration: none;
             font-weight: 700;
             font-size: 16px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        /* Common Premium Buttons */
+        /* Buttons Styling (AppTheme Matching) */
         .btn {
             padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 700;
+            border-radius: 16px;
+            font-weight: 800;
             font-size: 14px;
             text-decoration: none;
             display: inline-flex;
@@ -223,66 +201,73 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            background: var(--primary);
             color: white;
-            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+            box-shadow: 0 8px 22px rgba(180, 83, 9, 0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 14px 32px rgba(108, 92, 231, 0.55);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: rgba(0, 184, 148, 0.15);
-            color: var(--secondary-light);
-            border: 1px solid rgba(0, 184, 148, 0.35);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(0, 184, 148, 0.25);
-            transform: translateY(-3px);
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(180, 83, 9, 0.45);
             color: white;
         }
 
         .btn-download-play {
-            background: #000000;
+            background: #111111;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, 0.2);
         }
 
         .btn-download-play:hover {
-            background: #1A1A1A;
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: translateY(-3px);
+            background: #2A2A2A;
+            transform: translateY(-2px);
             color: white;
         }
 
         .btn-download-win {
             background: linear-gradient(135deg, #0078D4 0%, #00A4EF 100%);
             color: white;
-            box-shadow: 0 8px 25px rgba(0, 120, 212, 0.35);
+            box-shadow: 0 8px 22px rgba(0, 120, 212, 0.3);
         }
 
         .btn-download-win:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 14px 32px rgba(0, 120, 212, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 120, 212, 0.45);
             color: white;
         }
 
         .btn-outline {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-heading);
-            border: 1px solid var(--border-glass);
+            background: white;
+            color: var(--main-text);
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
 
         .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-            color: white;
+            background: var(--surface-light);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            color: var(--primary);
+        }
+
+        .btn-app-store-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.1;
+        }
+
+        .btn-app-store-content .subtext {
+            font-size: 10px;
+            font-weight: 600;
+            opacity: 0.85;
+            text-transform: uppercase;
+        }
+
+        .btn-app-store-content .maintext {
+            font-size: 14px;
+            font-weight: 800;
         }
 
         /* Hero Section */
@@ -303,12 +288,12 @@
             align-items: center;
             gap: 8px;
             padding: 6px 16px;
-            background: rgba(108, 92, 231, 0.15);
-            border: 1px solid var(--border-highlight);
+            background: rgba(180, 83, 9, 0.12);
+            border: 1px solid rgba(180, 83, 9, 0.3);
             border-radius: 30px;
-            color: var(--primary-light);
+            color: var(--primary);
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 24px;
         }
 
@@ -316,26 +301,26 @@
             font-size: 54px;
             font-weight: 900;
             line-height: 1.15;
-            color: var(--text-heading);
+            color: var(--main-text);
             letter-spacing: -1.5px;
             margin-bottom: 24px;
         }
 
         .hero-title span {
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .hero-subtitle {
             font-size: 18px;
-            color: var(--text-body);
+            color: var(--text-muted);
             margin-bottom: 36px;
             max-width: 600px;
-            font-weight: 400;
+            font-weight: 500;
         }
 
-        /* Download CTAs Row */
         .download-buttons-wrap {
             display: flex;
             gap: 14px;
@@ -343,61 +328,36 @@
             margin-bottom: 40px;
         }
 
-        .btn-app-store-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1.1;
-        }
-
-        .btn-app-store-content .subtext {
-            font-size: 10px;
-            font-weight: 600;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
-
-        .btn-app-store-content .maintext {
-            font-size: 14px;
-            font-weight: 800;
-        }
-
-        /* Stats Counter Bar */
+        /* Stats Row */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             padding-top: 28px;
-            border-top: 1px solid var(--border-glass);
+            border-top: 1.5px dashed var(--border);
         }
 
         .stat-card h3 {
-            font-size: 30px;
+            font-size: 32px;
             font-weight: 900;
-            color: var(--text-heading);
-            line-height: 1.2;
-        }
-
-        .stat-card h3 span {
-            color: var(--secondary);
+            color: var(--primary);
+            line-height: 1.1;
         }
 
         .stat-card p {
             font-size: 13px;
             color: var(--text-muted);
-            font-weight: 600;
-            margin-top: 2px;
+            font-weight: 700;
+            margin-top: 4px;
         }
 
         /* Hero Right Preview Card */
         .preview-widget {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-glass);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 28px;
-            padding: 32px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+            padding: 34px;
+            box-shadow: 0 20px 50px rgba(180, 83, 9, 0.12);
             position: relative;
         }
 
@@ -417,10 +377,10 @@
         .app-badge-icon {
             width: 48px;
             height: 48px;
-            background: #FFFFFF;
+            background: var(--background);
             border-radius: 14px;
             padding: 5px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
         }
 
         .app-badge-icon img {
@@ -434,10 +394,10 @@
             align-items: center;
             gap: 6px;
             padding: 6px 14px;
-            background: rgba(0, 184, 148, 0.15);
-            border: 1px solid rgba(0, 184, 148, 0.35);
+            background: rgba(21, 128, 61, 0.12);
+            border: 1px solid rgba(21, 128, 61, 0.3);
             border-radius: 20px;
-            color: var(--secondary-light);
+            color: var(--success);
             font-size: 11.5px;
             font-weight: 800;
             text-transform: uppercase;
@@ -446,9 +406,8 @@
         .pulse-light {
             width: 8px;
             height: 8px;
-            background: var(--secondary);
+            background: var(--success);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--secondary);
             animation: pulse-ring 1.8s infinite;
         }
 
@@ -459,9 +418,9 @@
         }
 
         .preview-feature-box {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 18px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 20px;
             padding: 20px;
             margin-top: 20px;
         }
@@ -480,7 +439,10 @@
         .mini-icon {
             width: 38px;
             height: 38px;
-            border-radius: 10px;
+            border-radius: 12px;
+            background: #FFFFFF;
+            color: var(--primary);
+            border: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -488,68 +450,12 @@
             flex-shrink: 0;
         }
 
-        /* Platform Downloads Banner Section */
+        /* Platform Downloads Banner */
         .downloads-banner-section {
-            background: linear-gradient(135deg, rgba(108, 92, 231, 0.12) 0%, rgba(0, 184, 148, 0.1) 100%);
-            border-top: 1px solid var(--border-glass);
-            border-bottom: 1px solid var(--border-glass);
-            padding: 70px 6%;
-            position: relative;
-            z-index: 1;
-        }
-
-        .downloads-grid {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 28px;
-        }
-
-        .download-platform-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .download-platform-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--primary-light);
-            box-shadow: 0 16px 36px rgba(108, 92, 231, 0.25);
-        }
-
-        .platform-icon-wrap {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
-
-        .download-platform-card h3 {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-heading);
-            margin-bottom: 8px;
-        }
-
-        .download-platform-card p {
-            font-size: 14px;
-            color: var(--text-body);
-            margin-bottom: 24px;
-        }
-
-        /* Features Grid Section */
-        .features-section {
-            padding: 100px 6%;
-            max-width: 1400px;
-            margin: 0 auto;
+            background: #EFE6D5;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 80px 6%;
             position: relative;
             z-index: 1;
         }
@@ -561,7 +467,7 @@
         }
 
         .section-tag {
-            color: var(--secondary-light);
+            color: var(--primary);
             font-size: 13px;
             font-weight: 800;
             letter-spacing: 1.5px;
@@ -571,14 +477,74 @@
         .section-title {
             font-size: 42px;
             font-weight: 900;
-            color: var(--text-heading);
+            color: var(--main-text);
             letter-spacing: -1px;
             margin: 10px 0 16px;
         }
 
         .section-desc {
             font-size: 16.5px;
-            color: var(--text-body);
+            color: var(--text-muted);
+        }
+
+        .downloads-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .download-platform-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 34px 28px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+
+        .download-platform-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--primary);
+            box-shadow: 0 16px 36px rgba(180, 83, 9, 0.15);
+        }
+
+        .platform-icon-wrap {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            color: var(--primary);
+        }
+
+        .download-platform-card h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--main-text);
+            margin-bottom: 8px;
+        }
+
+        .download-platform-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 100px 6%;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .features-cards-grid {
@@ -588,25 +554,27 @@
         }
 
         .feature-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 34px 28px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
             transition: all 0.35s ease;
         }
 
         .feature-card:hover {
             transform: translateY(-8px);
-            border-color: var(--border-highlight);
-            box-shadow: 0 20px 40px rgba(108, 92, 231, 0.2);
-            background: var(--bg-card-hover);
+            border-color: var(--primary);
+            box-shadow: 0 16px 36px rgba(180, 83, 9, 0.12);
         }
 
         .feature-card-icon {
             width: 56px;
             height: 56px;
             border-radius: 16px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -617,21 +585,21 @@
         .feature-card h3 {
             font-size: 21px;
             font-weight: 800;
-            color: var(--text-heading);
+            color: var(--main-text);
             margin-bottom: 12px;
         }
 
         .feature-card p {
             font-size: 14.5px;
-            color: var(--text-body);
+            color: var(--text-muted);
             line-height: 1.6;
         }
 
         /* 3-Step Walkthrough Section */
         .workflow-section {
-            background: rgba(15, 23, 42, 0.6);
-            border-top: 1px solid var(--border-glass);
-            border-bottom: 1px solid var(--border-glass);
+            background: #EFE6D5;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
             padding: 100px 6%;
             position: relative;
             z-index: 1;
@@ -646,17 +614,16 @@
         }
 
         .workflow-step-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 36px 28px;
-            position: relative;
         }
 
         .step-number {
             width: 44px;
             height: 44px;
-            border-radius: 12px;
+            border-radius: 14px;
             background: var(--primary);
             color: white;
             font-size: 18px;
@@ -665,17 +632,22 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 24px;
-            box-shadow: 0 6px 18px rgba(108, 92, 231, 0.4);
+            box-shadow: 0 6px 18px rgba(180, 83, 9, 0.3);
         }
 
         .workflow-step-card h3 {
             font-size: 20px;
             font-weight: 800;
-            color: var(--text-heading);
+            color: var(--main-text);
             margin-bottom: 12px;
         }
 
-        /* Active Quizzes Grid Section */
+        .workflow-step-card p {
+            font-size: 14.5px;
+            color: var(--text-muted);
+        }
+
+        /* Active Quizzes Section */
         .quizzes-section {
             padding: 100px 6%;
             max-width: 1400px;
@@ -691,8 +663,8 @@
         }
 
         .quiz-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 20px;
             padding: 26px;
             display: flex;
@@ -702,9 +674,9 @@
         }
 
         .quiz-card:hover {
-            border-color: rgba(0, 184, 148, 0.5);
+            border-color: var(--primary);
             transform: translateY(-4px);
-            box-shadow: 0 14px 32px rgba(0, 184, 148, 0.18);
+            box-shadow: 0 12px 28px rgba(180, 83, 9, 0.12);
         }
 
         .quiz-card-header {
@@ -719,28 +691,28 @@
             border-radius: 20px;
             font-size: 11px;
             font-weight: 800;
-            background: rgba(0, 184, 148, 0.15);
-            color: var(--secondary-light);
-            border: 1px solid rgba(0, 184, 148, 0.3);
+            background: rgba(21, 128, 61, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(21, 128, 61, 0.3);
             text-transform: uppercase;
         }
 
         .quiz-subject {
             font-size: 12px;
-            font-weight: 700;
-            color: var(--primary-light);
+            font-weight: 800;
+            color: var(--primary);
         }
 
         .quiz-title {
             font-size: 19px;
             font-weight: 800;
-            color: var(--text-heading);
+            color: var(--main-text);
             margin-bottom: 8px;
         }
 
         .quiz-desc {
             font-size: 14px;
-            color: var(--text-body);
+            color: var(--text-muted);
             margin-bottom: 20px;
         }
 
@@ -749,7 +721,7 @@
             justify-content: space-between;
             align-items: center;
             padding-top: 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid var(--border);
             font-size: 13px;
             color: var(--text-muted);
             font-weight: 600;
@@ -765,8 +737,8 @@
         }
 
         .faq-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 18px;
             margin-bottom: 16px;
             overflow: hidden;
@@ -776,8 +748,8 @@
         .faq-question {
             padding: 22px 26px;
             font-size: 17px;
-            font-weight: 700;
-            color: var(--text-heading);
+            font-weight: 800;
+            color: var(--main-text);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -788,7 +760,7 @@
         .faq-answer {
             padding: 0 26px 22px;
             font-size: 15px;
-            color: var(--text-body);
+            color: var(--text-muted);
             line-height: 1.6;
             display: none;
         }
@@ -799,13 +771,13 @@
 
         .faq-item.active .faq-question i {
             transform: rotate(180deg);
-            color: var(--primary-light);
+            color: var(--primary);
         }
 
         /* Footer Section */
         .footer {
-            background: #060911;
-            border-top: 1px solid var(--border-glass);
+            background: #EFE6D5;
+            border-top: 1px solid var(--border);
             padding: 80px 6% 40px;
             position: relative;
             z-index: 1;
@@ -820,7 +792,7 @@
         }
 
         .footer-brand p {
-            color: var(--text-body);
+            color: var(--text-muted);
             font-size: 14px;
             margin-top: 16px;
             max-width: 380px;
@@ -829,7 +801,7 @@
         .footer-heading {
             font-size: 16px;
             font-weight: 800;
-            color: var(--text-heading);
+            color: var(--main-text);
             margin-bottom: 20px;
         }
 
@@ -841,22 +813,22 @@
         }
 
         .footer-links a {
-            color: var(--text-body);
+            color: var(--text-muted);
             text-decoration: none;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             transition: color 0.2s ease;
         }
 
         .footer-links a:hover {
-            color: var(--primary-light);
+            color: var(--primary);
         }
 
         .footer-bottom {
             max-width: 1400px;
             margin: 0 auto;
             padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -893,9 +865,7 @@
 </head>
 <body>
 
-    <div class="glow-sphere glow-1"></div>
-    <div class="glow-sphere glow-2"></div>
-    <div class="glow-sphere glow-3"></div>
+    <div class="header-bg-glow"></div>
 
     <!-- Navigation Header -->
     <nav class="navbar">
@@ -909,10 +879,10 @@
             </div>
         </a>
 
-        <!-- Desktop Links -->
+        <!-- Desktop Menu Links -->
         <ul class="nav-menu">
             <li><a href="#downloads">Apps & Downloads</a></li>
-            <li><a href="#features">Platform Features</a></li>
+            <li><a href="#features">Features</a></li>
             <li><a href="#workflow">How It Works</a></li>
             <li><a href="#quizzes">Live Assessments</a></li>
             <li><a href="/help-center">Help Center</a></li>
@@ -934,22 +904,22 @@
         </button>
     </nav>
 
-    <!-- Mobile Navigation Drawer -->
+    <!-- Mobile Drawer Navigation -->
     <div class="mobile-drawer" id="mobileDrawer">
         <a href="#downloads"><i class="fa-solid fa-download"></i> Downloads</a>
         <a href="#features"><i class="fa-solid fa-star"></i> Features</a>
-        <a href="#workflow"><a href="#workflow"><i class="fa-solid fa-diagram-project"></i> How It Works</a>
+        <a href="#workflow"><i class="fa-solid fa-diagram-project"></i> How It Works</a>
         <a href="#quizzes"><i class="fa-solid fa-list-check"></i> Live Assessments</a>
         <a href="/help-center"><i class="fa-solid fa-circle-question"></i> Help Center</a>
-        <a href="/student/login" style="color: var(--primary-light);"><i class="fa-solid fa-graduation-cap"></i> Student Web Portal</a>
-        <a href="/neodyit/login" style="color: var(--secondary-light);"><i class="fa-solid fa-user-shield"></i> Admin & Faculty Login</a>
+        <a href="/student/login" style="color: var(--primary);"><i class="fa-solid fa-graduation-cap"></i> Student Web Portal</a>
+        <a href="/neodyit/login" style="color: var(--main-text);"><i class="fa-solid fa-user-shield"></i> Admin & Faculty Login</a>
     </div>
 
     <!-- Hero Section -->
     <section class="hero-container">
         <div class="hero-left">
             <div class="hero-badge">
-                <i class="fa-solid fa-shield-halved"></i> Official Examination & Assessment Platform
+                <i class="fa-solid fa-graduation-cap"></i> Academic Quiz & Examination Suite
             </div>
             <h1 class="hero-title">Empowering Learning with <span>Smart Assessments</span></h1>
             <p class="hero-subtitle">Acadova delivers timed quizzes, instant performance reports, automated grading, and live scoreboards across Android Mobile, Windows PC, and Web Browsers.</p>
@@ -997,7 +967,7 @@
             </div>
         </div>
 
-        <!-- Hero Right App Mockup -->
+        <!-- Hero Right Preview Widget -->
         <div class="hero-right">
             <div class="preview-widget">
                 <div class="preview-widget-header">
@@ -1006,8 +976,8 @@
                             <img src="{{ asset('logo.png') }}" alt="Acadova Icon">
                         </div>
                         <div>
-                            <h3 style="font-size: 19px; font-weight: 800; color: #FFF;">Acadova Ecosystem</h3>
-                            <p style="font-size: 12.5px; color: #94A3B8;">Android • Windows • Web</p>
+                            <h3 style="font-size: 19px; font-weight: 800; color: var(--main-text);">Acadova Ecosystem</h3>
+                            <p style="font-size: 12.5px; color: var(--text-muted);">Android • Windows • Web</p>
                         </div>
                     </div>
                     <div class="live-status-pill">
@@ -1015,38 +985,38 @@
                     </div>
                 </div>
 
-                <p style="font-size: 14.5px; color: #CBD5E1; line-height: 1.6;">
+                <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6;">
                     Powered by Neody IT backend infrastructure for real-time exam validation, instant submission processing, and zero latency.
                 </p>
 
                 <div class="preview-feature-box">
                     <div class="feature-mini-row">
-                        <div class="mini-icon" style="background: rgba(108, 92, 231, 0.2); color: var(--primary-light);">
+                        <div class="mini-icon">
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
                         <div>
-                            <h4 style="font-size: 14px; font-weight: 700; color: #FFF;">Timed Quiz Engine</h4>
-                            <p style="font-size: 12px; color: #94A3B8;">Auto-submit on timer completion</p>
+                            <h4 style="font-size: 14px; font-weight: 800; color: var(--main-text);">Timed Quiz Engine</h4>
+                            <p style="font-size: 12px; color: var(--text-muted);">Auto-submit on timer completion</p>
                         </div>
                     </div>
 
                     <div class="feature-mini-row">
-                        <div class="mini-icon" style="background: rgba(0, 184, 148, 0.2); color: var(--secondary-light);">
+                        <div class="mini-icon">
                             <i class="fa-solid fa-chart-pie"></i>
                         </div>
                         <div>
-                            <h4 style="font-size: 14px; font-weight: 700; color: #FFF;">Instant Score Breakdown</h4>
-                            <p style="font-size: 12px; color: #94A3B8;">Detailed answer feedback & accuracy</p>
+                            <h4 style="font-size: 14px; font-weight: 800; color: var(--main-text);">Instant Score Breakdown</h4>
+                            <p style="font-size: 12px; color: var(--text-muted);">Detailed answer feedback & accuracy</p>
                         </div>
                     </div>
 
                     <div class="feature-mini-row">
-                        <div class="mini-icon" style="background: rgba(253, 121, 168, 0.2); color: var(--accent-pink);">
-                            <i class="fa-solid fa-bell"></i>
+                        <div class="mini-icon">
+                            <i class="fa-solid fa-bullhorn"></i>
                         </div>
                         <div>
-                            <h4 style="font-size: 14px; font-weight: 700; color: #FFF;">Campaign & Notice Board</h4>
-                            <p style="font-size: 12px; color: #94A3B8;">Campus contests and announcements</p>
+                            <h4 style="font-size: 14px; font-weight: 800; color: var(--main-text);">Campaign Notice Board</h4>
+                            <p style="font-size: 12px; color: var(--text-muted);">Campus contests and announcements</p>
                         </div>
                     </div>
                 </div>
@@ -1054,7 +1024,7 @@
         </div>
     </section>
 
-    <!-- Multi-Platform Downloads Banner -->
+    <!-- Platform Downloads Banner Section -->
     <section id="downloads" class="downloads-banner-section">
         <div class="section-title-wrap">
             <span class="section-tag">Multi-Platform Access</span>
@@ -1065,7 +1035,7 @@
         <div class="downloads-grid">
             <!-- Google Play Store -->
             <div class="download-platform-card">
-                <div class="platform-icon-wrap" style="background: rgba(0, 184, 148, 0.15); color: var(--secondary-light);">
+                <div class="platform-icon-wrap">
                     <i class="fa-brands fa-android"></i>
                 </div>
                 <h3>Android App</h3>
@@ -1077,7 +1047,7 @@
 
             <!-- Windows PC (.exe) -->
             <div class="download-platform-card">
-                <div class="platform-icon-wrap" style="background: rgba(0, 120, 212, 0.15); color: #00A4EF;">
+                <div class="platform-icon-wrap" style="color: #00A4EF;">
                     <i class="fa-brands fa-windows"></i>
                 </div>
                 <h3>Windows PC (.exe)</h3>
@@ -1089,7 +1059,7 @@
 
             <!-- Web Browser Portal -->
             <div class="download-platform-card">
-                <div class="platform-icon-wrap" style="background: rgba(108, 92, 231, 0.15); color: var(--primary-light);">
+                <div class="platform-icon-wrap">
                     <i class="fa-solid fa-globe"></i>
                 </div>
                 <h3>Web Portal</h3>
@@ -1111,7 +1081,7 @@
 
         <div class="features-cards-grid">
             <div class="feature-card">
-                <div class="feature-card-icon" style="background: rgba(108, 92, 231, 0.15); color: var(--primary-light);">
+                <div class="feature-card-icon">
                     <i class="fa-solid fa-stopwatch"></i>
                 </div>
                 <h3>Timed Assessments</h3>
@@ -1119,7 +1089,7 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-card-icon" style="background: rgba(0, 184, 148, 0.15); color: var(--secondary-light);">
+                <div class="feature-card-icon">
                     <i class="fa-solid fa-trophy"></i>
                 </div>
                 <h3>Live Leaderboards</h3>
@@ -1127,7 +1097,7 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-card-icon" style="background: rgba(253, 121, 168, 0.15); color: var(--accent-pink);">
+                <div class="feature-card-icon">
                     <i class="fa-solid fa-bullhorn"></i>
                 </div>
                 <h3>Campus Notice Alerts</h3>
@@ -1135,7 +1105,7 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-card-icon" style="background: rgba(253, 203, 110, 0.15); color: var(--accent-yellow);">
+                <div class="feature-card-icon">
                     <i class="fa-solid fa-network-wired"></i>
                 </div>
                 <h3>Multi-Device Sync</h3>
@@ -1143,7 +1113,7 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-card-icon" style="background: rgba(0, 206, 201, 0.15); color: #00CEC9;">
+                <div class="feature-card-icon">
                     <i class="fa-solid fa-folder-tree"></i>
                 </div>
                 <h3>Department Filtering</h3>
@@ -1151,7 +1121,7 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-card-icon" style="background: rgba(162, 155, 254, 0.15); color: #A29BFE;">
+                <div class="feature-card-icon">
                     <i class="fa-solid fa-square-check"></i>
                 </div>
                 <h3>Automated Grading</h3>
@@ -1176,13 +1146,13 @@
             </div>
 
             <div class="workflow-step-card">
-                <div class="step-number" style="background: var(--secondary);">2</div>
+                <div class="step-number">2</div>
                 <h3>Attempt Timed Quiz</h3>
                 <p>Answer questions before the timer completes. Experience real-time progress indicators and smooth response saving.</p>
             </div>
 
             <div class="workflow-step-card">
-                <div class="step-number" style="background: var(--accent-pink);">3</div>
+                <div class="step-number">3</div>
                 <h3>Instant Score & Feedback</h3>
                 <p>Receive your automated grade report immediately upon submission, view correct answers, and climb the leaderboard.</p>
             </div>
@@ -1214,15 +1184,15 @@
                     </div>
                 </div>
             @empty
-                <div style="grid-column: 1/-1; text-align: center; color: var(--text-body); padding: 50px; background: var(--bg-card); border-radius: 24px; border: 1px solid var(--border-glass);">
-                    <i class="fa-solid fa-calendar-check" style="font-size: 36px; color: var(--primary-light); margin-bottom: 12px;"></i>
-                    <p style="font-size: 16px; font-weight: 600;">No public quizzes currently active. Log in to access your course quizzes!</p>
+                <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px; background: var(--card-bg); border-radius: 24px; border: 1px solid var(--border);">
+                    <i class="fa-solid fa-calendar-check" style="font-size: 36px; color: var(--primary); margin-bottom: 12px;"></i>
+                    <p style="font-size: 16px; font-weight: 700;">No public quizzes currently active. Log in to access your course quizzes!</p>
                 </div>
             @endforelse
         </div>
     </section>
 
-    <!-- FAQ Section -->
+    <!-- FAQ Accordion Section -->
     <section class="faq-section">
         <div class="section-title-wrap">
             <span class="section-tag">Got Questions?</span>
@@ -1305,10 +1275,10 @@
 
             <div>
                 <h4 class="footer-heading">Engineering</h4>
-                <p style="font-size: 13.5px; color: var(--text-body); line-height: 1.6;">
-                    Designed, developed, and maintained by <strong style="color: #FFF;">Neody IT</strong> software solutions.
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6;">
+                    Designed, developed, and maintained by <strong style="color: var(--main-text);">Neody IT</strong> software solutions.
                 </p>
-                <div style="margin-top: 14px; font-size: 13.5px; color: var(--secondary-light); font-weight: 700;">
+                <div style="margin-top: 14px; font-size: 13.5px; color: var(--primary); font-weight: 800;">
                     <i class="fa-solid fa-envelope"></i> support@neodyit.in
                 </div>
             </div>
@@ -1316,7 +1286,7 @@
 
         <div class="footer-bottom">
             <div>&copy; {{ date('Y') }} Acadova Platform. All rights reserved.</div>
-            <div style="color: var(--secondary-light); font-weight: 800; font-size: 12px; letter-spacing: 1px;">
+            <div style="color: var(--primary); font-weight: 800; font-size: 12px; letter-spacing: 1px;">
                 POWERED BY NEODY IT
             </div>
         </div>
