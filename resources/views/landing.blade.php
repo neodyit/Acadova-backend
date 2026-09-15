@@ -42,12 +42,16 @@
             scroll-behavior: smooth;
         }
 
-        body {
+        html, body {
             background-color: var(--background);
             color: var(--main-text);
-            overflow-x: hidden;
+            overflow-x: hidden !important;
             line-height: 1.6;
-            width: 100%;
+            width: 100vw !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            position: relative !important;
         }
 
         /* Ambient Header Glow */
@@ -56,16 +60,21 @@
             top: -120px;
             left: 50%;
             transform: translateX(-50%);
-            width: 800px;
-            height: 500px;
+            width: 100vw !important;
+            max-width: 500px !important;
+            height: 300px;
             background: radial-gradient(circle, rgba(180, 83, 9, 0.15) 0%, rgba(245, 236, 221, 0) 70%);
             pointer-events: none;
             z-index: 0;
+            overflow: hidden !important;
         }
 
         /* Sticky Navigation Bar */
         .navbar {
             height: 80px;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            box-sizing: border-box !important;
             background: rgba(245, 236, 221, 0.95);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -85,6 +94,8 @@
             align-items: center;
             gap: 12px;
             text-decoration: none;
+            max-width: calc(100vw - 80px);
+            overflow: hidden;
         }
 
         .brand-logo-box {
@@ -916,34 +927,45 @@
 
         /* Pixel-Perfect Mobile Responsiveness */
         @media (max-width: 992px) {
+            .navbar {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                padding: 0 16px !important;
+                box-sizing: border-box !important;
+            }
+            .nav-menu, .nav-cta-group { display: none !important; }
+            .mobile-toggle { display: flex !important; margin-left: auto !important; flex-shrink: 0 !important; }
+            .brand-container { max-width: calc(100vw - 70px) !important; overflow: hidden !important; }
             .hero-container {
                 grid-template-columns: 1fr;
                 text-align: center;
                 padding-top: 110px;
                 padding-bottom: 50px;
                 gap: 40px;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
             }
-            .hero-title { font-size: 38px; }
+            .hero-title { font-size: 36px; }
             .hero-subtitle { margin: 0 auto 28px; font-size: 16px; }
             .download-buttons-wrap { justify-content: center; flex-direction: column; width: 100%; }
             .download-buttons-wrap .btn { width: 100%; justify-content: center; }
-            .nav-menu, .nav-cta-group { display: none; }
-            .mobile-toggle { display: flex; }
             .downloads-grid, .workflow-grid, .features-cards-grid, .quiz-grid { grid-template-columns: 1fr; }
             .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
         }
 
         @media (max-width: 650px) {
-            .navbar { padding: 0 16px; height: 70px; }
+            .navbar { padding: 0 16px !important; height: 70px !important; }
             .brand-logo-box { width: 36px; height: 36px; border-radius: 10px; }
             .brand-name { font-size: 18px; }
             .brand-subtitle { font-size: 8px; }
             
-            .mobile-toggle { width: 40px; height: 40px; font-size: 17px; }
-            .mobile-drawer { top: 70px; padding: 18px 14px; }
+            .mobile-toggle { width: 40px; height: 40px; font-size: 17px; margin-left: auto !important; }
+            .mobile-drawer { top: 70px; padding: 18px 14px; width: 100vw !important; }
             .mobile-drawer a { padding: 12px 14px; font-size: 14.5px; }
 
-            .hero-container { padding: 90px 16px 40px; gap: 32px; }
+            .hero-container { padding: 90px 16px 40px !important; gap: 32px; width: 100vw !important; max-width: 100vw !important; box-sizing: border-box !important; }
             .hero-badge { font-size: 11px; padding: 5px 12px; margin-bottom: 16px; }
             .hero-title { font-size: 26px; line-height: 1.25; letter-spacing: -0.5px; margin-bottom: 14px; }
             .hero-subtitle { font-size: 14px; line-height: 1.5; margin-bottom: 24px; }
