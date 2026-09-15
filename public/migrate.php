@@ -38,8 +38,14 @@ if (!empty($_GET['db_host'])) {
 }
 
 // Clear cached config and route caches to ensure .env changes are loaded immediately
-Artisan::call('config:clear');
-Artisan::call('cache:clear');
+try {
+    Artisan::call('config:clear');
+} catch (\Throwable $e) {}
+
+try {
+    Artisan::call('cache:clear');
+} catch (\Throwable $e) {}
+
 \Illuminate\Support\Facades\DB::purge('mysql');
 \Illuminate\Support\Facades\DB::reconnect('mysql');
 
