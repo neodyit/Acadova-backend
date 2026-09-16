@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\CronController;
+use App\Http\Controllers\Api\UserPresenceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,10 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
     Route::post('/fcm-token', [NotificationController::class, 'saveFcmToken']);
     Route::post('/fcm-token/remove', [NotificationController::class, 'removeFcmToken']);
 
+    // User Presence, Version & Telemetry Tracking
+    Route::post('/user/presence/heartbeat', [UserPresenceController::class, 'heartbeat']);
+    Route::post('/user/presence/engagement', [UserPresenceController::class, 'logEngagement']);
+
     // Media & File Upload
     Route::post('/upload', [MediaController::class, 'store']);
     Route::get('/media', [MediaController::class, 'index']);
@@ -96,6 +101,7 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
         Route::get('/faculty/stats', [QuizController::class, 'getFacultyStats']);
         Route::get('/faculty/submissions', [QuizController::class, 'getFacultySubmissions']);
         Route::get('/faculty/my-allocations', [AdminController::class, 'getMyFacultyAllocations']);
+        Route::get('/admin/presence-stats', [UserPresenceController::class, 'presenceStats']);
     });
 
     /*

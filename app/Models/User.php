@@ -40,6 +40,20 @@ class User extends Authenticatable
         'subsection_id',
         'semester',
         'fcm_token',
+        'last_active_at',
+        'current_app_version',
+        'device_platform',
+        'device_model',
+        'os_version',
+    ];
+
+    /**
+     * The attributes that should be appended to JSON arrays.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'is_online',
     ];
 
     /**
@@ -61,9 +75,29 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_active_at' => 'datetime',
             'show_ads' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Accessor to check if user is online (active in last 3 minutes)
+     */
+    public function getIsOnlineAttribute(): bool
+    {
+        if (!$this->last_active_at) {
+            return false;
+        }
+        return $this->last_active_at->gt(now()->subMinutes(3));
+    }
+
+    /**
+     * Scope for querying online users
+     */
+    public function scopeOnline($query, int $minutes = 3)
+    {
+        return $query->where('last_active_at', '>=', now()->subMinutes($minutes));
     }
 
     /**
