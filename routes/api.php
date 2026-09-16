@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\CronController;
 use App\Http\Controllers\Api\UserPresenceController;
+use App\Http\Controllers\Api\FacultyReattemptController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,11 +98,13 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
         Route::delete('/questions/{id}', [QuizController::class, 'deleteQuestion']);
         Route::post('/quizzes/{id}/import-csv', [QuizController::class, 'importQuestionsCsv']);
 
-        // Faculty Dashboard Metrics & Submissions
+        // Faculty Dashboard Metrics, Submissions & Reattempt Management
         Route::get('/faculty/stats', [QuizController::class, 'getFacultyStats']);
         Route::get('/faculty/submissions', [QuizController::class, 'getFacultySubmissions']);
         Route::get('/faculty/my-allocations', [AdminController::class, 'getMyFacultyAllocations']);
         Route::get('/admin/presence-stats', [UserPresenceController::class, 'presenceStats']);
+        Route::get('/faculty/attempts/{id}/check-reattempt', [FacultyReattemptController::class, 'checkEligibility']);
+        Route::post('/faculty/attempts/{id}/grant-reattempt', [FacultyReattemptController::class, 'grantReattempt']);
     });
 
     /*
