@@ -20,10 +20,11 @@
         <table>
             <thead>
                 <tr>
+                    <th>Status / Last Active</th>
                     <th>Name / Email</th>
                     <th>Role</th>
                     <th>ID / Roll No.</th>
-                    <th>Department</th>
+                    <th>App Version / Device</th>
                     <th>Attempts</th>
                     <th>Joined</th>
                     <th style="text-align: right;">Actions</th>
@@ -32,6 +33,21 @@
             <tbody id="usersTableBody">
                 @forelse($users as $u)
                     <tr class="user-row">
+                        <td>
+                            @if($u->is_online)
+                                <span class="badge" style="background: #DEF7EC; color: #03543F; font-size: 11px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; display: inline-block;"></span> ONLINE
+                                </span>
+                            @else
+                                <span class="badge" style="background: #EDF2F7; color: #64748B; font-size: 11px;">
+                                    OFFLINE
+                                </span>
+                            @endif
+                            <br>
+                            <span style="font-size: 11px; color: var(--text-muted);" title="{{ $u->last_active_at ? $u->last_active_at->toIso8601String() : 'Never' }}">
+                                {{ $u->last_active_at ? $u->last_active_at->diffForHumans() : 'Never Active' }}
+                            </span>
+                        </td>
                         <td>
                             <strong>{{ $u->name }}</strong><br>
                             <span style="font-size: 11.5px; color: var(--text-muted);">{{ $u->email }}</span>
@@ -42,7 +58,18 @@
                             </span>
                         </td>
                         <td><strong>{{ $u->roll_number ?: ($u->faculty_id ?: 'N/A') }}</strong></td>
-                        <td>{{ $u->department ?: 'Not Specified' }}</td>
+                        <td>
+                            @if($u->current_app_version)
+                                <span class="badge" style="background: #E0E7FF; color: #3730A3; font-size: 11px;">
+                                    v{{ $u->current_app_version }}
+                                </span>
+                            @else
+                                <span style="font-size: 11px; color: var(--text-muted);">Unknown</span>
+                            @endif
+                            @if($u->device_platform)
+                                <br><span style="font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">{{ $u->device_platform }}</span>
+                            @endif
+                        </td>
                         <td><strong>{{ $u->attempts_count }}</strong> Quizzes</td>
                         <td>{{ $u->created_at ? $u->created_at->format('M d, Y') : 'N/A' }}</td>
                         <td style="text-align: right;">
@@ -55,7 +82,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No users found in directory.</td>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">No users found in directory.</td>
                     </tr>
                 @endforelse
             </tbody>
