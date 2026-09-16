@@ -1077,8 +1077,8 @@
 
         <!-- Desktop Action CTAs -->
         <div class="nav-cta-group">
-            <a href="/student/login" class="btn btn-primary" style="font-size: 13px; padding: 10px 18px;">
-                <i class="fa-solid fa-graduation-cap"></i> Student Portal
+            <a href="#downloads" class="btn btn-primary" style="font-size: 13px; padding: 10px 18px;">
+                <i class="fa-solid fa-download"></i> Get App
             </a>
             <a href="/neodyit/login" class="btn btn-outline" style="font-size: 13px; padding: 10px 18px;">
                 <i class="fa-solid fa-user-shield"></i> Faculty Access
@@ -1098,7 +1098,6 @@
         <a href="#workflow"><i class="fa-solid fa-diagram-project"></i> How It Works</a>
         <a href="#quizzes"><i class="fa-solid fa-list-check"></i> Live Assessments</a>
         <a href="/help-center"><i class="fa-solid fa-circle-question"></i> Help Center</a>
-        <a href="/student/login" style="color: var(--primary); background: rgba(180, 83, 9, 0.08);"><i class="fa-solid fa-graduation-cap"></i> Student Web Portal</a>
         <a href="/neodyit/login" style="color: var(--main-text); background: var(--surface-light);"><i class="fa-solid fa-user-shield"></i> Admin & Faculty Login</a>
     </div>
 
@@ -1131,9 +1130,9 @@
                     </div>
                 </a>
 
-                <!-- Student Portal Button -->
-                <a href="/student/login" class="btn btn-primary">
-                    <i class="fa-solid fa-globe"></i> Web Portal
+                <!-- Mobile App Notice Button -->
+                <a href="#downloads" class="btn btn-primary">
+                    <i class="fa-solid fa-mobile-screen-button"></i> Get App
                 </a>
             </div>
 
@@ -1164,7 +1163,7 @@
                         </div>
                         <div>
                             <h3 style="font-size: 18px; font-weight: 800; color: var(--main-text);">Acadova Ecosystem</h3>
-                            <p style="font-size: 12px; color: var(--text-muted);">Android • Windows • Web</p>
+                            <p style="font-size: 12px; color: var(--text-muted);">Android • Windows Desktop</p>
                         </div>
                     </div>
                     <div class="live-status-pill">
@@ -1214,9 +1213,9 @@
     <!-- Platform Downloads Banner Section -->
     <section id="downloads" class="downloads-banner-section">
         <div class="section-title-wrap">
-            <span class="section-tag">Multi-Platform Access</span>
+            <span class="section-tag">Download Acadova App</span>
             <h2 class="section-title">Available Anywhere You Learn</h2>
-            <p class="section-desc">Download Acadova natively on your favorite device or access the platform directly in your web browser.</p>
+            <p class="section-desc">Download Acadova natively on your favorite device to participate in quizzes and track your progress.</p>
         </div>
 
         <div class="downloads-grid">
@@ -1241,18 +1240,6 @@
                 <p>Standalone desktop installer for computer labs, proctored exams, and large screens.</p>
                 <a href="/downloads/Acadova-Setup.exe" class="btn btn-download-win" style="width: 100%; justify-content: center;">
                     <i class="fa-solid fa-download"></i> Download Setup (.exe)
-                </a>
-            </div>
-
-            <!-- Web Browser Portal -->
-            <div class="download-platform-card">
-                <div class="platform-icon-wrap">
-                    <i class="fa-solid fa-globe"></i>
-                </div>
-                <h3>Web Portal</h3>
-                <p>Zero installation required. Access your account instantly from any modern web browser.</p>
-                <a href="/student/login" class="btn btn-primary" style="width: 100%; justify-content: center;">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Launch Web App
                 </a>
             </div>
         </div>
