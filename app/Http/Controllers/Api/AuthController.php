@@ -242,7 +242,7 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'old_password' => 'nullable|string',
+            'old_password' => 'required|string',
             'new_password' => [
                 'required',
                 'string',
@@ -268,7 +268,7 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        if ($request->filled('old_password') && !Hash::check($request->old_password, $user->password)) {
+        if (!Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Current password does not match',
