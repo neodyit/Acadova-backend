@@ -477,8 +477,8 @@ class QuizController extends Controller
             // If an in_progress attempt exists, mark it as auto-submitted due to process interruption
             $existingAttempt->update([
                 'submission_type' => 'auto',
-                'auto_submit_reason' => 'Process Interruption / Unexpected Restart (Anti-Cheat Security Violation)',
-                'submitted_at' => now(),
+                'auto_submit_reason' => $existingAttempt->auto_submit_reason ?? 'Process Interruption / Unexpected Restart (Anti-Cheat Security Violation)',
+                'submitted_at' => $existingAttempt->submitted_at ?? now(),
             ]);
 
             return response()->json([
