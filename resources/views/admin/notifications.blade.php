@@ -139,7 +139,7 @@
         const userCountEl = document.getElementById('statTotalUserCount');
         if (userCountEl) userCountEl.innerText = users.length;
         if (tokenCountEl) {
-            const fcmCount = users.filter(u => u.fcm_token && u.fcm_token.trim() !== '').length;
+            const fcmCount = users.filter(u => u.fcm_token && String(u.fcm_token).trim() !== '' && String(u.fcm_token).toLowerCase() !== 'null').length;
             tokenCountEl.innerText = fcmCount;
         }
     }
@@ -185,6 +185,7 @@
                 },
                 body: JSON.stringify({
                     target_audience: audience,
+                    target: audience,
                     user_id: userId ? parseInt(userId) : null,
                     title: title,
                     type: type,
@@ -193,7 +194,7 @@
             });
 
             const json = await res.json();
-            if (res.ok && json.status === 'success') {
+            if (res.ok && (json.status === 'success' || json.success === true)) {
                 alert(json.message || 'Notification sent successfully!');
                 document.getElementById('notifTitle').value = '';
                 document.getElementById('notifBody').value = '';

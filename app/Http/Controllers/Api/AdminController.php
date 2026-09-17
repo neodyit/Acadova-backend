@@ -170,6 +170,7 @@ class AdminController extends Controller
                 'department' => $user->department,
                 'phone' => $user->phone,
                 'avatar' => $user->avatar,
+                'fcm_token' => $user->fcm_token,
                 'show_ads' => (bool)($user->show_ads ?? true),
                 'attempts_count' => $attemptsCount,
                 'created_at' => $user->created_at ? $user->created_at->format('M d, Y H:i') : 'N/A',

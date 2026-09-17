@@ -150,9 +150,15 @@ class NotificationController extends Controller
             return response()->json(['success' => false, 'message' => 'Forbidden. Admin authorization required.'], 403);
         }
 
+        $target = $request->input('target') ?? $request->input('target_audience') ?? 'all';
+        if ($target === 'user') {
+            $target = 'specific';
+        }
+
         $validated = $request->validate([
-            'target' => 'required|string|in:all,student,faculty,specific',
-            'user_id' => 'required_if:target,specific|nullable|integer|exists:users,id',
+            'target' => 'nullable|string|in:all,student,faculty,specific,user',
+            'target_audience' => 'nullable|string|in:all,student,faculty,specific,user',
+            'user_id' => 'nullable|integer|exists:users,id',
             'title' => 'required|string|max:255',
             'body' => 'required|string|max:2000',
             'type' => 'nullable|string|max:50',
@@ -160,17 +166,20 @@ class NotificationController extends Controller
 
         $query = \App\Models\User::query();
 
-        if ($validated['target'] === 'student') {
+        if ($target === 'student') {
             $query->where('role', 'student');
-        } elseif ($validated['target'] === 'faculty') {
+        } elseif ($target === 'faculty') {
             $query->where('role', 'faculty');
-        } elseif ($validated['target'] === 'specific') {
+        } elseif ($target === 'specific') {
+            if (empty($validated['user_id'])) {
+                return response()->json(['success' => false, 'status' => 'error', 'message' => 'User ID is required for specific user notification.'], 422);
+            }
             $query->where('id', $validated['user_id']);
         }
 
         $recipients = $query->get();
         if ($recipients->isEmpty()) {
-            return response()->json(['success' => false, 'message' => 'No target users found for this notification.'], 404);
+            return response()->json(['success' => false, 'status' => 'error', 'message' => 'No target users found for this notification.'], 404);
         }
 
         $sentCount = 0;
@@ -181,7 +190,7 @@ class NotificationController extends Controller
             Notification::create([
                 'user_id' => $recipient->id,
                 'title' => $validated['title'],
-                'message' => $validated['body'],
+                'body' => $validated['body'],
                 'type' => $validated['type'] ?? 'announcement',
                 'is_read' => false,
             ]);
@@ -204,8 +213,10 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 'success',
             'message' => "Notification successfully dispatched to {$sentCount} user(s).",
             'recipients_count' => $sentCount,
+            'fcm_sent_count' => count($fcmTokens),
         ]);
     }
 }
