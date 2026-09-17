@@ -76,6 +76,7 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
     // General Quiz Browsing & Student Quiz Attempts
     Route::get('/quizzes', [QuizController::class, 'index']);
     Route::get('/quizzes/{id}', [QuizController::class, 'show']);
+    Route::post('/quizzes/{id}/start', [QuizController::class, 'startAttempt']);
     Route::post('/quizzes/{id}/submit', [QuizController::class, 'submitAttempt']);
     Route::get('/attempts', [QuizController::class, 'getAttempts']);
 

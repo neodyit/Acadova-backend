@@ -446,6 +446,75 @@ class QuizController extends Controller
     }
 
     /**
+     * Start a quiz attempt (Instant Server-Side Lock)
+     */
+    public function startAttempt(Request $request, $id)
+    {
+        $quiz = Quiz::withCount('questions')->find($id);
+        if (!$quiz) {
+            return response()->json(['success' => false, 'message' => 'Quiz not found.'], 404);
+        }
+
+        $user = auth('sanctum')->user() ?? $request->user();
+        $userId = $user ? $user->id : 1;
+
+        // Check if an attempt for this quiz already exists
+        $existingAttempt = QuizAttempt::where('user_id', $userId)
+            ->where('quiz_id', $quiz->id)
+            ->latest()
+            ->first();
+
+        if ($existingAttempt) {
+            // Check if attempt is already completed or submitted
+            if ($existingAttempt->submission_type !== 'in_progress') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have already attempted or submitted this assessment.',
+                    'data' => $existingAttempt,
+                ], 403);
+            }
+
+            // If an in_progress attempt exists, mark it as auto-submitted due to process interruption
+            $existingAttempt->update([
+                'submission_type' => 'auto',
+                'auto_submit_reason' => 'Process Interruption / Unexpected Restart (Anti-Cheat Security Violation)',
+                'submitted_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Previous assessment session interrupted unexpectedly. Attempt locked & auto-submitted.',
+                'data' => $existingAttempt,
+            ], 403);
+        }
+
+        $ipAddress = $request->ip_address ?? $request->ip();
+
+        // Register new initial attempt record
+        $attempt = QuizAttempt::create([
+            'user_id' => $userId,
+            'quiz_id' => $quiz->id,
+            'score' => 0,
+            'total_questions' => $quiz->questions_count,
+            'user_answers' => [],
+            'violations_count' => 0,
+            'ip_address' => $ipAddress,
+            'location' => $request->location ?? null,
+            'latitude' => $request->latitude ?? null,
+            'longitude' => $request->longitude ?? null,
+            'submission_type' => 'in_progress',
+            'auto_submit_reason' => null,
+            'submitted_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz attempt initialized and locked on server.',
+            'data' => $attempt,
+        ], 201);
+    }
+
+    /**
      * Submit attempt results
      */
     public function submitAttempt(Request $request, $id)
@@ -466,7 +535,7 @@ class QuizController extends Controller
             'location' => 'nullable|string',
             'latitude' => 'nullable|string',
             'longitude' => 'nullable|string',
-            'submission_type' => 'nullable|in:manual,auto',
+            'submission_type' => 'nullable|in:manual,auto,in_progress',
             'auto_submit_reason' => 'nullable|string',
         ]);
 
@@ -502,10 +571,23 @@ class QuizController extends Controller
             }
         }
 
+        $user = auth('sanctum')->user() ?? $request->user();
+        $userId = $user ? $user->id : 1;
         $ipAddress = $request->ip_address ?? $request->ip();
 
-        $attempt = QuizAttempt::create([
-            'user_id' => $request->user() ? $request->user()->id : 1,
+        // Check if an attempt record already exists to update it
+        $attempt = QuizAttempt::where('user_id', $userId)
+            ->where('quiz_id', $quiz->id)
+            ->latest()
+            ->first();
+
+        $submissionType = $validated['submission_type'] ?? 'manual';
+        if ($submissionType === 'in_progress') {
+            $submissionType = 'manual';
+        }
+
+        $payload = [
+            'user_id' => $userId,
             'quiz_id' => $quiz->id,
             'score' => $score,
             'total_questions' => $quiz->questions->count(),
@@ -515,10 +597,16 @@ class QuizController extends Controller
             'location' => $validated['location'] ?? null,
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
-            'submission_type' => $validated['submission_type'] ?? 'manual',
+            'submission_type' => $submissionType,
             'auto_submit_reason' => $validated['auto_submit_reason'] ?? null,
             'submitted_at' => now(),
-        ]);
+        ];
+
+        if ($attempt) {
+            $attempt->update($payload);
+        } else {
+            $attempt = QuizAttempt::create($payload);
+        }
 
         return response()->json([
             'success' => true,
