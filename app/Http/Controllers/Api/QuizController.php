@@ -647,7 +647,7 @@ class QuizController extends Controller
      */
     public function getQuizLeaderboard(Request $request, $quizId)
     {
-        $quiz = Quiz::find($quizId);
+        $quiz = Quiz::with('questions')->find($quizId);
         if (!$quiz) {
             return response()->json(['success' => false, 'message' => 'Quiz not found.'], 404);
         }
@@ -660,6 +660,26 @@ class QuizController extends Controller
                 'is_published' => false,
                 'data' => []
             ]);
+        }
+
+        // Get student's own attempt if authenticated
+        $myAttempt = null;
+        if ($user) {
+            $myAttemptRecord = QuizAttempt::where('quiz_id', $quizId)
+                ->where('user_id', $user->id)
+                ->latest()
+                ->first();
+            if ($myAttemptRecord) {
+                $myAttempt = [
+                    'id' => $myAttemptRecord->id,
+                    'score' => $myAttemptRecord->score,
+                    'total_questions' => $myAttemptRecord->total_questions,
+                    'user_answers' => $myAttemptRecord->user_answers,
+                    'submission_type' => $myAttemptRecord->submission_type,
+                    'auto_submit_reason' => $myAttemptRecord->auto_submit_reason,
+                    'submitted_at' => $myAttemptRecord->submitted_at ? $myAttemptRecord->submitted_at->toIso8601String() : null,
+                ];
+            }
         }
 
         $attempts = QuizAttempt::with(['user.branch', 'user.section'])
@@ -688,6 +708,21 @@ class QuizController extends Controller
             ];
         });
 
+        // Format questions for detailed answer review
+        $questions = $quiz->questions->map(function ($q) {
+            $options = $q->options;
+            if (is_string($options)) {
+                $options = json_decode($options, true) ?? [];
+            }
+            return [
+                'id' => $q->id,
+                'question' => $q->question,
+                'type' => $q->type ?? 'single',
+                'options' => $options,
+                'correct_option' => $q->correct_option,
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'is_published' => true,
@@ -696,8 +731,11 @@ class QuizController extends Controller
                     'id' => $quiz->id,
                     'title' => $quiz->title,
                     'subject' => $quiz->subject,
+                    'passing_marks' => $quiz->passing_marks ?? 50,
                     'is_results_published' => (bool)$quiz->is_results_published,
                 ],
+                'my_attempt' => $myAttempt,
+                'questions' => $questions,
                 'leaderboard' => $leaderboard,
             ]
         ]);
