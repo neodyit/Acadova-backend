@@ -98,6 +98,7 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
         Route::put('/questions/{id}', [QuizController::class, 'updateQuestion']);
         Route::delete('/questions/{id}', [QuizController::class, 'deleteQuestion']);
         Route::post('/quizzes/{id}/import-csv', [QuizController::class, 'importQuestionsCsv']);
+        Route::get('/quizzes/{id}/export-excel', [AdminController::class, 'exportQuizResults']);
 
         // Faculty Dashboard Metrics, Submissions & Reattempt Management
         Route::get('/faculty/stats', [QuizController::class, 'getFacultyStats']);

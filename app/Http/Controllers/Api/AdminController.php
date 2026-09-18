@@ -590,4 +590,12 @@ class AdminController extends Controller
             'data' => $allocations,
         ]);
     }
+
+    /**
+     * Export structured Excel (.xls / .csv) results for a specific quiz (API / Web)
+     */
+    public function exportQuizResults($id, Request $request)
+    {
+        return app(\App\Http\Controllers\Web\AdminWebController::class)->exportQuizResults($id, $request);
+    }
 }

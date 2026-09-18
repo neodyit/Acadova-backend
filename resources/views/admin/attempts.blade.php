@@ -7,11 +7,17 @@
 <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div>
         <h2 style="font-size: 24px; font-weight: 800; color: var(--dark); margin-bottom: 4px;">Student Attempts & Re-attempt Authorization</h2>
-        <p style="color: var(--text-muted); font-size: 14px;">View student quiz submissions in chronological order, inspect anti-cheat violations, location details, and grant re-attempts by deleting attempt locks.</p>
+        <p style="color: var(--text-muted); font-size: 14px;">View student quiz submissions, inspect anti-cheat logs, and export structured Excel marksheets per quiz.</p>
     </div>
-    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <input type="text" id="attemptsSearchInput" onkeyup="filterAttempts()" class="form-control" placeholder="Search student name, email, or quiz..." style="width: 280px;">
-        <button class="btn btn-secondary" onclick="loadAttempts()"><i class="fa-solid fa-rotate"></i> Refresh Logs</button>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <select id="exportQuizSelect" class="form-control" style="width: 220px; font-weight: 600; font-size: 13px;">
+            <option value="">-- Select Quiz to Export --</option>
+        </select>
+        <button class="btn btn-primary" onclick="exportSelectedQuizResults()" style="background: #10B981; border-color: #10B981; font-size: 13px;">
+            <i class="fa-solid fa-file-excel"></i> Export Excel
+        </button>
+        <input type="text" id="attemptsSearchInput" onkeyup="filterAttempts()" class="form-control" placeholder="Search student or quiz..." style="width: 220px;">
+        <button class="btn btn-secondary" onclick="loadAttempts()"><i class="fa-solid fa-rotate"></i> Refresh</button>
     </div>
 </div>
 
@@ -46,7 +52,36 @@
 <script>
     let allAttempts = [];
 
-    document.addEventListener('DOMContentLoaded', loadAttempts);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAttempts();
+        loadQuizOptions();
+    });
+
+    async function loadQuizOptions() {
+        try {
+            const res = await fetch('/api/quizzes');
+            const json = await res.json();
+            const quizzes = json.data || json || [];
+            const select = document.getElementById('exportQuizSelect');
+            if (select) {
+                let html = '<option value="">-- Select Quiz to Export --</option>';
+                quizzes.forEach(q => {
+                    html += `<option value="${q.id}">${q.title} (${q.subject || 'General'})</option>`;
+                });
+                select.innerHTML = html;
+            }
+        } catch (e) {}
+    }
+
+    function exportSelectedQuizResults() {
+        const select = document.getElementById('exportQuizSelect');
+        const quizId = select ? select.value : '';
+        if (!quizId) {
+            alert('Please select a quiz from the dropdown to export its Excel report.');
+            return;
+        }
+        window.location.href = `/neodyit/quizzes/${quizId}/export-excel`;
+    }
 
     async function loadAttempts() {
         const tbody = document.getElementById('attemptsTableBody');

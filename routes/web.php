@@ -110,6 +110,7 @@ Route::middleware(['auth:web', 'admin'])->prefix('neodyit')->name('admin.')->gro
     Route::get('/academic', [AdminWebController::class, 'academic'])->name('academic');
     Route::get('/attempts', [AdminWebController::class, 'attemptsPage'])->name('attempts');
     Route::get('/quizzes', [AdminWebController::class, 'quizzes'])->name('quizzes');
+    Route::get('/quizzes/{id}/export-excel', [AdminWebController::class, 'exportQuizResults'])->name('quizzes.export');
     Route::get('/campaigns', [AdminWebController::class, 'campaigns'])->name('campaigns');
     Route::get('/users', [AdminWebController::class, 'users'])->name('users');
     Route::get('/media', [AdminWebController::class, 'media'])->name('media');

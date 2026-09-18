@@ -40,6 +40,7 @@
             </div>
             <div class="quiz-actions">
                 <button class="btn btn-secondary" onclick="openManageQuestionsModal({{ $q->id }}, '{{ addslashes($q->title) }}', '{{ addslashes($q->subject ?: 'General') }}')">Questions</button>
+                <a href="{{ route('admin.quizzes.export', $q->id) }}" class="btn btn-primary" title="Export Quiz Results to Excel" style="background: #10B981; border-color: #10B981; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-file-excel"></i> Export</a>
                 <button class="btn btn-secondary" onclick="editQuiz({{ json_encode($q) }})"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn btn-danger" onclick="deleteQuiz({{ $q->id }})"><i class="fa-solid fa-trash"></i></button>
             </div>
@@ -170,7 +171,10 @@
                 <div class="modal-title" id="manageModalQuizTitle">Manage Quiz Questions</div>
                 <div style="font-size: 13px; color: var(--primary); font-weight: 700; margin-top: 2px;" id="manageModalQuizSub">Subject</div>
             </div>
-            <button class="close-btn" onclick="closeModal('manageQuestionsModal')">&times;</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn btn-primary" onclick="triggerExportFromModal()" style="font-size: 12px; padding: 6px 12px; background: #10B981; border-color: #10B981;"><i class="fa-solid fa-file-excel"></i> Export Results (Excel)</button>
+                <button class="close-btn" onclick="closeModal('manageQuestionsModal')">&times;</button>
+            </div>
         </div>
 
         <input type="hidden" id="activeQuizId">
@@ -652,6 +656,15 @@
         cancelEditQuestion();
         openModal('manageQuestionsModal');
         loadQuestionsList(quizId);
+    }
+
+    function triggerExportFromModal() {
+        const quizId = document.getElementById('activeQuizId').value;
+        if (quizId) {
+            window.location.href = `/neodyit/quizzes/${quizId}/export-excel`;
+        } else {
+            showToast('No active quiz selected');
+        }
     }
 
     function escapeHtml(str) {
