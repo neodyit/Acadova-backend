@@ -38,8 +38,11 @@
                 <span><i class="fa-regular fa-clock"></i> {{ $q->duration_minutes }} mins</span>
                 <span><i class="fa-solid fa-list"></i> {{ $q->questions_count }} Questions</span>
             </div>
-            <div class="quiz-actions">
+            <div class="quiz-actions" style="flex-wrap: wrap;">
                 <button class="btn btn-secondary" onclick="openManageQuestionsModal({{ $q->id }}, '{{ addslashes($q->title) }}', '{{ addslashes($q->subject ?: 'General') }}')">Questions</button>
+                <button class="btn {{ $q->is_results_published ? 'btn-danger' : 'btn-success' }}" onclick="togglePublishResults({{ $q->id }}, this)" style="{{ $q->is_results_published ? 'background: #DC2626; border-color: #DC2626;' : 'background: #059669; border-color: #059669;' }} color: white; display: inline-flex; align-items: center; gap: 4px;" title="{{ $q->is_results_published ? 'Unpublish quiz results' : 'Publish quiz results & leaderboard to students' }}">
+                    <i class="fa-solid {{ $q->is_results_published ? 'fa-eye-slash' : 'fa-bullhorn' }}"></i> {{ $q->is_results_published ? 'Unpublish' : 'Publish Result' }}
+                </button>
                 <a href="{{ route('admin.quizzes.export', $q->id) }}" class="btn btn-primary" title="Export Quiz Results to Excel" style="background: #10B981; border-color: #10B981; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-file-excel"></i> Export</a>
                 <button class="btn btn-secondary" onclick="editQuiz({{ json_encode($q) }})"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn btn-danger" onclick="deleteQuiz({{ $q->id }})"><i class="fa-solid fa-trash"></i></button>
@@ -903,6 +906,34 @@
         const type = document.getElementById('qType').value;
         document.getElementById('singleChoiceGroup').style.display = (type === 'single') ? 'block' : 'none';
         document.getElementById('multiChoiceGroup').style.display = (type === 'multiple') ? 'block' : 'none';
+    }
+
+    async function togglePublishResults(quizId, btnElem) {
+        try {
+            const res = await fetch(`/neodyit/quizzes/${quizId}/toggle-publish`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' }
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast(json.message);
+                if (json.is_published) {
+                    btnElem.className = 'btn btn-danger';
+                    btnElem.style.background = '#DC2626';
+                    btnElem.style.borderColor = '#DC2626';
+                    btnElem.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Unpublish';
+                } else {
+                    btnElem.className = 'btn btn-success';
+                    btnElem.style.background = '#059669';
+                    btnElem.style.borderColor = '#059669';
+                    btnElem.innerHTML = '<i class="fa-solid fa-bullhorn"></i> Publish Result';
+                }
+            } else {
+                showToast(json.message || 'Action failed');
+            }
+        } catch(e) {
+            showToast('Error updating result publication status');
+        }
     }
 </script>
 @endsection

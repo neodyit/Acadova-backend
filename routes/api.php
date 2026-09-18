@@ -79,6 +79,7 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
     Route::post('/quizzes/{id}/start', [QuizController::class, 'startAttempt']);
     Route::post('/quizzes/{id}/submit', [QuizController::class, 'submitAttempt']);
     Route::get('/attempts', [QuizController::class, 'getAttempts']);
+    Route::get('/quizzes/{id}/leaderboard', [QuizController::class, 'getQuizLeaderboard']);
 
     // Announcements & Campaigns View
     Route::get('/campaigns', [CampaignController::class, 'index']);
@@ -94,6 +95,7 @@ Route::middleware(['auth:sanctum,web', 'validate.session'])->group(function () {
         Route::post('/quizzes', [QuizController::class, 'store']);
         Route::put('/quizzes/{id}', [QuizController::class, 'update']);
         Route::delete('/quizzes/{id}', [QuizController::class, 'destroy']);
+        Route::post('/quizzes/{id}/toggle-publish', [AdminWebController::class, 'togglePublishResult']);
         Route::post('/quizzes/{id}/questions', [QuizController::class, 'addQuestion']);
         Route::put('/questions/{id}', [QuizController::class, 'updateQuestion']);
         Route::delete('/questions/{id}', [QuizController::class, 'deleteQuestion']);

@@ -15,6 +15,7 @@ class Quiz extends Model
         'description',
         'duration_minutes',
         'status',
+        'is_results_published',
         'scheduled_at',
         'starts_at',
         'ends_at',
@@ -29,6 +30,7 @@ class Quiz extends Model
     ];
 
     protected $casts = [
+        'is_results_published' => 'boolean',
         'scheduled_at' => 'datetime',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',

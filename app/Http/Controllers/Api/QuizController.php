@@ -70,6 +70,9 @@ class QuizController extends Controller
                     'message' => 'Quiz not available for your department/batch scope.',
                 ], 403);
             }
+            if (!$quiz->is_results_published) {
+                $quiz->questions->makeHidden(['correct_option']);
+            }
         }
 
         return response()->json([
@@ -636,6 +639,67 @@ class QuizController extends Controller
         return response()->json([
             'success' => true,
             'data' => $attempts,
+        ]);
+    }
+
+    /**
+     * Get Quiz Leaderboard for published quiz
+     */
+    public function getQuizLeaderboard(Request $request, $quizId)
+    {
+        $quiz = Quiz::find($quizId);
+        if (!$quiz) {
+            return response()->json(['success' => false, 'message' => 'Quiz not found.'], 404);
+        }
+
+        $user = auth('sanctum')->user() ?? $request->user();
+        if ($user && strtolower($user->role) === 'student' && !$quiz->is_results_published) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Leaderboard & detailed results are not published yet by the institution.',
+                'is_published' => false,
+                'data' => []
+            ]);
+        }
+
+        $attempts = QuizAttempt::with(['user.branch', 'user.section'])
+            ->where('quiz_id', $quizId)
+            ->orderBy('score', 'desc')
+            ->orderBy('submitted_at', 'asc')
+            ->get();
+
+        $rank = 1;
+        $leaderboard = $attempts->map(function ($att) use (&$rank) {
+            $u = $att->user;
+            $scoreStr = $att->score . '/' . ($att->total_questions > 0 ? $att->total_questions : 1);
+            $percentage = $att->total_questions > 0 ? round(($att->score / $att->total_questions) * 100, 1) : 0;
+            return [
+                'rank' => $rank++,
+                'attempt_id' => $att->id,
+                'user_id' => $u ? $u->id : null,
+                'name' => $u ? ($u->name ?? $u->full_name) : 'Student User',
+                'roll_number' => $u ? ($u->roll_number ?? 'N/A') : 'N/A',
+                'avatar' => $u ? $u->avatar : null,
+                'score' => $att->score,
+                'total_questions' => $att->total_questions,
+                'score_display' => "$scoreStr ($percentage%)",
+                'percentage' => $percentage,
+                'submitted_at' => $att->submitted_at ? $att->submitted_at->toIso8601String() : null,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'is_published' => true,
+            'data' => [
+                'quiz' => [
+                    'id' => $quiz->id,
+                    'title' => $quiz->title,
+                    'subject' => $quiz->subject,
+                    'is_results_published' => (bool)$quiz->is_results_published,
+                ],
+                'leaderboard' => $leaderboard,
+            ]
         ]);
     }
 

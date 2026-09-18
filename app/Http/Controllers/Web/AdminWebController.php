@@ -114,6 +114,26 @@ class AdminWebController extends Controller
     }
 
     /**
+     * Toggle Result Publication status for a Quiz
+     */
+    public function togglePublishResult(Request $request, $id)
+    {
+        $quiz = Quiz::findOrFail($id);
+        $quiz->is_results_published = !$quiz->is_results_published;
+        $quiz->save();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $quiz->is_results_published ? 'Quiz results published successfully!' : 'Quiz results unpublished successfully!',
+                'is_published' => $quiz->is_results_published,
+            ]);
+        }
+
+        return back()->with('success', $quiz->is_results_published ? 'Quiz results published successfully!' : 'Quiz results unpublished successfully!');
+    }
+
+    /**
      * Academic Management Page (Universities, Colleges, Departments, Courses, Branches, Subjects, Sections, Subsections)
      */
     public function academic()
