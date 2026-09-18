@@ -491,5 +491,37 @@ class AdminWebController extends Controller
             'Cache-Control' => 'max-age=0',
         ]);
     }
+
+    /**
+     * Media Library Page
+     */
+    public function media()
+    {
+        return view('admin.media');
+    }
+
+    /**
+     * System Settings Page
+     */
+    public function settings()
+    {
+        return view('admin.settings');
+    }
+
+    /**
+     * Ads Management Page
+     */
+    public function ads()
+    {
+        return view('admin.ads');
+    }
+
+    /**
+     * Notifications Page
+     */
+    public function notifications()
+    {
+        return view('admin.notifications');
+    }
 }
 
